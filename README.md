@@ -2,6 +2,7 @@ Baobab Touchscreen Toolkit
 ---------------------------
 
 The Touchscreen Toolkit is a library for transforming HTML pages into touch-friendly user interfaces. This is a combination of JavaScript and CSS. It transforms standard HTML forms as they are loaded in a browser, into a set of wizard-like pages displaying  each of the input fields on separate screens. For each input field, the Touchscreen Toolkit displays a customized page with:
+
 * Appropriate input controls
 * User instructions
 * Global navigation buttons (Next, Back, Cancel and Finish)
@@ -23,6 +24,7 @@ Contributing To Touchscreen Toolkit
 -----------------------------------
 
 If you are a developer, you can contribute in various ways. Some of the ways include the following:
+
 * Addition new and advanced features
 * Creating cool custom CSS themes
 * Catching and firing bugs
