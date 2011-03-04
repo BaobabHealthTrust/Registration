@@ -18,7 +18,7 @@ It is pretty simple to use Touchscreen Toolkit. Just add touchscreen.js and any 
 History
 -------
 
-The original touchscreen toolkit was developed by Baobab Health Partnership (now [Baobab Health Trust] (http://baobabhealth.org)) in 2006. The toolkit passed through some revolutions within the organization. There were once more than one version of the toolkit within the organization. Developers were maintaining their own versions of the toolkit as it became an orphan project. In 2011, we forked it from [Baobab](https://github.com/baobab)'s Github repository to here, the organization's repository and started standardizing it. Since then, it is maintained here.
+The original touchscreen toolkit was developed by Baobab Health Partnership (now [Baobab Health Trust] (http://www.baobabhealth.org)) in 2006. The toolkit passed through some revolutions within the organization. There were once more than one version of the toolkit within the organization. Developers were maintaining their own versions of the toolkit as it became an orphan project. In 2011, we forked it from [Baobab](https://github.com/baobab)'s Github repository to here, the organization's repository and started standardizing it. Since then, it is maintained here.
 
 Contributing To Touchscreen Toolkit
 -----------------------------------
@@ -68,6 +68,7 @@ Baobab Health Trust (2006 - Present)
 Copyright
 ---------
 
-Copyright © 2006, 2011 Baobab Health Trust  (http://baobabhealth.org)
+Copyright © 2006, 2011 Baobab Health Trust  (http://www.baobabhealth.org)
+
 ![BaobabHealth](http://baobabhealth.org/wp-content/themes/atahualpa34/images/huge-logo.gif)
 
