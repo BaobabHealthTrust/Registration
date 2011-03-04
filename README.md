@@ -44,7 +44,7 @@ There are several examples in the Examples directory
 
 ###Source Code
 
-You will get latest source code and releases on (https://github.com/BaobabHealthTrust/touchscreentoolkit)
+You will get latest source code and releases on https://github.com/BaobabHealthTrust/touchscreentoolkit
 
 ###Support
 
