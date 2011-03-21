@@ -22,9 +22,6 @@ body{
   font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
   margin: 0;
   -moz-user-select:none;
-}
-
-#container {
   background-color:#000000;
 }
 
@@ -270,4 +267,79 @@ div.panel h2 {
   padding-top:10px;
   text-decoration:none;
   text-align:center;
+}
+
+#banner{
+    display: table;
+    background-color: #fff;
+    height: 140px;
+    padding: 10px;
+    border-bottom: 1px dotted #fff;
+    width: 98%;
+}
+
+#bannerrow{
+    display: table-row;
+}
+
+#scanlabel {
+    display: table-cell;
+    font-size: 28px;
+    padding-left: 15px;
+    color: silver;
+    height: 65%;
+    background-color: #fff;
+}
+
+#scaninput {
+    display: table-cell;
+    height: 45%;
+    width: 46%;
+    padding: 10px;
+    background-color: #fff;
+}
+
+#barcodeinput{
+    border-top:none;
+    border-left:none;
+    border-right:none;
+    border-bottom: 1px solid #eee;
+    width:100%;
+    font-family:"Nimbus Sans L","Arial Narrow",sans-serif;
+    font-size:2.2em;
+    background:none;
+    padding-left:5px;
+}
+
+#application {
+    display: table-cell;
+    height: 92%;
+    background-color: #fff;
+}
+
+#applicationname {
+    font-size: 80px;
+    color: #ddd;
+    text-align: center;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 22px;
+    -moz-border-radius: 75px;
+    border: 1px solid #eee;
+}
+
+#main {
+    background-color: #fff;
+    height: 68%;
+}
+
+#nav {
+    background-color: #333333;
+    border-top:3px solid :#99AAB7;
+    color:#CADCEA;
+    height:80px;
+    width:100%;
+    bottom:0px;
+    position:absolute;
+    overflow:hidden;
 }
