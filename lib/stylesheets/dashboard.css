@@ -19,7 +19,8 @@
 .light { background-color:#ddd }
 
 body{
-  font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
+  /*font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;*/
+  font-family: "Nimbus Sans L";
   margin: 0;
   -moz-user-select:none;
   background-color:#000000;
@@ -326,6 +327,9 @@ div.panel h2 {
     padding-bottom: 22px;
     -moz-border-radius: 75px;
     border: 1px solid #eee;
+    max-height: 122px;
+    width: 190px;
+    overflow: hidden;
 }
 
 #main {
@@ -343,3 +347,165 @@ div.panel h2 {
     position:absolute;
     overflow:hidden;
 }
+
+#patient-dashboard-application {
+    float: left;
+    height: 160px;
+    margin-left: 5px;
+    padding-top: 40px;
+    margin-bottom: 0px;
+    width: 30%;
+}
+
+#patient-dashboard-applicationname {
+    font-size: 5em;
+    color: #ddd;
+    text-align: center;
+    padding: 3px;
+    -moz-border-radius: 75px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    padding-bottom: 27px;
+    height: 98px;
+    overflow: hidden;
+}
+
+#links {
+    height: 90%;
+    float: right;
+    width: 26%;
+    background-color: #fff;
+}
+
+#patient-dashboard-main {
+    float: left;
+    width: 73%;
+    height: 60%;
+    background-color: #fff;
+}
+
+#details {
+    display: table;
+    background-color: #fff;
+    margin: 10px;
+    width: 40%;
+    height: 160px;
+    border: 1px solid #999;
+    -moz-border-radius: 20px;
+    float: left;
+    overflow: auto;
+}
+
+#detailsRow1{
+    display: table-row;
+}
+
+#detailsRow1Cell{
+    display: table-row;
+}
+
+#detailsRow2{
+    display: table-row;
+}
+
+#detailsRow2Cell{
+    display: table-row;
+}
+
+#mainTopicContent{
+    display: table;
+    width: 100%;
+}
+
+#topicRow{
+    display: table-row;
+}
+
+#mainDetailsContent{
+    display: table;
+    width: 100%;
+}
+
+#detailsTopic {
+    display: table-cell;
+    font-weight: bold;
+    font-size: 25px;
+    padding: 10px;
+    padding-top: 0px;
+    border-bottom: 1px solid #999;
+}
+
+#gendercell{
+    display: table-cell;
+    width: 30px;
+    padding: 10px;
+    border-bottom: 1px solid #999;
+}
+
+#gender {
+    width: 30px;
+    height: 30px;
+    -moz-border-radius: 20px;
+    border: 1px #000 solid;
+    background-color: #eef;
+}
+
+#nameRow{
+    display: table-row;
+}
+
+#id {
+    display: table-cell;
+    margin: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 10px;
+    width: 25%;
+}
+
+#idvalue {
+    display: table-cell;
+    margin: 10px;
+    padding: 10px;
+}
+
+#residenceRow{
+    display: table-row;
+}
+
+#residence {
+    display: table-cell;
+    margin: 10px;
+    margin-top: 0px;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 10px;
+}
+
+#residencevalue {
+    display: table-cell;
+    margin: 10px;
+    margin-top: 0px;
+    padding: 10px;
+}
+
+#ageRow{
+    display: table-row;
+}
+
+#age {
+    display: table-cell;
+    margin: 10px;
+    margin-top: 0px;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 10px;
+}
+
+#agevalue {
+    display: table-cell;
+    margin: 10px;
+    margin-top: 0px;
+    padding: 10px;
+}
+
