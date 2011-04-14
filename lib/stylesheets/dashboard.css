@@ -100,7 +100,6 @@ button {
 .nav {
   height:42px;
   z-index:2;
-  margin-left:5px;
 }
 
 .nav ul {
@@ -137,12 +136,10 @@ button {
 
 #tab {
   margin-top:1px;
-  margin-left: 6px;
-  margin-right: 6px;
   background-color:#ddd;
-  height:454px;
-  border:1px solid black;
-
+  height:565px;
+  border-top:1px solid black;
+  border-bottom:1px solid black;
 }
 
 ul, ul li, ul li div {
@@ -227,6 +224,15 @@ div.panel h2 {
   top:235px;
 }
 .report_button{
+  /*
+  text-align:center;
+  text-decoration:none;
+  width:100%;
+  height:60px;
+  border-top-style:outset;
+  border-top-color:gray;
+  border-bottom-style:outset;
+  -moz-user-select:none;*/
   background-color:grey;
   border-bottom-color:black;
   border-bottom-width:1px;
@@ -249,6 +255,8 @@ div.panel h2 {
   border-right-width-rtl-source:physical;
   border-right-width-value:1px;
   border-top-color:black;
+  /*border-top-style:solid;
+  border-bottom-style:solid;*/
   border-style:outset;
   border-top-width:1px;
   color:white;
@@ -372,20 +380,26 @@ div.panel h2 {
 #patient-dashboard-main {
     float: left;
     width: 73%;
-    height: 60%;
+    height: 57%;
     background-color: #fff;
+}
+
+#detailscontainer {
+    width: 100%;
+    height: 145px;
+    overflow: auto;
 }
 
 #details {
     display: table;
-    background-color: #fff;
-    margin: 10px;
-    width: 40%;
-    height: 160px;
     border: 1px solid #999;
     -moz-border-radius: 20px;
     float: left;
-    overflow: auto;
+    overflow: hidden;
+    margin: 5px;
+    width: 40%;
+    background-color: #fff;
+    padding: 10px;
 }
 
 #detailsRow1{
@@ -481,11 +495,11 @@ div.panel h2 {
     padding: 10px;
 }
 
-#ageRow{
+.patientLabelRow{
     display: table-row;
 }
 
-#age {
+.patientLabel {
     display: table-cell;
     margin: 10px;
     margin-top: 0px;
@@ -494,7 +508,7 @@ div.panel h2 {
     padding: 10px;
 }
 
-#agevalue {
+.patientLabelValue {
     display: table-cell;
     margin: 10px;
     margin-top: 0px;
