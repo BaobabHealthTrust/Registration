@@ -515,3 +515,71 @@ div.panel h2 {
     padding: 10px;
 }
 
+#logininfo{
+    position: absolute;
+    border: 1px #eee solid;
+    left: 765px;
+    top: 140px;
+    height: 30px;
+    width: 225px;
+    background-color: #fff;
+    -moz-border-radius: 40px;
+    font-size: 1.5em;
+    color: #666;
+    text-align: center;
+    padding-top: 8px;
+}
+
+#siteinfo{
+    position: absolute;
+    border: 1px #eee solid;
+    left: 20px;
+    top: 110px;
+    height: 50px;
+    width: 740px;
+    background-color: #fff;
+    -moz-border-radius: 40px;
+    background-color: #eee;
+}
+
+#sitetable {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+#siterow {
+    display: table-row;
+}
+
+#sitecol1 {
+    display: table-cell;
+    border-right: 1px solid #ccc;
+    width: 50%;
+    padding: 8px;
+    font-size: 1.5em;
+    font-style: italic;
+    color: #999;
+    padding-left: 12px;
+}
+
+#sitecol2 {
+    display: table-cell;
+    text-align: right;
+    width: 50%;
+    padding: 8px;
+    font-size: 1.5em;
+    font-style: italic;
+    color: #999;
+    padding-right: 12px;
+}
+
+#user {
+    margin-top: 6px;
+    background-color: #eee;
+    padding: 5px;
+    -moz-border-radius: 30px;
+    overflow: hidden;
+    max-height: 30px;
+    font-style: italic;
+}
