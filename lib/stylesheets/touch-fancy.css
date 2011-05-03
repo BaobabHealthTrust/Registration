@@ -683,3 +683,9 @@ display:block;
   min-width: 140px;
 }
 
+textarea {
+  background-color: #eee;
+  border: 0px solid #eee;
+  padding: 10px;
+  font-size: 2.2em;
+}
