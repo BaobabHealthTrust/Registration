@@ -466,7 +466,7 @@ div.panel h2 {
     font-size: 1em;
     font-weight: bold;
     padding: 10px;
-    width: 45%;
+    width: 20%;
 }
 
 #idvalue {
@@ -486,7 +486,7 @@ div.panel h2 {
     font-size: 1em;
     font-weight: bold;
     padding: 10px;
-    width: 45%;
+    width: 20%;
 }
 
 #residencevalue {
@@ -507,7 +507,7 @@ div.panel h2 {
     font-size: 1em;
     font-weight: bold;
     padding: 10px;
-    width: 45%;
+    width: 20%;
 }
 
 .patientLabelValue {
