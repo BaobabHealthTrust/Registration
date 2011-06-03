@@ -67,10 +67,6 @@ button {
   margin: 0 4px;
 }
 
-#footer {
-
-}
-
 #footer button {
   width:140px;
   margin-top:10px;
@@ -463,10 +459,10 @@ div.panel h2 {
 #id {
     display: table-cell;
     margin: 10px;
-    font-size: 1em;
+    font-size: 1.2em;
     font-weight: bold;
     padding: 10px;
-    width: 45%;
+    width: 25%;
 }
 
 #idvalue {
@@ -483,10 +479,9 @@ div.panel h2 {
     display: table-cell;
     margin: 10px;
     margin-top: 0px;
-    font-size: 1em;
+    font-size: 1.2em;
     font-weight: bold;
     padding: 10px;
-    width: 45%;
 }
 
 #residencevalue {
@@ -504,10 +499,9 @@ div.panel h2 {
     display: table-cell;
     margin: 10px;
     margin-top: 0px;
-    font-size: 1em;
+    font-size: 1.2em;
     font-weight: bold;
     padding: 10px;
-    width: 45%;
 }
 
 .patientLabelValue {
