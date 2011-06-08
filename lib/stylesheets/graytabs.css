@@ -44,10 +44,8 @@
 #tabMainContainer {
     width: 99%;
     height: 98%;
-    border: 1px solid #fff;
     -moz-border-radius: 10px;
     padding: 0.2%;
-    background-color: #fff;
 }
 
 #tabContainer2 {
