@@ -326,7 +326,7 @@ button {
   border:0; 
   cursor:pointer; 
   font-weight:bold; 
-  text-align:center; 
+  text-align:center;
 }
 
 button span { 
@@ -418,6 +418,10 @@ button:hover.dark span {
 }
 
 #nextButton {
+}
+
+#btnNext {
+    min-width: 150px;
 }
 
 #backspace, #num, #space, #date, #abc{
