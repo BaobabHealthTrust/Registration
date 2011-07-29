@@ -778,3 +778,78 @@ button {
   .NoKeyboard #keyboard {
       display: none;
 }
+
+button:active.blue span {
+    background:url(../images/buttons/btn_left_yellow.png) left no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+button:active.blue {
+    background:url(../images/buttons/btn_right_yellow.png) right no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+button:active.green span {
+    background:url(../images/buttons/btn_left_yellow.png) left no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+button:active.green {
+    background:url(../images/buttons/btn_right_yellow.png) right no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+button:active.red span {
+    background:url(../images/buttons/btn_left_yellow.png) left no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+button:active.red {
+    background:url(../images/buttons/btn_right_yellow.png) right no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+button:active span {
+    background:url(../images/buttons/btn_left_yellow.png) left no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+button:active {
+    background:url(../images/buttons/btn_right_yellow.png) right no-repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+.btn {
+    min-height: 50px;
+    margin: 0px;
+    margin-bottom: 5px;
+    font-size: 1.2em;
+    background-color: #6281a7;
+    color: #FFF;
+    font-weight: normal;
+    border: 5px outset #000;
+    padding: 10px;
+    cursor: pointer;
+    background:url(../images/btn_blue.png) right repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+.btn:hover {
+    background:url(../images/btn_blue_hover.png) right repeat;
+    -moz-user-select:none;
+    -moz-user-focus:disabled;
+}
+
+.btn:active {
+    background:url(../images/btn_yellow.png) right repeat;
+    border: 3px inset #000;
+}
