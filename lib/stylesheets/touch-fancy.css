@@ -165,6 +165,7 @@ form{
     /*  height: 3.2em;*/
     height: 70px;
     /*	margin-top: 10px; */
+    width: 100%;
 }
 
 #launchButton{
@@ -318,7 +319,7 @@ form{
     width: 250px;
 }
 
-#SHIFT, #qwerty, #showDataButton, #lessthan, #greaterthan, #equals, #unknown {
+#SHIFT, #qwerty, #na, #showDataButton, #lessthan, #greaterthan, #equals, #unknown {
     display: none;
 }
 
@@ -730,11 +731,6 @@ textarea {
     min-width: 80px;
 }
 
-.NumbersOnly #backspace {
-    margin-left: 265px;
-    margin-right: 0px;
-}
-
 #zero {
     margin-left: 85px;
 }
@@ -794,10 +790,10 @@ button {
     margin-left: 50%;
     left: -475px;
     -moz-border-radius: 20px;
-  }
+}
 
-  .NoKeyboard #keyboard {
-      display: none;
+.NoKeyboard #keyboard {
+    display: none;
 }
 
 button:active.blue span {
@@ -873,4 +869,8 @@ button:active {
 .btn:active {
     background:url(../images/btn_yellow.png) right repeat;
     border: 3px inset #000;
+}
+
+#na, #Unknown, #backspace, #char, #whitespace, #num {
+    float: right;
 }
