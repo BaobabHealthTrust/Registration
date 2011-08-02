@@ -43,7 +43,7 @@ form{
     border-left:none;
     border-right:none;
     border-bottom: 1px solid silver;
-    width:965px;
+    width:928px;
     font-family:"Nimbus Sans L","Arial Narrow",sans-serif;
     font-size:2.2em;
     background:none;
@@ -52,7 +52,7 @@ form{
 
 .options{
     overflow: auto;
-    height:14em;
+    height:13em;
 }
 
 .options ul{
@@ -157,6 +157,7 @@ form{
     -moz-border-radius: 15px;
     padding: 5px;
     background-color: #fff;
+    width: 935px;
 }
 
 .buttonLine{
@@ -182,7 +183,7 @@ form{
     left: 0px;
     z-index: 1;
     height: 670px;
-    width: 965px;
+    width: 998px;
     overflow: hidden;
 }
 
@@ -205,10 +206,12 @@ form{
 }
 
 .inputFrameClass {
-    border: 2px solid black;
+    border: 1px solid black;
     margin-left:25px;
     background: #F0F0F0;
     width:935px;
+    -moz-border-radius: 10px;
+    padding: 5px;
 }
 
 .progressAreaSearchPage {
@@ -279,6 +282,7 @@ form{
     z-index: 999;
     border: 5px outset tomato;
     display: none;
+    -moz-border-radius: 15px;
 }
 
 .confirmationBar {
@@ -314,7 +318,7 @@ form{
     width: 250px;
 }
 
-#SHIFT, #space, #qwerty, #showDataButton, #lessthan, #greaterthan, #equals, #unknown {
+#SHIFT, #qwerty, #showDataButton, #lessthan, #greaterthan, #equals, #unknown {
     display: none;
 }
 
@@ -676,7 +680,7 @@ button:hover.dark span {
     font-size:1.3em;
     margin-left:25px;
     padding-top:5px;
-    width:750px;
+    width:942px;
     border-bottom:2px dotted;
 }  
 
@@ -701,12 +705,29 @@ textarea {
     font-size: 2.2em;
 }
 
+#apostrophe {
+    margin-left: 25px;
+}
+
 #backspace {
     margin-left: 40px;
 }
 
-#apostrophe {
-    margin-left: 25px;
+.qwertyKeyboard #backspace, #apostrophe {
+    margin-left: 20px;
+}
+
+.qwertyKeyboard #apostrophe {
+    margin-left: 5px;
+}
+
+.abcKeyboard #backspace {
+    margin-left: 5px;
+}
+
+.abcKeyboard #qwerty, #backspace, #num, #apostrophe {
+    margin-left: 5px;
+    min-width: 80px;
 }
 
 .NumbersOnly #backspace {
@@ -768,10 +789,10 @@ button {
     background-color: #efe;
     font-size: 2em;
     padding: 15px;
-    width: 920px;
+    width: 915px;
     top: 120px;
     margin-left: 50%;
-    left: -470px;
+    left: -475px;
     -moz-border-radius: 20px;
   }
 
