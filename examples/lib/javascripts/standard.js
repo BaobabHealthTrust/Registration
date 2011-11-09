@@ -1508,9 +1508,9 @@ function confirmValue() {
     confirmationBar.appendChild(username);
 
     confirmationBar.innerHTML += "<div style='display: block; margin-top: 15px;'><input type='submit'" +
-        " value='OK' class='btn' style='float: left;' onclick='validateConfirmUsername()'" + 
-        " onmousedown='validateConfirmUsername()'/><input type='submit' value='Cancel' " + 
-        " class='btn' style='float: right; right: 3px;' onmousedown='cancelConfirmValue()' />";
+    " value='OK' class='btn' style='float: left;' onclick='validateConfirmUsername()'" + 
+    " onmousedown='validateConfirmUsername()'/><input type='submit' value='Cancel' " + 
+    " class='btn' style='float: right; right: 3px;' onmousedown='cancelConfirmValue()' />";
 
     confirmationBar.style.display = "block";
     tstInputTarget = __$("confirmUsername");
@@ -1555,6 +1555,27 @@ function clearInput(){
 
     if(doListSuggestions){
         listSuggestions(tstCurrentPage);
+    }
+    
+    if(tstFormElements[tstPages[tstCurrentPage]].tagName == "SELECT"){
+        var options = __$("tt_currentUnorderedListOptions").getElementsByTagName("li");
+            
+        if(tstFormElements[tstPages[tstCurrentPage]].getAttribute("multiple")){
+            for(var i = 0; i < options.length; i++){
+                if(options[i].style.backgroundColor == "lightblue"){
+                    options[i].click();
+                    options[i].click();
+                }
+            }
+        } else {
+            for(var i = 0; i < options.length; i++){
+                if(options[i].style.backgroundColor == "lightblue"){
+                    options[i].style.backgroundColor = "";
+                    tstFormElements[tstPages[tstCurrentPage]].value = ""; 
+                    __$('touchscreenInput'+tstCurrentPage).setAttribute("tstvalue", "");
+                }
+            }
+        }
     }
 }
 
