@@ -75,7 +75,7 @@
                             <td>Year Of Birth</td>
                             <td>
                                 <input type='text' value='' field_type='number' name='birth_year' id='birth_year' helptext='Year Of Birth' 
-                                       tt_pageStyleClass="NumbersWithUnknown" />
+                                       tt_pageStyleClass="NumbersWithUnknown" validationCode="this.value.match(/^19\d{2}$/)" validationMessage="This is a question for adults only" />
                             </td>
                         </tr>
                         <tr>

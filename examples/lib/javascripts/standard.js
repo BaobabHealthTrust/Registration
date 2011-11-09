@@ -1498,14 +1498,19 @@ function inputIsValid() {
 
 function confirmValue() {
     var confirmationBar = __$("confirmationBar");
-    confirmationBar.innerHTML = "Username: ";
+    confirmationBar.innerHTML = "<span style='font-size: 2em;'>Username: </span>";
     var username = document.createElement("input");
     username.setAttribute("id", "confirmUsername");
     username.setAttribute("type", "text");
     username.setAttribute("textCase", "lower");
+    username.style.fontSize = "2em";
+    username.style.width = "252px";
     confirmationBar.appendChild(username);
 
-    confirmationBar.innerHTML += "<div style='display: block;'><input type='submit' value='OK' class='button' style='float: left;' onclick='validateConfirmUsername()' onmousedown='validateConfirmUsername()'/><input type='submit' value='Cancel' class='button' style='float: right; right: 3px;' onmousedown='cancelConfirmValue()' />";
+    confirmationBar.innerHTML += "<div style='display: block; margin-top: 15px;'><input type='submit'" +
+        " value='OK' class='btn' style='float: left;' onclick='validateConfirmUsername()'" + 
+        " onmousedown='validateConfirmUsername()'/><input type='submit' value='Cancel' " + 
+        " class='btn' style='float: right; right: 3px;' onmousedown='cancelConfirmValue()' />";
 
     confirmationBar.style.display = "block";
     tstInputTarget = __$("confirmUsername");
