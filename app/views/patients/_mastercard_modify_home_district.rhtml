@@ -1,0 +1,8 @@
+<style>
+  .tt_controls_occupation .keyboard{display:none;}
+    #tt_page_occupation .options{height:560px;}
+    #tt_page_occupation .options li{font-size:30px;}
+    #space {display:inline;}
+</style>
+
+<%= select_tag "person[addresses][address2]", options_for_select(@districts, params[:address2]), {:helpText => 'Home district'}%>

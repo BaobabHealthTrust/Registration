@@ -1,0 +1,10 @@
+<style>
+  .tt_controls_occupation .keyboard{display:none;}
+    #tt_page_occupation .options{height:560px;}
+    #tt_page_occupation .options li{font-size:30px;}
+    #space {display:inline;}
+</style>
+
+<%= select_tag "person[addresses][county_district]", options_for_select(@traditional_authorities, params[:county_district]), {:helpText => 'Traditional Authority'}%>
+
+<%#= text_field_tag "person[addresses][county_district]",  params[:county_district], {:field_type => 'alpha', :helpText => 'Ancestral Traditional Authority (TA)', :ajaxURL => '/person_addresses/traditional_authority?search_string=', :allowFreeText => true }%>

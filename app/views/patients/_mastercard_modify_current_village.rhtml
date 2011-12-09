@@ -1,0 +1,8 @@
+<style>
+  .tt_controls_occupation .keyboard{display:none;}
+    #tt_page_occupation .options{height:560px;}
+    #tt_page_occupation .options li{font-size:30px;}
+    #space {display:inline;}
+</style>
+
+<%= select_tag "person[addresses][city_village]", options_for_select(@districts, params[:city_village]), {:helpText => 'Current village'}%>

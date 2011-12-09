@@ -1,0 +1,11 @@
+<style>
+  .tt_controls_ground_phone_number #num , #plus, #apostrophe, #star, #char, #abc, #date, #slash, #minus, #comma, #percent, #decimal { display:none; }
+</style>
+
+<%= text_field_tag "person[attributes][home_phone_number]",  params[:home_phone_number],
+   {:field_type => 'number',
+    :helpText => 'Ground Phone Number',
+    :allowFreeText => true,
+    :tt_pageStyleClass => "nota",
+    :validationRule => "^0\\d{7,9}$|Unknown|Not Available|N\/A",
+    :validationMessage => "Not a valid phone number" } if ask_ground_phone %>

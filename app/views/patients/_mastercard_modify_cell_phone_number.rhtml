@@ -1,0 +1,14 @@
+<style>
+  .tt_controls_cell_phone_number #num , #plus, #apostrophe, #star, #char, #abc, #date, #slash, #minus, #comma, #percent, #decimal { display:none; }
+</style>
+
+<%= text_field_tag "person[attributes][cell_phone_number]",  params[:cell_phone_number], 
+      {
+        :field_type => 'number',
+        :helpText => 'Cell Phone Number', 
+        :validationRule => "^0\\d{7}$|Unknown|Not Available|N\/A|^0\\d{9}$",
+        :validationMessage => "Not a valid phone number",
+        :tt_pageStyleClass => "nota",
+        :id => 'cellphone'
+      }
+  %>

@@ -1,0 +1,67 @@
+  <%= javascript_include_tag "barcode" %>
+  <script>
+    <% 
+    if params[:from] == 'clinic'%>
+      var tt_cancel_destination = "/clinic"
+    <%else%>
+      var tt_cancel_destination = "/logout"
+    <%end%>
+    barcodeId = 'touchscreenInput0';
+    barcodeFocusOnce = true;
+    // barcodeScanAction = gotoNextPage;
+
+    setTimeout("setupBarcode()", 300);
+
+    function setupBarcode(){
+      barcodeScanAction = gotoNextPage;
+      loadBarcodePage();
+    }
+
+    function inform() {
+      $('infoBar'+tstCurrentPage).innerHTML = "<%= welcome_message %>";  
+    }
+
+    function updateUserProperty(){
+      var aUrl = "/user/add_update_property?username="+ tstUsername + "&property=last_login_location&property_value=" + $('ward').value;
+      var xmlhttp = new XMLHttpRequest();
+      xmlhttp.open('GET', aUrl, true);
+      xmlhttp.send(null);    
+      //aalert('TT')
+    }    
+
+    function updateNextButton() {
+      $('nextButton').setAttribute("onmousedown", "updateUserProperty(); gotoNextPage();");
+    }        
+  </script>
+  
+  <style>
+
+    .tt_controls_workstation_location .keyboard {
+      display: none;
+    }
+
+    #tt_page_workstation_location .options {
+      display: none;
+    }
+  </style>
+  <% form_tag session_path, :method => :put do -%>
+
+    <label for="location">Location</label>
+    <%= hidden_field_tag(:location, 4, :helpText=> "Workstation Location", :field_type => "number", :tt_onLoad => "inform();") %><br>
+
+    
+    <label for="patient_id">Location</label>
+    <%= hidden_field_tag "patient_id", @patient.id %>
+    <%#= hidden_field_tag(:patient_id, 4, :helpText=> "Workstation Location", :field_type => "number", :tt_onLoad => "inform();") %><br>
+
+    <label for="ward">Ward</label>
+    <%= select_tag("ward", options_for_select(@login_wards), {:helpText => 'Select Ward', :tt_requireNextClick => 'false', :tt_onload => 'updateNextButton();'})%> <br>
+
+
+    <%= submit_tag value="Submit"%>
+  <% end %>
+
+  <div id="popupBox"  align="center">
+    <p id="p1">Verifying location</p>
+    <p id="p2">Please wait...</p>
+  </div>

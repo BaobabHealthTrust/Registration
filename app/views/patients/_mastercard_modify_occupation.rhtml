@@ -1,0 +1,7 @@
+<style>
+  .tt_controls_occupation .keyboard{display:none;}
+    #tt_page_occupation .options{height:500px;}
+    #tt_page_occupation .options li{font-size:30px;}
+    #space {display:inline;}
+</style>
+<%= select_tag "person[attributes][occupation]", options_for_select(@occupations, params[:occupation]), {:helpText => 'Occupation'}%>
