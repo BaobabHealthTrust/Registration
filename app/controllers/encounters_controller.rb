@@ -322,12 +322,12 @@ class EncountersController < ApplicationController
 
 		@wards = []
 		if @patient_bean.age <= 15
-      @wards = GlobalProperty.find_by_property('facility.paediatrics_admission_wards').property_value.split(',') rescue []
+      @wards = CoreService.get_global_property_value("facility_paediatrics_admission_wards").split(',') rescue []
     else
-      if @patient_bean.age > 15 && @patient_bean.sex == "Female"
-        @wards = GlobalProperty.find_by_property('facility.female_adults_admission_wards').property_value.split(',') rescue []
+      if is_child_bearing_female(@patient)
+        @wards = CoreService.get_global_property_value("facility_female_adults_admission_wards").split(',') rescue []
       else
-        @wards = GlobalProperty.find_by_property('facility.adults_admission_wards').property_value.split(',').map{|ward| ward if !ward.include?('Gynaecology Ward')}
+        @wards = CoreService.get_global_property_value("facility_adults_admission_wards").split(',').map{|ward| ward if !ward.include?('Gynaecology Ward')}
       end
     end
 

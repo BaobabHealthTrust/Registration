@@ -39,9 +39,9 @@
               <% if (@reason_for_art_eligibility rescue nil) != nil && (@reason_for_art_eligibility) != "" %>
                 <span value="<%= @reason_for_art_eligibility rescue "" %>">Reason for Starting</span>
               <% end %>
-              
-              <% if (@ward rescue nil) != nil && (@ward) != "" %>
-                <span value="<%= @ward rescue "" %>">Ward/Department</span>
+
+              <% if (@ward.first rescue nil) != nil && (@ward.first) != "" %>
+                <span value="<%= @ward.first rescue "" %>">Ward/Department</span>
               <% end %>
               
               <% if (@hiv_status rescue nil) != nil && (@hiv_status) != "" && (@hiv_status) != "UNKNOWN" %>

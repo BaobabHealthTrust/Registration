@@ -45,7 +45,6 @@ class PatientsController < ApplicationController
   end
 
   def all_traditional_authorities
-    #@patient = Patient.find(params[:id])
     patient_bean = PatientService.get_patient(@patient.person)
     
     traditional_authorities = []
