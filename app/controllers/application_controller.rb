@@ -83,6 +83,19 @@ class ApplicationController < ActionController::Base
                                  WHERE name = 'Workstation Location'))
              ORDER BY name ASC").collect{|name| name.send(field_name)} rescue []
   end
+  
+  def referral_sections
+    field_name = "name"
+    referral_sections = CoreService.get_global_property_value("facility_referral_section_tag") rescue false
+    Location.find_by_sql("SELECT *
+          FROM location
+          WHERE location_id IN (SELECT location_id
+                         FROM location_tag_map
+                          WHERE location_tag_id = (SELECT location_tag_id
+                                 FROM location_tag
+                                 WHERE name = '#{referral_sections}'))
+             ORDER BY name ASC").collect{|name| name.send(field_name)} rescue []
+  end
 
   def site_prefix
     site_prefix = CoreService.get_global_property_value("site_prefix") rescue false
@@ -149,13 +162,13 @@ class ApplicationController < ActionController::Base
   def main_next_task(location, patient, session_date = Date.today)
     task = Task.first rescue Task.new()
 
-    type = 'PART_INITIAL'
+    type = 'PATIENT REGISTRATION'
     encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
                                      patient.id,EncounterType.find_by_name(type).id,session_date],
                                      :order =>'encounter_datetime DESC',:limit => 1)
       task.encounter_type = type 
       if encounter_available.blank? 
-        task.url = "/encounters/new/part_initial?patient_id=#{patient.id}"
+        task.url = "/encounters/new/patient_registration?patient_id=#{patient.id}"
       else 
         task.encounter_type = 'NONE'
         task.url = "/patients/show/#{patient.id}"
@@ -213,8 +226,6 @@ class ApplicationController < ActionController::Base
     elsif hiv_reception.blank? and task.encounter_type == art_encounters[1]
       return task
     end
-
-
 
     reception = Encounter.find(:first,:conditions =>["patient_id = ? AND DATE(encounter_datetime) = ? AND encounter_type = ?",
                         patient.id,session_date,EncounterType.find_by_name(art_encounters[1]).id]).collect{|r|r.to_s}.join(',') rescue ''

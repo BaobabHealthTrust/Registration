@@ -17,11 +17,6 @@ class SessionsController < ApplicationController
       render :action => 'new'
     end
   end
-  
-  def select_ward
-    @patient = Patient.find(params[:patient_id])
-    @login_wards = [' '] + GlobalProperty.find_by_property('facility.login_wards').property_value.split(',') rescue []
-  end
 
   # Form for entering the location information
   def location
@@ -30,32 +25,21 @@ class SessionsController < ApplicationController
   # Update the session with the location information
   def update    
     # First try by id, then by name
-    if params[:ward]
-      @login_wards = [' '] + GlobalProperty.find_by_property('facility.login_wards').property_value.split(',') rescue []
-    unless @login_wards.include?(params[:ward])
-      flash[:error] = "Invalid Ward"
+    location = Location.find(params[:location]) rescue nil
+    location ||= Location.find_by_name(params[:location]) rescue nil
+
+    valid_location = (generic_locations.include?(location.name)) rescue false
+
+    unless location and valid_location
+      flash[:error] = "Invalid workstation location"
       render :action => 'location'
-      return 
-    end 
-      session[:ward] = params[:ward]
-      redirect_to "/patients/show/#{params[:patient_id]}"
+      return    
+    end
+    self.current_location = location
+    if use_user_selected_activities and not location.name.match(/Outpatient/i)
+      redirect_to "/user/activities/#{User.current_user.id}"
     else
-      location = Location.find(params[:location]) rescue nil
-      location ||= Location.find_by_name(params[:location]) rescue nil
-
-      valid_location = (generic_locations.include?(location.name)) rescue false
-
-      unless location and valid_location
-        flash[:error] = "Invalid workstation location"
-        render :action => 'location'
-        return    
-      end
-      self.current_location = location
-      if use_user_selected_activities and not location.name.match(/Outpatient/i)
-        redirect_to "/patients/show/24"
-      else
-        redirect_to '/clinic'
-      end
+      redirect_to '/clinic'
     end
   end
 
