@@ -27,14 +27,7 @@
               <th colspan=2>Patient Dashboard</th>
             </tr>
             <h1 id='project_name'>
-              <%if User.current_user.activities.include?('Manage Lab Orders') or User.current_user.activities.include?('Manage Lab Results') or
-       User.current_user.activities.include?('Manage Sputum Submissions') or User.current_user.activities.include?('Manage TB Clinic Visits') or
-       User.current_user.activities.include?('Manage TB Reception Visits') or User.current_user.activities.include?('Manage TB Registration Visits') or
-       User.current_user.activities.include?('Manage HIV Status Visits') %>
-                 <span style="font-size: 55px;">TB-ART</span>
-               <%else%>
-                 BART
-               <%end%>
+              BPR
             </h1>
             <span id='patient_name'><%= @patient_bean.name rescue "" %></span>
             <span id='patient_id'><%= @patient_bean.national_id_with_dashes rescue "" %></span>
@@ -54,14 +47,11 @@
               <% if (@hiv_status rescue nil) != nil && (@hiv_status) != "" && (@hiv_status) != "UNKNOWN" %>
                 <span value="<%= @hiv_status rescue "" %>">HIV Status</span>
               <% end %>
+
               <% if (@arv_number rescue nil) != nil && (@arv_number) != " " %>
                 <span value="<%= @arv_number rescue "" %>">ARV Number</span>
               <% end %>
-              
-              <%# if (@patient_bean.eid_number rescue nil) != nil && (@patient_bean.eid_number) != " " %>
-                <!--<span value="<%= @patient_bean.eid_number rescue "" %>">EID Number</span>-->
-              <%# end %>
-              
+
               <% if (@patient_bean.filing_number rescue nil) != nil && (@patient_bean.filing_number) != " " %>
                 <span value="<%= @patient_bean.filing_number rescue "" %>">Filing Number</span>
               <% end %>
@@ -77,10 +67,6 @@
             </div>
             <select id="tabs">
               <option value='/patients/overview?patient_id=<%= @patient.id %>'>Overview</option>
-              <!--
-              <option value='/patients/visit_history?patient_id=<%= @patient.id %>'>Current Visit</option>
-              <option value='/patients/past_visits_summary?patient_id=<%= @patient.id %>'>Past Visits</option>
-              -->
               <option value='/patients/personal/<%= @patient.id -%>'>Printouts and Other</option>
               <option value='/patients/next_task_description?task_id=<%= task.id -%>'>
                 NEXT TASK: <%= task_name.gsub('_',' ') %>
@@ -99,7 +85,6 @@
              <% else %>
                 <select id="links">
                   <option value='/patients/programs_dashboard/<%= @patient.id -%>'>Outcomes</option>
-                  <option value='/patients/show/<%= @patient.id -%>?source=opd'>OPD</option>
                   <option value='/patients/patient_demographics?patient_id=<%=@patient.id%>'>Edit Demograghics</option>
                 </select>
                 <select id="navigation_links">
