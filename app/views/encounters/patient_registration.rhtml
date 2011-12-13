@@ -1,0 +1,38 @@
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
+</script>
+  <style type="text/css">
+    #summary {
+      padding:10px;
+      font-size:1.8em;
+    }
+    #char {
+      display: none;
+    }
+    .title {
+      text-decoration:underline;
+      margin-right:10px;
+    }
+
+    #tt_page_summary_ .inputFrameClass { height:84%; }
+  </style>
+ 
+
+  <form action="/encounters/create">
+    <%= hidden_field_tag "encounter[encounter_type_name]", "PATIENT REGISTRATION" %>
+    <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+    <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+    <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+
+    <%= touch_select_tag "WARD", @patient, options_for_select(@selected_wards),
+        {:id => "ward",
+         :helptext =>"Select ward/department"} %>
+         
+    <% if @retrospective %>
+      <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+      <%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+    <% else %>
+      <%= hidden_field_tag "filter[provider]", nil %>
+    <%end%>
+    <%= submit_tag "Finish" %>    
+  </form>
