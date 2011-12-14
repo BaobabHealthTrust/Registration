@@ -138,15 +138,6 @@ class ApplicationController < ActionController::Base
 	return final_options
   end
 
-  def tb_next_form(location , patient , session_date = Date.today)
-    task = Task.first rescue Task.new()
-    
-    #task.encounter_type = 'Visit complete ...'
-    task.encounter_type = 'NONE'
-    task.url = "/patients/show/#{patient.id}"
-    return task
-  end
-
   def next_task(patient)
     session_date = session[:datetime].to_date rescue Date.today
     task = main_next_task(Location.current_location, patient,session_date)
