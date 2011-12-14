@@ -39,31 +39,13 @@
             <span id='patient_gender'><%= @patient_bean.sex rescue "" %></span>
 
             <div id="patient_card">
-              <% if (@reason_for_art_eligibility rescue nil) != nil && (@reason_for_art_eligibility) != "" %>
-
-                 <span value="<%= @reason_for_art_eligibility rescue "" %>">Reason for Starting</span>
-               <% end %>
-
-               <% if (@arv_number rescue nil) != nil && (@arv_number) != " " %>
-
-                  <span value="<%= @arv_number rescue "" %>">ARV Number</span>
-
-               <% end %>
-               <% if (@patient_bean.filing_number rescue nil) != nil && (@patient_bean.filing_number) != " " %>
-
-                <span value="<%= @patient_bean.filing_number rescue "" %>">Filing Number</span>
-
-               <% end %>
-               <% if (@patient_bean.eid_number rescue nil) != nil && (@patient_bean.eid_number) != " " %>
-
-                 <span value="<%= @patient_bean.eid_number rescue "" %>">EID Number</span>
-
-               <% end %>
-               <% if (@patient_bean.pre_art_number rescue nil) != nil && (@patient_bean.pre_art_number) != " " %>
-
-                <span value="<%= @patient_bean.pre_art_number rescue "" %>">Pre-ART Number</span>
-
-               <% end %>
+              <% if (@ward rescue nil) != nil && (@ward) != "" %>
+                <span value="<%= @ward rescue "" %>">Ward/Department</span>
+              <% end %>
+              
+              <% if (@hiv_status rescue nil) != nil && (@hiv_status) != "" && (@hiv_status) != "UNKNOWN" %>
+                <span value="<%= @hiv_status rescue "" %>">HIV Status</span>
+              <% end %>
             </div>
             <select id="tabs">
               <option value='/patients/programs?patient_id=<%= @patient.id %>'>Outcomes</option>

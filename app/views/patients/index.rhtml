@@ -35,8 +35,8 @@
             <span id='patient_gender'><%= @patient_bean.sex rescue "" %></span>
 
             <div id="patient_card">
-              <% if (@ward.first rescue nil) != nil && (@ward.first) != "" %>
-                <span value="<%= @ward.first rescue "" %>">Ward/Department</span>
+              <% if (@ward rescue nil) != nil && (@ward) != "" %>
+                <span value="<%= @ward rescue "" %>">Ward/Department</span>
               <% end %>
               
               <% if (@hiv_status rescue nil) != nil && (@hiv_status) != "" && (@hiv_status) != "UNKNOWN" %>

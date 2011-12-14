@@ -115,13 +115,9 @@ class ClinicController < ApplicationController
 
     @reports = [
       ["Diagnosis","/drug/date_select?goto=/report/age_group_select?type=diagnosis"],
-     # ["Patient Level Data","/drug/date_select?goto=/report/age_group_select?type=patient_level_data"],
       ["Disaggregated Diagnosis","/drug/date_select?goto=/report/age_group_select?type=disaggregated_diagnosis"],
       ["Referrals","/drug/date_select?goto=/report/opd?type=referrals"],
-      #["Total Visits","/drug/date_select?goto=/report/age_group_select?type=total_visits"],
-      #["User Stats","/drug/date_select?goto=/report/age_group_select?type=user_stats"],
       ["User Stats","/"],
-     # ["Total registered","/drug/date_select?goto=/report/age_group_select?type=total_registered"],
       ["Diagnosis (By address)","/drug/date_select?goto=/report/age_group_select?type=diagnosis_by_address"],
       ["Diagnosis + demographics","/drug/date_select?goto=/report/age_group_select?type=diagnosis_by_demographics"]
     ] if Location.current_location.name.match(/Outpatient/i)
@@ -146,7 +142,6 @@ class ClinicController < ApplicationController
       ["Set Clinic Holidays","/properties/set_clinic_holidays"],
       ["Set Site Code", "/properties/site_code"],
       ["Manage Roles", "/properties/set_role_privileges"],
-      ["Use Extended Staging Format", "/properties/creation?value=use_extended_staging_format"],
       ["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
       ["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
       ["Show Lab Results", "/properties/creation?value=show_lab_results"],

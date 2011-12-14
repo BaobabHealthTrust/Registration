@@ -8,8 +8,7 @@ class PatientsController < ApplicationController
 	  @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 	  @patient_bean = PatientService.get_patient(@patient.person)
 	  @encounters = @patient.encounters.find_by_date(session_date)
-	  @diabetes_number = DiabetesService.diabetes_number(@patient)
-	  @ward = Observation.find(:all, :conditions => ["person_id = ? AND concept_id = ?", @patient.person.id, ConceptName.find_by_name("WARD").concept_id]).map{|obs| obs.value_text}
+    @ward = referral_section
     @prescriptions = @patient.orders.unfinished.prescriptions.all
     @programs = @patient.patient_programs.all
     @alerts = alerts(@patient, session_date) rescue nil
@@ -149,6 +148,8 @@ class PatientsController < ApplicationController
       render :template => 'dashboards/programs_tab', :layout => false
     end
   end
+
+
 
   def graph
     @currentWeight = params[:currentWeight]
@@ -573,6 +574,24 @@ class PatientsController < ApplicationController
     end
     return "#{label.print(1)} #{label2.print(1)} #{label3.print(1)}" if !extra_lines.blank?
     return "#{label.print(1)} #{label2.print(1)}"
+  end
+
+  def referral_section
+    @patient_bean = PatientService.get_patient(@patient.person)
+    
+    ward = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.person.id, ConceptName.find_by_name("WARD").concept_id])
+   
+    if ward.value_text
+        @ward = ward.value_text
+    else
+        @ward = ConceptName.find_by_concept_id(ward.value_coded).name
+    end
+  end
+
+  def programs_dashboard
+	  @patient_bean = PatientService.get_patient(@patient.person)
+    @ward = referral_section
+    render :template => 'dashboards/programs_dashboard', :layout => false
   end
 
   def patient_transfer_out_label(patient_id)
