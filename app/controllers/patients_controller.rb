@@ -803,25 +803,6 @@ class PatientsController < ApplicationController
     #raise params.to_yaml
     patient = Patient.find(params[:patient_id])
     case params[:field]
-    when 'arv_number'
-      type = params['identifiers'][0][:identifier_type]
-      #patient = Patient.find(params[:patient_id])
-      patient_identifiers = PatientIdentifier.find(:all,
-        :conditions => ["voided = 0 AND identifier_type = ? AND patient_id = ?",type.to_i,patient.id])
-
-      patient_identifiers.map{|identifier|
-        identifier.voided = 1
-        identifier.void_reason = "given another number"
-        identifier.date_voided  = Time.now()
-        identifier.voided_by = User.current_user.id
-        identifier.save
-      }
-
-      identifier = params['identifiers'][0][:identifier].strip
-      if identifier.match(/(.*)[A-Z]/i).blank?
-        params['identifiers'][0][:identifier] = "#{PatientIdentifier.site_prefix}-ARV-#{identifier}"
-      end
-      patient.patient_identifiers.create(params[:identifiers])
     when "name"
       names_params =  {"given_name" => params[:given_name].to_s,"family_name" => params[:family_name].to_s}
       patient.person.names.first.update_attributes(names_params) if names_params
@@ -850,9 +831,6 @@ class PatientsController < ApplicationController
       if exists_person_attribute
         exists_person_attribute.update_attributes({'value' => attribute[:occupation].to_s})
       end
-    when "guardian"
-      names_params =  {"given_name" => params[:given_name].to_s,"family_name" => params[:family_name].to_s}
-      Person.find(params[:guardian_id].to_s).names.first.update_attributes(names_params) rescue '' if names_params
     when "address"
       address2 = params[:person][:addresses]
       patient.person.addresses.first.update_attributes(address2) if address2
@@ -869,6 +847,9 @@ class PatientsController < ApplicationController
       attribute = params[:person][:attributes]
       cell_phone_number_attribute = PersonAttributeType.find_by_name("Cell Phone Number")
       exists_person_attribute = PersonAttribute.find(:first, :conditions => ["person_id = ? AND person_attribute_type_id = ?", patient.person.id, cell_phone_number_attribute.person_attribute_type_id]) rescue nil
+      if exists_person_attribute
+        exists_person_attribute.update_attributes({'value' => attribute[:cell_phone_number].to_s})
+      end
    when "home_phone_number"
       attribute = params[:person][:attributes]
       cell_phone_number_attribute = PersonAttributeType.find_by_name("Home Phone Number")
