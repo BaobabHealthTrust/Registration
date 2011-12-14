@@ -227,21 +227,6 @@
   <tr>
     <th>National ID:</th><td><%= @patient_bean.national_id_with_dashes %></td>
   </tr>
-  <%
-  use_filing_number = get_global_property_value('use.filing.number') rescue 'false'
-  if Location.current_location.name.match(/HIV|ART/) and use_filing_number == 'true'%>
-    <tr>
-      <th>Filing number:</th><td><%= @patient_bean.filing_number || @patient_bean.archived_filing_number %></td>
-    </tr>
-  <%end%>
-  <%if Location.current_location.name.match(/HIV|ART/) %>
-    <tr>
-      <th>ARV number:</th><td><%= @patient_bean.arv_number || 'N/A' %></td>
-    </tr>
-  <%end%>
-  <tr>
-    <th> Guardian: </th><td><%= @patient_bean.guardian || 'NONE'%></td>
-  </tr>
   </table>
   <div>
     <table>

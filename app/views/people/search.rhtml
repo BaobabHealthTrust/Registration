@@ -35,20 +35,8 @@ pos = 1
         people[<%= pos %>]["Mother Surname"] = "<%=h person.mothers_surname -%>";
     <% end %>
 
-    <% if !person.arv_number.blank? %> 
-        people[<%= pos %>]["ARV Number"] = "<%=h person.arv_number rescue "" -%>";
-    <% end %>
-
     <% if !person.national_id.blank? %>     
         people[<%= pos %>]["Patient National ID"] = "<%=h person.national_id rescue "" -%>";
-    <% end %>
-    
-    <% if !person.eid_number.blank? %>    
-        people[<%= pos %>]["EID Number"] = "<%=h person.eid_number rescue "" -%>";
-    <% end %>
-
-    <% if !person.pre_art_number.blank? %>    
-        people[<%= pos %>]["Pre-ART Number"] = "<%=h person.pre_art_number rescue "" -%>";
     <% end %>
   <%
 
