@@ -779,7 +779,7 @@ class PatientsController < ApplicationController
       attribute = params[:person][:attributes]
       cell_phone_number_attribute = PersonAttributeType.find_by_name("Home Phone Number")
       exists_person_attribute = PersonAttribute.find(:first, :conditions => ["person_id = ? AND person_attribute_type_id = ?", patient.person.id, cell_phone_number_attribute.person_attribute_type_id]) rescue nil
-      
+
       if exists_person_attribute
         exists_person_attribute.update_attributes({'value' => attribute[:home_phone_number].to_s})
       end
