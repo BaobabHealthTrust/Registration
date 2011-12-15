@@ -9,3 +9,25 @@ global_property_00001:
   description: Indicates hostnames for retrieving patient demographics
   property_value: "localhost"
   uuid: 1fe590fa-268f-102d-a2b3-16da04859145
+global_property_00003: 
+  property: facility_adults_admission_wards
+  description: Adults admission wards
+  property_value: "Burns,Gynaecology Ward,Ward 3A,Ward 4B,Ward 5A,Ward 5B,Ward 6A"
+  uuid: 4514377e-24b2-11e1-a256-544249152fc0
+global_property_00004: 
+  property: facility_female_adults_admission_wards
+  description: Female adults admission wards
+  property_value: "Ante-Natal Ward,Burns,Gynaecology Ward,Labour Ward,Post-Natal Ward,Post-Natal Ward(Low Risk),Post-Natal Ward(High Risk), Ward 3A,Ward 4B,Ward 5A,Ward 5B,Ward 6A"
+  uuid: da7aaf5a-24b2-11e1-a256-544249152fc0
+global_property_00004: 
+  property: facility_paediatrics_admission_wards
+  description: Paeds admission wards
+  property_value: "Malaria Research Ward,Moyo Ward,Oncology Ward, Paediatrics Nursery Ward,Paediatrics Special Care Ward,Paediatrics Surgical Ward"
+  uuid: a42e49ca-24b2-11e1-a256-544249152fc0
+global_property_00004: 
+  property: facility_referral_section_tag
+  description: KCH referral sections or departments
+  property_value: "KCH referral section"
+  uuid: 7bf49e88-24a2-11e1-a256-544249152fc0
+
+

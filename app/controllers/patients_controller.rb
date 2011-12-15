@@ -87,7 +87,6 @@ class PatientsController < ApplicationController
     patient_bean = PatientService.get_patient(@patient.person)
     
     traditional_authorities = []
-
     district_id = District.find_by_name("#{patient_bean.home_district}").id
     traditional_authority_conditions = ["district_id = ?}%", district_id]
 
@@ -367,7 +366,7 @@ class PatientsController < ApplicationController
 
   def get_recent_lab_orders_label(patient_id)
     encounters = Encounter.find(:all,:conditions =>["encounter_type = ? and patient_id = ?",
-        EncounterType.find_by_name("LAB ORDERS").id,patient_id]).last(5)
+        EncounterType.find_by_name("LAB ORDERS").id,patient_id]).last(5) rescue []
       observations = []
 
     encounters.each{|encounter|
@@ -506,7 +505,6 @@ class PatientsController < ApplicationController
     @patient_bean = PatientService.get_patient(@patient.person)
     
     ward = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.person.id, ConceptName.find_by_name("WARD").concept_id])
-   
     if ward.value_text
         @ward = ward.value_text
     else

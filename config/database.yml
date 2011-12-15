@@ -14,9 +14,9 @@ development:
 
 test: &TEST
   adapter: mysql
-  database: openmrs15
-  username: yamiko
-  password: bart
+  database: bart2_test
+  username: root
+  password: root
   host: localhost
 
 cucumber:

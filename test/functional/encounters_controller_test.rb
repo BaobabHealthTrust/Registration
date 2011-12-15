@@ -4,7 +4,7 @@ class EncountersControllerTest < ActionController::TestCase
   fixtures :person, :person_name, :person_name_code, :person_address, 
            :patient, :patient_identifier, :patient_identifier_type,
            :concept, :concept_name, :concept_class,
-           :encounter, :encounter_type, :obs
+           :encounter, :encounter_type, :obs, :global_property
 
   def setup  
     @controller = EncountersController.new
@@ -13,19 +13,6 @@ class EncountersControllerTest < ActionController::TestCase
   end
 
   context "Encounters controller" do
-  
-    context "Outpatient Diagnoses" do
-
-      should "lookup diagnoses by name return them in the search results" do
-        logged_in_as :mikmck, :registration do
-          get :diagnoses, {:search_string => 'EXTRAPULMONARY'}
-          assert_response :success
-          #can be done better
-          concepts = ConceptName.find(:all).map(&:name)
-          assert_contains concepts, concept_name(:concept_name_03112).name
-        end  
-      end
-    end
     
     should "create a new encounter" do
       logged_in_as :mikmck, :registration do

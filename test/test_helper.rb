@@ -6,6 +6,7 @@ require 'shoulda'
 require 'mocha'
 require 'colorfy_strings'
 require 'factory_girl'
+
 Factory.find_definitions
 
 if (!Factory.factories || Factory.factories.empty?)

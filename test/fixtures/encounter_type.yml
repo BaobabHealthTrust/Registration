@@ -588,3 +588,14 @@ encounter_type_00057:
   description: Lab Test order
   retired: "0"
   date_created: 2010-08-23 09:50:40
+encounter_type_00057:  
+  encounter_type_id: 104
+  name: "PATIENT REGISTRATION"
+  description: "First encounter with patient at registration desk"
+  creator: 1
+  date_created: "2011-12-08 16:22:01"
+  retired: 0
+  retired_by:
+  date_retired:
+  retire_reason:
+  uuid: "7b37ddfc-24a2-11e1-a256-544249152fc0"

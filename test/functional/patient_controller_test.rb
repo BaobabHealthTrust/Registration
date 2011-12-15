@@ -2,14 +2,16 @@ require File.dirname(__FILE__) + '/../test_helper'
 
 class PatientsControllerTest < ActionController::TestCase
   fixtures :person, :person_name, :person_name_code, :person_address,
-           :patient, :patient_identifier, :patient_identifier_type,
-           :program, :concept, :concept_name, :encounter, :encounter_type
+           :patient, :patient_identifier, :patient_identifier_type, :program,
+           :concept, :concept_name, :encounter, :encounter_type, :location,
+           :obs
 
   def setup  
     @controller = PatientsController.new
     @request    = ActionController::TestRequest.new
     @response   = ActionController::TestResponse.new
-    @patient = patient(:evan)  
+    @patient = patient(:evan)
+    @patient_bean = PatientService.get_patient(@patient.person) 
   end
 
   context "Patient controller" do
@@ -28,39 +30,23 @@ class PatientsControllerTest < ActionController::TestCase
           assert_no_match /Pre ART Number/, @response.body
           assert_no_match /PART\-311/, @response.body
           assert_response :success
-        end  
+        end
       end
 
       should "show the number of booked patients" do
         logged_in_as :mikmck, :registration do
-          #TODO rewrite 
+          #TODO rewrite
           get :number_of_booked_patients, {:id => patient(:evan).id, :date => Date.today}
-          assert_response :success
-        end
-      end
-
-      should "get opdshow" do
-        logged_in_as :mikmck, :registration do
-          #TODO mastercard, opdcard, opdtreatment, mastercard_printable, patient_state
-          #session[:mastercard_ids] = []
-          get :treatment, {:patient_id => patient(:evan).patient_id}
           assert_response :success
         end
       end
 
       should "get the mastercard_modify" do
         logged_in_as :mikmck, :registration do
-          get :mastercard_modify, {:id => patient(:evan).patient_id, :field => 'guardian'}
-          assert_redirected_to("relationships/search?patient_id=#{patient(:evan).patient_id}")
-          get :mastercard_modify, {:id => patient(:evan).patient_id, :field => 'occupation'}
-          assert_response :success
-        end
-      end
 
-      should "get the general_mastercard" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :general_mastercard, {:id => patient(:evan).patient_id, :type => 4}
+          get :mastercard_modify, {:id => patient(:evan).patient_id, :field => 'name'}
+          assert_response :success
+          get :mastercard_modify, {:id => patient(:evan).patient_id, :field => 'occupation'}
           assert_response :success
         end
       end
@@ -70,24 +56,8 @@ class PatientsControllerTest < ActionController::TestCase
           #TODO rewrite the test
           get :index, {:patient_id => patient(:evan).patient_id}
           assert_response :success
-          assert_equal @response.body.include?("ARV-311"), true
-          assert_equal @response.body.include?("HIV Status"), true
-        end
-      end
-
-      should "relationships" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :relationships, {:patient_id => patient(:evan).patient_id}
-          assert_response :success
-        end
-      end    
-    
-     should "guardians" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :guardians, {:patient_id => patient(:evan).patient_id}
-          assert_response :success
+          assert_equal @response.body.include?("ARV-311"), false
+          assert_equal @response.body.include?("HIV Status"), false
         end
       end
 
@@ -101,24 +71,7 @@ class PatientsControllerTest < ActionController::TestCase
        assert_response :success
       end
     end
-
-    should "mastercard" do
-      logged_in_as :mikmck, :registration do
-       #TODO rewrite the test
-       patient = patient(:evan)
-       get :mastercard_printable, {:patient_id => patient.patient_id}
-       assert_response :success
-      end
-    end
-
-    should "print mastercard" do
-      logged_in_as :mikmck, :registration do
-       #TODO rewrite the test
-       patient = patient(:evan)
-       get :print_mastercard, {:patient_id => patient.patient_id}
-       assert_redirected_to("patients/mastercard?patient_id=#{patient(:evan).patient_id}")
-      end
-    end    
+  
 
    should "demographics" do
       logged_in_as :mikmck, :registration do
@@ -133,38 +86,6 @@ class PatientsControllerTest < ActionController::TestCase
         logged_in_as :mikmck, :registration do
           #TODO rewrite the test
           get :overview, {:patient_id => patient(:evan).patient_id}
-          assert_response :success
-        end
-    end
-      
-    should "visit_history" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :visit_history, {:patient_id => patient(:evan).patient_id}
-          assert_response :success
-        end
-    end
-
-    should "past_visits_summary" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :past_visits_summary, {:patient_id => patient(:evan).patient_id}
-          assert_response :success
-        end
-    end
-
-    should "treatment_dashboard" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :treatment_dashboard, {:patient_id => patient(:evan).patient_id}
-          assert_response :success
-        end
-    end
-
-    should "guardians_dashboard" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :guardians_dashboard, {:patient_id => patient(:evan).patient_id}
           assert_response :success
         end
     end

@@ -508,19 +508,302 @@ location_00002:
   retire_reason: 
   latitude: ""
   address2: ""
-  subregion: 
-  retired_by: 
   location_type_id: 
   country: ""
   city_village: Neno
   postal_code: ""
   creator: 5
   uuid: 88ac2e36-bd81-11df-9b35-00248c09418a
-  date_retired: 
   location_id: 2
-  county_district: 
-  neighborhood_cell: 
   longitude: ""
   description: Neno District Hospital, formerly Neno Rural Hospital (ID=750)
   retired: false
   date_created: 2007-11-30 02:23:00 +02:00
+location_00738:
+  location_id: 738
+  name: "Ward 4B"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:34:49"
+  retired: false
+  uuid: "7bf49d8e-24a2-11e1-a256-544249152fc0"
+location_00739:
+  location_id: 739
+  name: "Ward 3A"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:35:12"
+  retired: false
+  uuid: "7bf49e88-24a2-11e1-a256-544249152fc0"
+location_00740:
+  location_id: 740
+  name: "Gynaecology Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:35:57"
+  retired: false
+  uuid: "7bf49f6e-24a2-11e1-a256-544249152fc0"
+location_00741:
+  location_id: 741
+  name: "Ward 5A"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:36:16"
+  retired: false
+  uuid: "7bf4a068-24a2-11e1-a256-544249152fc0"
+location_00742:
+  location_id: 742
+  name: "Ward 5B"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:36:29"
+  retired: false
+  uuid: "7bf4a158-24a2-11e1-a256-544249152fc0"
+location_00743:
+  location_id: 743
+  name: "Ward 6A"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:36:42"
+  retired: false
+  uuid: "7bf4a248-24a2-11e1-a256-544249152fc0"
+location_00744:
+  location_id: 744
+  name: "Burns"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:36:56"
+  retired: false
+  uuid: "7bf4a338-24a2-11e1-a256-544249152fc0"
+location_00745:
+  location_id: 745
+  name: "Ante-natal Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:37:22"
+  retired: false
+  uuid: "7bf4a428-24a2-11e1-a256-544249152fc0"
+location_00746:
+  location_id: 746
+  name: "Labour Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:37:39"
+  retired: false
+  uuid: "7bf4a518-24a2-11e1-a256-544249152fc0"
+location_00747:
+  location_id: 747
+  name: "Post-natal Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:37:57"
+  retired: false
+  uuid: "7bf4a612-24a2-11e1-a256-544249152fc0"
+location_00748:
+  location_id: 748
+  name: "Post-natal Ward (Low Risk)"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:38:33"
+  retired: false
+  uuid: "7bf4a70c-24a2-11e1-a256-544249152fc0"
+location_00749:
+  location_id: 749
+  name: "Post-natal Ward (High Risk)"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:39:07"
+  retired: false
+  uuid: "7bf4a806-24a2-11e1-a256-544249152fc0"
+location_00750:
+  location_id: 750
+  name: "Moyo Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:39:31"
+  retired: false
+  uuid: "7bf4a8f6-24a2-11e1-a256-544249152fc0"
+location_00751:
+  location_id: 751
+  name: "Peadiatrics Nursery Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:39:54"
+  retired: false
+  uuid: "7bf4a9f0-24a2-11e1-a256-544249152fc0"
+location_00752:
+  location_id: 752
+  name: "Paeiatrics Special Care Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:40:16"
+  retired: false
+  uuid: "7bf4aae0-24a2-11e1-a256-544249152fc0"
+location_00753:
+  location_id: 753
+  name: "Paediatrics Surgical Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:41:01"
+  retired: false
+  uuid: "7bf4abda-24a2-11e1-a256-544249152fc0"
+location_00754:
+  location_id: 754
+  name: "Oncology Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:41:15"
+  retired: false
+  uuid: "7bf4acd4-24a2-11e1-a256-544249152fc0"
+location_00755:
+  location_id: 755
+  name: "Malaria Research Ward"
+  description: "Ward"
+  address1: ""
+  address2: ""
+  city_village: ""
+  state_province: ""
+  postal_code: ""
+  country: ""
+  latitude: ""
+  longitude: ""
+  creator: 1
+  date_created: "2011-12-08 16:41:39"
+  retired: false
+  uuid: "7bf4adce-24a2-11e1-a256-544249152fc0"

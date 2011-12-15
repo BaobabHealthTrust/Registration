@@ -107501,3 +107501,17 @@ concept_name_09709:
   locale: en
   concept_id: "6987"
   date_created: 2010-03-11 23:24:15 +02:00
+concept_name_10703:
+  concept_id: "7829"
+  name: "Ward"
+  locale: "en"
+  creator: 1
+  date_created: "2011-06-01 09:31:25"
+  concept_name_id: "10703"
+  voided: 0
+  voided_by:
+  date_voided:
+  void_reason:
+  uuid: "7a8b9132-24a2-11e1-a256-544249152fc0"
+  concept_name_type: "FULLY_SPECIFIED"
+  locale_preferred: 0

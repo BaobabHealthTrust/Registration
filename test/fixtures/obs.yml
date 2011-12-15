@@ -8,12 +8,23 @@ evan_vitals_height:
   date_created: 2000-01-01 00:00:00
   uuid: 1fea0306-268f-102d-a2b3-16da04859145
 evan_vitals_weight:
-  obs_id: 3
+  obs_id: 5
   person_id: 1
   concept_id: 5089
   encounter_id: 1
   obs_datetime: 2000-01-01 00:00:00
   value_numeric: 60
   date_created: 2000-01-01 00:00:00
-  uuid: 1fea0306-269f-102d-a2b3-16da04859145  
-  
+  uuid: 1fea0306-269f-102d-a2b3-16da04859145
+evan_ward:
+  obs_id: 4
+  person_id: 1
+  concept_id: 7829
+  encounter_id: 1
+  obs_datetime: 2011-12-14 14:30:16
+  location_id: 700
+  value_text: "Ward 6A"
+  creator: 1
+  date_created: "2011-12-14 14:30:56"
+  voided: 0
+  uuid: "7873c050-264f-11e1-8ccd-544249152fc0"

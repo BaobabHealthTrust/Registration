@@ -81946,3 +81946,22 @@ concept_06987:
   datatype_id: 2
   concept_id: 6987
   date_created: 2011-04-17 11:54:03 +02:00
+concept_07829:
+  concept_id: 7829
+  retired: 0
+  short_name:
+  description:
+  form_text:
+  datatype_id: 4
+  class_id: 11
+  is_set: 0
+  creator: 1
+  date_created: "2011-06-01 09:31:25"
+  default_charge: nil
+  version: ""
+  changed_by: nil
+  date_changed: nil
+  retired_by: nil
+  date_retired: nil
+  retire_reason: nil
+  uuid: "78699d22-24a2-11e1-a256-544249152fc0"
