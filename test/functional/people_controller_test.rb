@@ -29,13 +29,6 @@ class PeopleControllerTest < ActionController::TestCase
       end  
     end
 
-    should "find a valid person by ARV number and redirect them to dashboard" do
-      logged_in_as :mikmck, :registration do
-        get :find_by_arv_number, {:identifier => 'ARV-311'}
-        assert_response :success
-      end
-    end
-
     should "set the datetime" do
       logged_in_as :mikmck, :registration do
         get :set_datetime, {"set_year"=>"2010", "set_month"=>"6", "set_day"=>"26"}

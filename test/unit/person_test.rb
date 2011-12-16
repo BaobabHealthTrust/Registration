@@ -118,7 +118,7 @@ assert_equal PatientService.birthdate_formatted(Person.make(:birthdate => "2000-
       o.void("End of the world")
       p = person(:evan)
       assert p.observations
-      assert_equal p.observations.count, 1
+      assert_equal p.observations.count, 2
     end
     
     should "refer to the corresponding patient" do
@@ -141,7 +141,7 @@ assert_equal PatientService.birthdate_formatted(Person.make(:birthdate => "2000-
       p = person(:evan)
       data = {
         "address1" => "Green Snake Way",
-        "address2" => "Friendship House",
+        "address2" => "Lilongwe",
         "county_district" => "Checkuchecku",
         "city_village" => "Katoleza"
       }
@@ -177,7 +177,7 @@ assert_equal PatientService.birthdate_formatted(Person.make(:birthdate => "2000-
       p = person(:evan)
 
       evan_demographics = {"person" => {
-        "addresses"=> {"address2" => "Friendship House",
+        "addresses"=> {"address2" => "Lilongwe",
                        "city_village" => "Katoleza",
                        "address1" => "Green Snake Way",
                        "county_district" => "Checkuchecku"},
