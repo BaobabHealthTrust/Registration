@@ -84,7 +84,7 @@ class ApplicationController < ActionController::Base
              ORDER BY name ASC").collect{|name| name.send(field_name)} rescue []
   end
   
-  def referral_sections
+  def all_facility_referral_sections
     field_name = "name"
     referral_sections = CoreService.get_global_property_value("facility_referral_section_tag") rescue false
     Location.find_by_sql("SELECT *
@@ -96,6 +96,20 @@ class ApplicationController < ActionController::Base
                                  WHERE name = '#{referral_sections}'))
              ORDER BY name ASC").collect{|name| name.send(field_name)} rescue []
   end
+
+  def peads_facility_referral_sections
+    field_name = "name"
+ 
+    Location.find_by_sql("SELECT *
+          FROM location
+          WHERE location_id IN (SELECT location_id
+                         FROM location_tag_map
+                          WHERE location_tag_id = (SELECT location_tag_id
+                                 FROM location_tag
+                                 WHERE name = 'Facility peads sections'))
+             ORDER BY name ASC").collect{|name| name.send(field_name)} rescue []
+  end
+
 
   def site_prefix
     site_prefix = CoreService.get_global_property_value("site_prefix") rescue false

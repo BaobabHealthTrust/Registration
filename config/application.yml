@@ -4,7 +4,8 @@ production:
 
 development:
  create_from_remote: no
- use.user.selected.activities: yes
+ use.user.selected.activities: false
+ use.filing.number: false
 
 test: &TEST
  create_from_remote: no

@@ -8,7 +8,7 @@ class PatientsController < ApplicationController
 	  @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 	  @patient_bean = PatientService.get_patient(@patient.person)
 	  @encounters = @patient.encounters.find_by_date(session_date)
-    @ward = referral_section
+    @ward = referral_section rescue 'None'
     @prescriptions = @patient.orders.unfinished.prescriptions.all
     @programs = @patient.patient_programs.all
     @alerts = alerts(@patient, session_date) rescue nil
@@ -514,7 +514,7 @@ class PatientsController < ApplicationController
 
   def programs_dashboard
 	  @patient_bean = PatientService.get_patient(@patient.person)
-    @ward = referral_section
+    @ward = referral_section rescue 'None'
     render :template => 'dashboards/programs_dashboard', :layout => false
   end
 

@@ -23,7 +23,7 @@
     <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
     <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-    <%= touch_select_tag "WARD", @patient, options_for_select(@wards),
+    <%= touch_select_tag "WARD", @patient, options_for_select(@referral_sections),
         {:id => "ward",
          :helptext =>"Select ward/department"} %>
 

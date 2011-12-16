@@ -309,18 +309,7 @@ class EncountersController < ApplicationController
 			@retrospective = false
 		end
 
-		@referral_sections = referral_sections
-
-		@wards = []
-		if @patient_bean.age <= 15
-      @wards = CoreService.get_global_property_value("facility_paediatrics_admission_wards").split(',') rescue []
-    else
-      if is_child_bearing_female(@patient)
-        @wards = CoreService.get_global_property_value("facility_female_adults_admission_wards").split(',') rescue []
-      else
-        @wards = CoreService.get_global_property_value("facility_adults_admission_wards").split(',').map{|ward| ward if !ward.include?('Gynaecology Ward')}
-      end
-    end
+		@referral_sections = patient_referral_sections(@patient_bean.age)
 
 		@current_height = PatientService.get_patient_attribute_value(@patient, "current_height")
 		@min_weight = PatientService.get_patient_attribute_value(@patient, "min_weight")
@@ -374,6 +363,17 @@ class EncountersController < ApplicationController
   def is_child_bearing_female(patient)
   	patient_bean = PatientService.get_patient(patient.person)
     (patient_bean.sex == 'Female' && patient_bean.age >= 9 && patient_bean.age <= 45) ? true : false
+  end
+
+  def patient_referral_sections(patient_age)
+		@sections = []
+
+		if patient_age <= 15
+      @sections = peads_facility_referral_sections
+    else
+      @sections = all_facility_referral_sections - peads_facility_referral_sections
+    end
+
   end
 
 end

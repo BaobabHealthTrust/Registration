@@ -63,10 +63,10 @@ class PeopleController < ApplicationController
       elsif local_results.length == 1
         found_person = local_results.first
       else
-        # TODO - figure out how to write a test for this
-        # This is sloppy - creating something as the result of a GET
-        found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
-        found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+        if create_from_remote        
+			found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
+    	    found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+		    end
       end
       if found_person
         if params[:relation]
