@@ -68,7 +68,7 @@ form{
     margin-top: 5px;
     margin-bottom: 5px;
     font-family:"Nimbus Sans L","Arial Narrow",sans-serif;
-    font-size:1.5em;
+    font-size:1.2em;
 }
 .optionsList{
     display:none;
@@ -321,7 +321,7 @@ form{
     width: 250px;
 }
 
-#SHIFT, #qwerty, #na, #showDataButton, #lessthan, #greaterthan, #equals, #unknown {
+#SHIFT, #na, #showDataButton, #lessthan, #greaterthan, #equals, #unknown {
     display: none;
 }
 
