@@ -977,7 +977,7 @@ ul li {
     position: absolute;
     top: 150px;
     left: 260px;
-    font-size: 2em;
+    font-size: 2.35em;
     float: right;
     text-align: left;
     z-index: 842;
@@ -987,4 +987,19 @@ ul li {
     padding: 20px;   
     border: 5px outset #40f999;
     -moz-border-radius: 15px; 
+}
+
+#progress_bar {
+    background-color: #40f999;
+    border: 5px outset #40f999;
+    border-radius: 15px 15px 15px 15px;
+    display: none;
+    font-size: 2em;
+    left: 250px;
+    padding: 10px;
+    position: absolute;
+    text-align: center;
+    top: 100px;
+    width: 450px;
+    z-index: 999;
 }
