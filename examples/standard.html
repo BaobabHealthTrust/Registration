@@ -18,6 +18,17 @@
                             <th colspan=2>Registration</th>
                         </tr>
                         <tr>
+                            <td>Preferred Keyboard</td>
+                            <td>
+                                <select style='width: 100%' name='keybrd' id='keybrd' 
+                                        helptext='Preferred Keyboard' tt_onUnLoad="tstUserKeyboardPref=__$('keybrd').value">
+                                    <option></option>
+                                    <option value="abc">abc</option>
+                                    <option value="qwerty">qwerty</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>First Name</td>
                             <td>
                                 <input type='text' value='Text' field_type='text' name='first_name' id='first_name' 
