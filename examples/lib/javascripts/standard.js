@@ -1572,7 +1572,6 @@ function clearInput(){
             for(var i = 0; i < options.length; i++){
                 if(options[i].style.backgroundColor == "lightblue"){
                     options[i].click();
-                    options[i].click();
                 }
             }
         } else {
