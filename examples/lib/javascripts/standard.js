@@ -1750,6 +1750,7 @@ function getDatePart(aElementName) {
 
 
 function gotoNextPage() {
+    tstMultipleSelected = {};
     gotoPage(tstCurrentPage+1, true);
 }
 
