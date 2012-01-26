@@ -533,6 +533,7 @@ button:hover.dark span {
 .NumbersOnlyWithDecimal #slash,
 .NumbersOnlyWithDecimal #comma,
 .NumbersOnlyWithDecimal #Unknown,
+.NumbersOnlyWithDecimal #qwerty,
 .NumbersOnlyWithDecimal #percent{
     display: none
 }
@@ -547,6 +548,7 @@ button:hover.dark span {
 .NumbersOnly #slash,
 .NumbersOnly #comma,
 .NumbersOnly #Unknown,
+.NumbersOnly #qwerty,
 .NumbersOnly #percent{
     display: none
 }
