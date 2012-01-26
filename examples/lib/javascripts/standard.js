@@ -66,6 +66,8 @@ var tstMessageBoxType = {
 var tstTimerHandle = null;
 var tstTimerFunctionCall = "";
 
+var tstMultipleSelected = {};
+
 //--------------------------------------
 // Default method in module to access element id changed to __$ to avoid
 // conflicts with other libraries like jQuery. The same is recommended for use
@@ -917,7 +919,6 @@ function unhighlight(element){
 
 //TODO make these into 1 function
 function updateTouchscreenInputForSelect(element){
-    
     var inputTarget = tstInputTarget;
     var multiple = inputTarget.getAttribute("multiple") == "multiple";
 
@@ -932,12 +933,15 @@ function updateTouchscreenInputForSelect(element){
             val = element.value;
         
         // Check if the item is already included
-        var idx = val_arr.toString().indexOf(val);
-        if (idx == -1)
+        // var idx = val_arr.toString().indexOf(val);
+        if (!tstMultipleSelected[val]){ //(idx == -1){
             val_arr.push(val);
-        else
+            tstMultipleSelected[val] = true;
+        } else {
             // val_arr.splice(idx, 1);
             val_arr = removeFromArray(val_arr, val);
+            delete(tstMultipleSelected[val]);
+        }
         inputTarget.value = val_arr.join(tstMultipleSplitChar);
         if (inputTarget.value.indexOf(tstMultipleSplitChar) == 0)
             inputTarget.value = inputTarget.value.substring(1, inputTarget.value.length);
