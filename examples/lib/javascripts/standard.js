@@ -3537,10 +3537,10 @@ function showKeyboard(full_keyboard, qwerty){
     div.id = "divMenu";
     // div.className = "keyboard";
     
-    var row1 = (qwerty ? ["Q","W","E","R","T","Y","U","I","O","P"] : ["A","B","C","D","E","F","G","H","I","J"]);
-    var row2 = (qwerty ? ["A","S","D","F","G","H","J","K","L",":"] : ["K","L","M","N","O","P","Q","R","S",":"]);
-    var row3 = (qwerty ? ["Z","X","C","V","B","N","M",",",".","?"] : ["T","U","V","W","X","Y","Z",",",".","?"]);
-    var row4 = ["cap","space","delete"];
+    var row1 = (qwerty ? ["q","w","e","r","t","y","u","i","o","p"] : ["a","b","c","d","e","f","g","h","i","j"]);
+    var row2 = (qwerty ? ["a","s","d","f","g","h","j","k","l",":"] : ["k","l","m","n","o","p","q","r","s",":"]);
+    var row3 = (qwerty ? ["z","x","c","v","b","n","m",",",".","?"] : ["t","u","v","w","x","y","z",",",".","?"]);
+    var row4 = ["CAP","space","delete"];
     var row5 = ["1","2","3","4","5","6","7","8","9","0"];
     var row6 = ["_","-","@","(",")","+",";","=","\\","/"];
 
