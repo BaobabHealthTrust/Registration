@@ -538,6 +538,19 @@ button:hover.dark span {
     display: none
 }
 
+.NumbersOnlyWithUnknown #star,
+.NumbersOnlyWithUnknown #abc,
+.NumbersOnlyWithUnknown #char,
+.NumbersOnlyWithUnknown #date,
+.NumbersOnlyWithUnknown #minus,
+.NumbersOnlyWithUnknown #plus,
+.NumbersOnlyWithUnknown #slash,
+.NumbersOnlyWithUnknown #comma,
+.NumbersOnlyWithUnknown #qwerty,
+.NumbersOnlyWithUnknown #percent{
+    display: none
+}
+
 .NumbersOnly #star,
 .NumbersOnly #abc,
 .NumbersOnly #char,
@@ -757,6 +770,7 @@ button {
 .NumbersWithUnknown #decimal,
 .NumbersWithUnknown #slash,
 .NumbersWithUnknown #comma,
+.NumbersWithUnknown #qwerty,
 .NumbersWithUnknown #percent{
     display: none
 }
