@@ -9,6 +9,11 @@
             tt_cancel_destination = '../home.html';
             tt_cancel_show = 'show.html';
         </script>
+        <style>
+            .tt_unknown #SHIFT {
+                display: none;
+            }
+        </style>
     </head>
     <body><div id='content'>
             <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
@@ -54,7 +59,7 @@
                             <td>
                                 <select style='width: 100%' name='gender' id='gender' helptext='Gender (Single Selection Example)'>
                                     <option></option>
-                                    <option>Male</option>
+                                    <option selected="selected">Male</option>
                                     <option>Female</option>
                                     <option></option>
                                 </select>
@@ -73,17 +78,17 @@
                                     <option value="d4T/3TC/NVP">d4T/3TC/NVP</option>
                                     <option value="d4T/3TC">d4T/3TC</option>
                                     <option value="d4T">d4T</option>
-                                    <option value="Didanosine">Didanosine</option>
-                                    <option value="Efavirenz">Efavirenz</option>
-                                    <option value="Lamivudine">Lamivudine</option>
+                                    <option selected value="Didanosine">Didanosine</option>
+                                    <option selected value="Efavirenz">Efavirenz</option>
+                                    <option selected value="Lamivudine">Lamivudine</option>
                                     <option value="LPV/r">LPV/r</option>
 
                                     <option value="Nelfinavir">Nelfinavir</option>
                                     <option value="Nevirapine">Nevirapine</option>
                                     <option value="Stavudine Lamivudine and Abacavir">Stavudine Lamivudine and Abacavir</option>
                                     <option value="TDF+3TC">TDF+3TC</option>
-                                    <option value="TDF/3TC/EFV">TDF/3TC/EFV</option>
-                                    <option value="TDF">TDF</option>
+                                    <option selected value="TDF/3TC/EFV">TDF/3TC/EFV</option>
+                                    <option selected value="TDF">TDF</option>
                                     <option value="Zidovudine">Zidovudine</option>
                                     <option value="Other antiretroviral drug">Other antiretroviral drug</option>
                                     <option value="Unknown antiretroviral drug">Unknown antiretroviral drug</option>
@@ -130,7 +135,7 @@
                             <td>Mother's Surname</td>
                             <td>
                                 <input type='text' value='Text' field_type='text' name='mothers_surname' id='mothers_surname' 
-                                       helptext="Mother's Surname" />
+                                       helptext="Mother's Surname" tt_pageStyleClass="tt_unknown" />
                             </td>
                         </tr>
                         <tr>

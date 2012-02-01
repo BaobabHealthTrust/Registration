@@ -756,16 +756,18 @@ function toggleShowProgress() {
     }
 }
 
-function loadSelectOptions(selectOptions, options, dualViewOptions) {
+function loadSelectOptions(selectOptions, options, dualViewOptions) {        
     
     if(dualViewOptions != undefined) {
         tstDualViewOptions = eval(dualViewOptions);
         setTimeout("addSummary(" + selected + ")", 0);
     }
-
+    
     var optionsList = "<ul id='tt_currentUnorderedListOptions'>";  // <li id='default'> </li>";
     var selectOptionCount = selectOptions.length;
     var selected = -1;
+
+    options.innerHTML = "";
 
     for(var j=0;j<selectOptionCount;j++){
         // njih
@@ -784,6 +786,12 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
             optionsList += " id='option"+selectOptions[j].value +"' tstValue='"+selectOptions[j].value +"'";
             selected = j;
         } 
+        
+        if(selectOptions[j].selected){
+            try{
+                setTimeout("__$(" + (j-1) + ").click();", 0);
+            } catch(e){}
+        }
         
         // optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
         // ' onmousedown="'+ mouseDownAction +'"';
@@ -1460,7 +1468,7 @@ function navigateToPage(destPage, validate, navback){
     }
     else{
 
-    /*
+        /*
         var popupBox = __$("popupBox");
         if (popupBox) {
             popupBox.style.visibility = "visible";
@@ -3812,13 +3820,13 @@ function showKeyboard(full_keyboard, qwerty){
 
 function showStatus(){
     if(!__$("popupBox")){
-       var  popupBox = document.createElement("div");
-       popupBox.id = "popupBox";
-       popupBox.style.display = "none";
+        var  popupBox = document.createElement("div");
+        popupBox.id = "popupBox";
+        popupBox.style.display = "none";
        
-       popupBox.innerHTML = "<p>Processing. Please Wait ...</p>"
+        popupBox.innerHTML = "<p>Processing. Please Wait ...</p>"
        
-       __$("content").appendChild(popupBox);
+        __$("content").appendChild(popupBox);
     }
     
     __$("popupBox").style.display = "block";
