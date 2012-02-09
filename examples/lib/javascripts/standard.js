@@ -66,6 +66,8 @@ var tstMessageBoxType = {
 var tstTimerHandle = null;
 var tstTimerFunctionCall = "";
 
+var tstMultipleSelected = {};
+
 //--------------------------------------
 // Default method in module to access element id changed to __$ to avoid
 // conflicts with other libraries like jQuery. The same is recommended for use
@@ -343,7 +345,7 @@ function enableTouchscreenInterface(){
     document.getElementById('launchButton').innerHTML = "Disable Touchscreen UI";
 }
 
-function populateInputPage(pageNum) {
+function populateInputPage(pageNum, navback) {   
     var i = tstPages[pageNum];
 
     inputPage  = createInputPage(pageNum);
@@ -431,7 +433,7 @@ function populateInputPage(pageNum) {
     tstInputTarget = touchscreenInputNode;
 
     // options
-    inputDiv.appendChild(getOptions());
+    inputDiv.appendChild(getOptions(navback));
 
     contentContainer.appendChild(wrapperPage);
 
@@ -593,7 +595,7 @@ function getHelpText(inputElement, aPageNum) {
     return helpText;
 }
 
-function getOptions() {
+function getOptions(navback) {   
     var pageNum = tstCurrentPage;
     var i = tstPages[pageNum]
     var optionsClass = "";
@@ -646,7 +648,7 @@ function getOptions() {
                     tstFormElements[i].getAttribute("dualViewOptions") != undefined){
                     loadSelectOptions(selectOptions, options, tstFormElements[i].getAttribute("dualViewOptions"));
                 } else {
-                    loadSelectOptions(selectOptions, options);
+                    loadSelectOptions(selectOptions, options, null, navback);
                 }
                       
                 var val = elementSelectedValue(tstFormElements[i]);
@@ -755,15 +757,16 @@ function toggleShowProgress() {
 }
 
 function loadSelectOptions(selectOptions, options, dualViewOptions) {
-    
-    if(dualViewOptions != undefined) {
+    if(dualViewOptions != undefined || dualViewOptions != null) {
         tstDualViewOptions = eval(dualViewOptions);
         setTimeout("addSummary(" + selected + ")", 0);
     }
-
+    
     var optionsList = "<ul id='tt_currentUnorderedListOptions'>";  // <li id='default'> </li>";
     var selectOptionCount = selectOptions.length;
     var selected = -1;
+
+    options.innerHTML = "";
 
     for(var j=0;j<selectOptionCount;j++){
         // njih
@@ -774,7 +777,8 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
         // inherit mouse down options
         mouseDownAction = selectOptions[j].getAttribute("onmousedown")
         mouseDownAction += '; updateTouchscreenInputForSelect(' +
-        (tstFormElements[tstCurrentPage].getAttribute("multiple") ? '__$(\'optionValue\' + this.id), this' : 'this') + '); ' + 
+        (tstFormElements[tstCurrentPage].getAttribute("multiple") ? '__$(\'optionValue\' + this.id), this' : 'this') + 
+        '); ' + 
         (dualViewOptions ? 'changeSummary(this.id);' : '');
         
         optionsList += '<li id=\'' + (j-1) + '\' ';
@@ -783,9 +787,16 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
             selected = j;
         } 
         
-        // optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
-        // ' onmousedown="'+ mouseDownAction +'"';
-    
+        if(selectOptions[j].selected){
+            try{
+                setTimeout("__$(" + (j-1) + ").click();", 0);
+            } catch(e){}
+        }
+        
+        optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
+        ' onmousedown="'+ (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") != null ? 
+            (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") == "false" ? "checkRequireNextClick();" : "") : "") +'"';
+
         optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
         ' onclick="' + mouseDownAction + '" ';
         
@@ -916,8 +927,7 @@ function unhighlight(element){
 }
 
 //TODO make these into 1 function
-function updateTouchscreenInputForSelect(element){
-    
+function updateTouchscreenInputForSelect(element){ 
     var inputTarget = tstInputTarget;
     var multiple = inputTarget.getAttribute("multiple") == "multiple";
 
@@ -932,12 +942,15 @@ function updateTouchscreenInputForSelect(element){
             val = element.value;
         
         // Check if the item is already included
-        var idx = val_arr.toString().indexOf(val);
-        if (idx == -1)
+        // var idx = val_arr.toString().indexOf(val);
+        if (!tstMultipleSelected[val]){ //(idx == -1){
             val_arr.push(val);
-        else
+            tstMultipleSelected[val] = true;
+        } else {
             // val_arr.splice(idx, 1);
             val_arr = removeFromArray(val_arr, val);
+            delete(tstMultipleSelected[val]);
+        }
         inputTarget.value = val_arr.join(tstMultipleSplitChar);
         if (inputTarget.value.indexOf(tstMultipleSplitChar) == 0)
             inputTarget.value = inputTarget.value.substring(1, inputTarget.value.length);
@@ -953,7 +966,10 @@ function updateTouchscreenInputForSelect(element){
     highlightSelection(element.parentNode.childNodes, inputTarget)
             
     tt_update(inputTarget);
-    checkRequireNextClick();
+    
+/*if(tstDirectionForward == true){
+        checkRequireNextClick();
+    }*/
 }
 
 function updateTouchscreenInput(element){
@@ -1118,7 +1134,8 @@ function tt_update(sourceElement, navback){
         } else {
             sourceValue = sourceElement.getAttribute("tstValue");
         }                
-    } else {
+    }
+    else {
         if (condition && navback == true) {
             sourceValue = "";            
         } else {
@@ -1163,36 +1180,37 @@ function tt_update(sourceElement, navback){
                         for(i=0;i<targetElement.options.length;i++){
                             if(optionIncludedInValue(targetElement.options[i].text, val_arr)) {
                                 targetElement.options[i].selected = true;
-                            } else
-                                targetElement.options[i].selected = false;
+                            }
+                            else
+                            targetElement.options[i].selected = false;
 
-                        }
-                    }
-                }
+                            }
+                            }
+                            }
 
-            }
-            break;
-        case "SELECT":
+                            }
+                            break;
+                            case "SELECT":
             
-            var val_arr = new Array();
-            if (targetElement.multiple) {
-                val_arr = sourceElement.value.split(tstMultipleSplitChar);
-            }
-            else {
-                val_arr.push(sourceElement.value);
-            }
+                            var val_arr = new Array();
+                            if (targetElement.multiple) {
+                            val_arr = sourceElement.value.split(tstMultipleSplitChar);
+                            }
+                            else {
+            val_arr.push(sourceElement.value);
+        }
 
-            for(i=0;i<targetElement.options.length;i++){
-                if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
-                    targetElement.options[i].selected = true;
-                    if (!targetElement.multiple)
-                        break;
-                } else {
-                    targetElement.options[i].selected = false;
-                }
+        for(i=0;i<targetElement.options.length;i++){
+            if(optionIncludedInValue(targetElement.options[i].value, val_arr)){
+                targetElement.options[i].selected = true;
+                if (!targetElement.multiple)
+                    break;
+            } else {
+                targetElement.options[i].selected = false;
             }
+        }
 			 
-            break;
+        break;
         case "TEXTAREA":
             targetElement.value = sourceValue;
             break;
@@ -1275,26 +1293,28 @@ function joinDateValues(aDateElement) {
     if (strDate.length != 10 && aDateElement.value) return aDateElement.value;
     if (strDate.length != 10) return "";
     else return strDate;
-}
+    }
 
-// This detour has been added to capture alert messages that need to be displayed
-// before the next page is viewed
-function gotoPage(destPage, validate, navback){
+    // This detour has been added to capture alert messages that need to be displayed
+    // before the next page is viewed
+    function gotoPage(destPage, validate, navback){
     var currentPage = tstCurrentPage;
     var currentInput = __$("touchscreenInput"+currentPage);
 
-    var navback = (navback ? navback : false);    
+    var navback = (navback == true ? true : false);    
 
     //	tt_BeforeUnload
     var unloadElementId = 'touchscreenInput';
     if (currentPage < destPage) {
-        unloadElementId = 'touchscreenInput'+(destPage-1);
+    unloadElementId = 'touchscreenInput'+(destPage-1);
+    tstDirectionForward = true;
     }
     else if (currentPage > destPage) {
-        unloadElementId = 'touchscreenInput'+(destPage+1);
-    }
+    unloadElementId = 'touchscreenInput'+(destPage+1);
+    tstDirectionForward = false;
+}
 
-    var unloadElement = __$(unloadElementId);
+var unloadElement = __$(unloadElementId);
     if (unloadElement) {
         var onUnloadCode = unloadElement.getAttribute('tt_BeforeUnload');
         if (onUnloadCode) {
@@ -1305,10 +1325,12 @@ function gotoPage(destPage, validate, navback){
                 // corresponding function for earlier cancelling when required
                 tstTimerHandle = setTimeout("navigateToPage(" + destPage + ", " + validate + ", " + navback + ");", 3000);
                 tstTimerFunctionCall = "navigateToPage(" + destPage + ", " + validate + ", " + navback + ");";
-            } else {
+            }
+            else {
                 navigateToPage(destPage, validate, navback);
             }
-        } else {
+        }
+        else {
             navigateToPage(destPage, validate, navback);
         }
     } else {
@@ -1317,7 +1339,7 @@ function gotoPage(destPage, validate, navback){
 }
 
 //args: page number to load, validate: true/false
-function navigateToPage(destPage, validate, navback){    
+function navigateToPage(destPage, validate, navback){
     clearTimeout(tstTimerHandle);
     
     var currentPage = tstCurrentPage;
@@ -1409,7 +1431,7 @@ function navigateToPage(destPage, validate, navback){
 
         inputTargetPageNumber = destPage;
         tstCurrentPage = destPage;
-        populateInputPage(destPage);
+        populateInputPage(destPage, navback);
         __$("progressAreaPage"+destPage).setAttribute("class", "currentIndex");
 
         var nextButton = tstNextButton;
@@ -1456,10 +1478,14 @@ function navigateToPage(destPage, validate, navback){
     }
     else{
 
+        /*
         var popupBox = __$("popupBox");
         if (popupBox) {
             popupBox.style.visibility = "visible";
         }
+    */
+   
+        showStatus();
 
         document.forms[0].submit();
     }
@@ -1563,7 +1589,6 @@ function clearInput(){
         if(tstFormElements[tstPages[tstCurrentPage]].getAttribute("multiple")){
             for(var i = 0; i < options.length; i++){
                 if(options[i].style.backgroundColor == "lightblue"){
-                    options[i].click();
                     options[i].click();
                 }
             }
@@ -1674,7 +1699,7 @@ function showBestKeyboard(aPageNum) {
     switch (inputElement.getAttribute("field_type")) {
         case "password":
         case "full_keyboard":
-            showKeyboard(true);
+            showKeyboard(true, (tstUserKeyboardPref.toLowerCase() == "qwerty" ? true : false));
             break;
         case "alpha":
             __$("keyboard").innerHTML = getPreferredKeyboard();
@@ -1743,6 +1768,7 @@ function getDatePart(aElementName) {
 
 
 function gotoNextPage() {
+    tstMultipleSelected = {};
     gotoPage(tstCurrentPage+1, true);
 }
 
@@ -3524,15 +3550,15 @@ function stripZero(value){
     return value;
 }
 
-function showKeyboard(full_keyboard){   
+function showKeyboard(full_keyboard, qwerty){   
     var div = document.createElement("div");
     div.id = "divMenu";
     // div.className = "keyboard";
     
-    var row1 = ["Q","W","E","R","T","Y","U","I","O","P"];
-    var row2 = ["A","S","D","F","G","H","J","K","L",":"];
-    var row3 = ["Z","X","C","V","B","N","M",",",".","?"];
-    var row4 = ["cap","space","delete"];
+    var row1 = (qwerty ? ["q","w","e","r","t","y","u","i","o","p"] : ["a","b","c","d","e","f","g","h","i","j"]);
+    var row2 = (qwerty ? ["a","s","d","f","g","h","j","k","l",":"] : ["k","l","m","n","o","p","q","r","s",":"]);
+    var row3 = (qwerty ? ["z","x","c","v","b","n","m",",",".","?"] : ["t","u","v","w","x","y","z",",",".","?"]);
+    var row4 = ["CAP","space","delete"];
     var row5 = ["1","2","3","4","5","6","7","8","9","0"];
     var row6 = ["_","-","@","(",")","+",";","=","\\","/"];
 
@@ -3769,13 +3795,13 @@ function showKeyboard(full_keyboard){
 
                 full_keyboard = true;
 
-                showKeyboard(global_control);
+                showKeyboard(global_control, qwerty);
 
             } else if(this.innerHTML.match(/<span>(.+)<\/span>/)[1].toLowerCase() == "basic"){
 
                 full_keyboard = false;
 
-                showKeyboard(global_control);
+                showKeyboard(global_control, qwerty);
 
             } else if(!this.innerHTML.match(/<span>(.+)<\/span>/)[1].match(/^$/)){
 
@@ -3800,4 +3826,18 @@ function showKeyboard(full_keyboard){
     
     __$("keyboard").appendChild(div);
     
+}
+
+function showStatus(){
+    if(!__$("popupBox")){
+        var  popupBox = document.createElement("div");
+        popupBox.id = "popupBox";
+        popupBox.style.display = "none";
+       
+        popupBox.innerHTML = "<p>Processing. Please Wait ...</p>"
+       
+        __$("content").appendChild(popupBox);
+    }
+    
+    __$("popupBox").style.display = "block";
 }
