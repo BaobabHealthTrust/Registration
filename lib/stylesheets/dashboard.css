@@ -35,7 +35,7 @@ body{
     height:750px;
     margin-left:-500px;
     margin-top:-380px;
-
+    -moz-user-select:none;
 }
 
 #footer {
