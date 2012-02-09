@@ -794,10 +794,9 @@ function loadSelectOptions(selectOptions, options, dualViewOptions) {
         }
         
         optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
-        ' onmousedown="'+ mouseDownAction + 
-        (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") != null ? 
+        ' onmousedown="'+ (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") != null ? 
             (tstFormElements[tstCurrentPage].getAttribute("tt_requirenextclick") == "false" ? "checkRequireNextClick();" : "") : "") +'"';
-    
+
         optionsList += (j % 2 == 0 ? " class='odd' tag='odd' " : " class='even' tag='even'") + 
         ' onclick="' + mouseDownAction + '" ';
         
