@@ -152,12 +152,14 @@ class ClinicController < ApplicationController
 
   def administration_tab
     @reports =  [
-                  ['/clinic/users_tab','User Accounts/Settings'],
+                  ['/clinic/users_tab','User Accounts'],
                   ['/clinic/location_management_tab','Location Management'],
                 ]
+=begin
     if User.current_user.admin?
       @reports << ['/clinic/management_tab','Drug Management']
     end
+=end
     @landing_dashboard = 'clinic_administration'
     render :layout => false
   end
