@@ -26,14 +26,10 @@ class PatientsController < ApplicationController
         render :template => 'dashboards/opdtreatment_dashboard', :layout => false
      else
         @task = main_next_task(Location.current_location,@patient,session_date)
-        @hiv_status = PatientService.patient_hiv_status(@patient)
-        @reason_for_art_eligibility = PatientService.reason_for_art_eligibility(@patient)
-        @arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
         render :template => 'patients/index', :layout => false
      end
   end
 
-   
   def index
     session[:mastercard_ids] = []
     session_date = session[:datetime].to_date rescue Date.today
@@ -115,16 +111,7 @@ class PatientsController < ApplicationController
     @links = []
     patient = Patient.find(params[:id])
 
-    @links << ["Demographics (Print)","/patients/print_demographics/#{patient.id}"]
-    @links << ["Visit Summary (Print)","/patients/dashboard_print_visit/#{patient.id}"]
     @links << ["National ID (Print)","/patients/dashboard_print_national_id/#{patient.id}"]
-
-    if use_filing_number and not PatientService.get_patient_identifier(patient, 'Filing Number').blank?
-      @links << ["Filing Number (Print)","/patients/print_filing_number/#{patient.id}"]
-    end 
-
-    @links << ["Recent Lab Orders Label","/patients/recent_lab_orders?patient_id=#{patient.id}"]
-    @links << ["Transfer out label (Print)","/patients/print_transfer_out_label/#{patient.id}"]
 
     render :template => 'dashboards/personal_tab', :layout => false
   end
@@ -147,8 +134,6 @@ class PatientsController < ApplicationController
       render :template => 'dashboards/programs_tab', :layout => false
     end
   end
-
-
 
   def graph
     @currentWeight = params[:currentWeight]
@@ -173,61 +158,9 @@ class PatientsController < ApplicationController
     end
     print_and_redirect("/patients/national_id_label?patient_id=#{params[:id]}", redirect)  
   end
-  
-  def dashboard_print_visit
-    print_and_redirect("/patients/visit_label/?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")
-  end
-  
-  def print_visit
-    print_and_redirect("/patients/visit_label/?patient_id=#{@patient.id}", next_task(@patient))  
-  end
-
-  def print_demographics
-    print_and_redirect("/patients/patient_demographics_label/#{@patient.id}", "/patients/show/#{params[:id]}")
-  end
- 
-  def print_filing_number
-    print_and_redirect("/patients/filing_number_label/#{params[:id]}", "/patients/show/#{params[:id]}")  
-  end
    
-  def print_transfer_out_label
-    print_and_redirect("/patients/transfer_out_label?patient_id=#{params[:id]}", "/patients/show/#{params[:id]}")  
-  end
-   
-  def patient_demographics_label
-    print_string = demographics_label(params[:id])
-    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:id]}#{rand(10000)}.lbl", :disposition => "inline")
-  end
-  
   def national_id_label
     print_string = PatientService.patient_national_id_label(@patient) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a national id label for that patient")
-    send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
-  end
-
-  def print_lab_orders
-    print_and_redirect("/patients/lab_orders_label/?patient_id=#{@patient.id}", next_task(@patient))
-  end
-
-  def lab_orders_label
-    label_commands = patient_lab_orders_label(@patient.id)
-    send_data(label_commands.to_s,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbs", :disposition => "inline")
-  end
-
-  def filing_number_label
-    patient = Patient.find(params[:id])
-    label_commands = patient_filing_number_label(patient)
-    send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline")
-  end
- 
-  def filing_number_and_national_id
-    patient = Patient.find(params[:patient_id])
-    label_commands = PatientService.patient_national_id_label(patient) + patient_filing_number_label(patient)
-
-    send_data(label_commands,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbl", :disposition => "inline")
-  end
-
-  def visit_label
-    print_string = patient_visit_label(@patient) rescue (raise "Unable to find patient (#{params[:patient_id]}) or generate a visit label for that patient")
     send_data(print_string,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{params[:patient_id]}#{rand(10000)}.lbl", :disposition => "inline")
   end
 
@@ -297,38 +230,6 @@ class PatientsController < ApplicationController
     render :layout => false
   end
 
-  def number_of_booked_patients
-    date = params[:date].to_date
-    encounter_type = EncounterType.find_by_name('APPOINTMENT')
-    concept_id = ConceptName.find_by_name('APPOINTMENT DATE').concept_id
-    count = Observation.count(:all,
-            :joins => "INNER JOIN encounter e USING(encounter_id)",:group => "value_datetime",
-            :conditions =>["concept_id = ? AND encounter_type = ? AND value_datetime >= ? AND value_datetime <= ?",
-            concept_id,encounter_type.id,date.strftime('%Y-%m-%d 00:00:00'),date.strftime('%Y-%m-%d 23:59:59')])
-    count = count.values unless count.blank?
-    count = '0' if count.blank?
-    render :text => count
-  end
-
-  def recent_lab_orders_print
-    patient = Patient.find(params[:id])
-    lab_orders_label = params[:lab_tests].split(":")
-
-    label_commands = recent_lab_orders_label(lab_orders_label, patient)
-    send_data(label_commands.to_s,:type=>"application/label; charset=utf-8", :stream=> false, :filename=>"#{patient.id}#{rand(10000)}.lbs", :disposition => "inline")
-  end
-
-  def print_recent_lab_orders_label
-    lab_orders_label = params[:lab_tests].join(":")
-    print_and_redirect("/patients/recent_lab_orders_print/#{params[:id]}?lab_tests=#{lab_orders_label}" , "/patients/show/#{params[:id]}")
-  end
-
-  def recent_lab_orders
-    patient = Patient.find(params[:patient_id])
-    @lab_order_labels = get_recent_lab_orders_label(patient.id)
-    @patient_id = params[:patient_id]
-  end
-
   def next_task_description
     @task = Task.find(params[:task_id])
     render :template => 'dashboards/next_task_description', :layout => false
@@ -339,7 +240,7 @@ class PatientsController < ApplicationController
     # adherence
     # drug auto-expiry
     # cd4 due
-	patient_bean = PatientService.get_patient(patient.person)
+		patient_bean = PatientService.get_patient(patient.person)
     alerts = []
 
     type = EncounterType.find_by_name("APPOINTMENT")
@@ -364,59 +265,6 @@ class PatientsController < ApplicationController
     alerts
   end
 
-  def get_recent_lab_orders_label(patient_id)
-    encounters = Encounter.find(:all,:conditions =>["encounter_type = ? and patient_id = ?",
-        EncounterType.find_by_name("LAB ORDERS").id,patient_id]).last(5) rescue []
-      observations = []
-
-    encounters.each{|encounter|
-      encounter.observations.each{|observation|
-       unless observation['concept_id'] == Concept.find_by_name("Workstation location").concept_id
-          observations << ["#{ConceptName.find_by_concept_id(observation['value_coded'].to_i).name} : #{observation['date_created'].strftime("%Y-%m-%d") }",
-                            "#{observation['obs_id']}"]
-       end
-      }
-    }
-    return observations
-  end
-
-  def recent_lab_orders_label(test_list, patient)
-  	patient_bean = PatientService.get_patient(patient.person)
-    lab_orders = test_list
-    labels = []
-    i = 0
-    lab_orders.each{|test|
-      observation = Observation.find(test.to_i)
-
-      accession_number = "#{observation.accession_number rescue nil}"
-		patient_national_id_with_dashes = PatientService.get_national_id_with_dashes(patient)
-        if accession_number != ""
-          label = 'label' + i.to_s
-          label = ZebraPrinter::Label.new(500,165)
-          label.font_size = 2
-          label.font_horizontal_multiplier = 1
-          label.font_vertical_multiplier = 1
-          label.left_margin = 300
-          label.draw_barcode(50,105,0,1,4,8,50,false,"#{accession_number}")
-          label.draw_multi_text("#{patient_bean.name.titleize.delete("'")} #{patient_national_id_with_dashes}")
-          label.draw_multi_text("#{observation.name rescue nil} - #{accession_number rescue nil}")
-          label.draw_multi_text("#{observation.date_created.strftime("%d-%b-%Y %H:%M")}")
-          labels << label
-         end
-
-         i = i + 1
-    }
-
-      print_labels = []
-      label = 0
-      while label <= labels.size
-        print_labels << labels[label].print(1) if labels[label] != nil
-        label = label + 1
-      end
-
-      return print_labels
-  end
-
   # Get the any BMI-related alert for this patient
   def current_bmi_alert(patient_weight, patient_height)
     weight = patient_weight
@@ -434,76 +282,9 @@ class PatientsController < ApplicationController
     alert
   end
 
-  #moved from the patient model. Needs good testing
-  def demographics_label(patient_id)
-    patient = Patient.find(patient_id)
-    patient_bean = PatientService.get_patient(patient.person)
-    demographics = mastercard_demographics(patient)
-    hiv_staging = Encounter.find(:last,:conditions =>["encounter_type = ? and patient_id = ?",
-        EncounterType.find_by_name("HIV Staging").id,patient.id])
-
-    tb_within_last_two_yrs = "tb within last 2 yrs" unless demographics.tb_within_last_two_yrs.blank?
-    eptb = "eptb" unless demographics.eptb.blank?
-    pulmonary_tb = "Pulmonary tb" unless demographics.pulmonary_tb.blank?
-
-    cd4_count_date = nil ; cd4_count = nil ; pregnant = 'N/A'
-
-    (hiv_staging.observations).map do | obs |
-      concept_name = obs.to_s.split(':')[0].strip rescue nil
-      next if concept_name.blank?
-      case concept_name
-      when 'CD4 COUNT DATETIME'
-        cd4_count_date = obs.value_datetime.to_date
-      when 'CD4 COUNT'
-        cd4_count = obs.value_numeric
-      when 'IS PATIENT PREGNANT?'
-        pregnant = obs.to_s.split(':')[1] rescue nil
-      end
-    end rescue []
-
-    office_phone_number = PatientService.get_attribute(patient.person, 'Office phone number')
-    home_phone_number = PatientService.get_attribute(patient.person, 'Home phone number')
-    cell_phone_number = PatientService.get_attribute(patient.person, 'Cell phone number')
-
-    phone_number = office_phone_number if not office_phone_number.downcase == "not available" and not office_phone_number.downcase == "unknown" rescue nil
-    phone_number= home_phone_number if not home_phone_number.downcase == "not available" and not home_phone_number.downcase == "unknown" rescue nil
-    phone_number = cell_phone_number if not cell_phone_number.downcase == "not available" and not cell_phone_number.downcase == "unknown" rescue nil
-
-    initial_height = PatientService.get_patient_attribute_value(patient, "initial_height")
-    initial_weight = PatientService.get_patient_attribute_value(patient, "initial_weight")
-
-    label = ZebraPrinter::StandardLabel.new
-    label.draw_text("Printed on: #{Date.today.strftime('%A, %d-%b-%Y')}",450,300,0,1,1,1,false)
-    label.draw_text("#{demographics.arv_number}",575,30,0,3,1,1,false)
-    label.draw_text("PATIENT DETAILS",25,30,0,3,1,1,false)
-    label.draw_text("Name:   #{demographics.name} (#{demographics.sex})",25,60,0,3,1,1,false)
-    label.draw_text("DOB:    #{PatientService.birthdate_formatted(patient.person)}",25,90,0,3,1,1,false)
-    label.draw_text("Phone: #{phone_number}",25,120,0,3,1,1,false)
-    if demographics.address.length > 48
-      label.draw_text("Addr:  #{demographics.address[0..47]}",25,150,0,3,1,1,false)
-      label.draw_text("    :  #{demographics.address[48..-1]}",25,180,0,3,1,1,false)
-      last_line = 180
-    else
-      label.draw_text("Addr:  #{demographics.address}",25,150,0,3,1,1,false)
-      last_line = 150
-    end
-
-    label.draw_text("Occupation:    #{demographics.occupation}",25,last_line+=30,0,3,1,1,false)
-    label.draw_text("Landmark:   #{demographics.landmark}",25,last_line+=30,0,3,1,1,false)
-
-
-    label2 = ZebraPrinter::StandardLabel.new
-
-    label2.draw_line(25,170,795,3)
-    label2.draw_text("HEIGHT: #{initial_height}",570,70,0,2,1,1,false)
-    label2.draw_text("WEIGHT: #{initial_weight}",570,110,0,2,1,1,false)
-
-    return "#{label.print(1)} #{label2.print(1)}"
-  end
-
   def referral_section
     @patient_bean = PatientService.get_patient(@patient.person)
-    
+
     ward = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.person.id, ConceptName.find_by_name("WARD").concept_id])
     if ward.value_text
         @ward = ward.value_text
@@ -516,147 +297,6 @@ class PatientsController < ApplicationController
 	  @patient_bean = PatientService.get_patient(@patient.person)
     @ward = referral_section rescue 'None'
     render :template => 'dashboards/programs_dashboard', :layout => false
-  end
-
-  def patient_transfer_out_label(patient_id)
-    patient = Patient.find(patient_id)
-    patient_bean = PatientService.get_patient(patient.person)
-    demographics = mastercard_demographics(patient)
-    demographics_str = []
-    demographics_str << "Name: #{demographics.name}"
-    demographics_str << "DOB: #{patient_bean.birth_date}"
-    demographics_str << "DOB-E: #{patient_bean.birthdate_estimated}"
-    demographics_str << "Sex: #{demographics.sex}"
-    demographics_str << "Guardian name: #{demographics.guardian}"
-    demographics_str << "ARV number: #{demographics.arv_number}"
-    demographics_str << "National ID: #{demographics.national_id}"
-
-    demographics_str << "Address: #{demographics.address}"
-    demographics_str << "FU: #{demographics.agrees_to_followup}"
-    demographics_str << "1st alt line: #{demographics.alt_first_line_drugs.join(':')}"
-    demographics_str << "BMI: #{demographics.bmi}"
-    demographics_str << "CD4: #{demographics.cd4_count}"
-    demographics_str << "CD4 date: #{demographics.cd4_count_date}"
-    demographics_str << "1st line date: #{demographics.date_of_first_line_regimen}"
-    demographics_str << "ERA: #{demographics.ever_received_art}"
-    demographics_str << "1st line: #{demographics.first_line_drugs.join(':')}"
-    demographics_str << "1st pos HIV test date: #{demographics.first_positive_hiv_test_date}"
-
-    demographics_str << "1st pos HIV test site: #{demographics.first_positive_hiv_test_site}"
-    demographics_str << "1st pos HIV test type: #{demographics.first_positive_hiv_test_type}"
-    demographics_str << "Test date: #{demographics.hiv_test_date.gsub('/','-')}" if demographics.hiv_test_date
-    demographics_str << "Test loc: #{demographics.hiv_test_location}"
-    demographics_str << "Init HT: #{demographics.init_ht}"
-    demographics_str << "Init WT: #{demographics.init_wt}"
-    demographics_str << "Landmark: #{demographics.landmark}"
-    demographics_str << "Occupation: #{demographics.occupation}"
-    demographics_str << "Preg: #{demographics.pregnant}" if patient.person.gender == 'F'
-    demographics_str << "SR: #{demographics.reason_for_art_eligibility}"
-    demographics_str << "2nd line: #{demographics.second_line_drugs}"
-    demographics_str << "TB status: #{demographics.tb_status_at_initiation}"
-    demographics_str << "TI: #{demographics.transfer_in}"
-    demographics_str << "TI date: #{demographics.transfer_in_date}"
-
-
-    visits = visits(patient) ; count = 0 ; visit_str = nil
-    (visits || {}).sort{|a,b| b[0].to_date<=>a[0].to_date}.each do | date,visit |
-      break if count > 3
-      visit_str = "Visit date: #{date}" if visit_str.blank?
-      visit_str += ";Visit date: #{date}" unless visit_str.blank?
-      visit_str += ";wt: #{visit.weight}" if visit.weight
-      visit_str += ";ht: #{visit.height}" if visit.height
-      visit_str += ";bmi: #{visit.bmi}" if visit.bmi
-      visit_str += ";Outcome: #{visit.outcome}" if visit.outcome
-      visit_str += ";Regimen: #{visit.reg}" if visit.reg
-      visit_str += ";Adh: #{visit.adherence.join(' ')}" if visit.adherence
-      visit_str += ";TB status: #{visit.tb_status}" if visit.tb_status
-      gave = nil
-      (visit.gave.uniq || []).each do | name , quantity |
-        gave += "  #{name} (#{quantity})" unless gave.blank?
-        gave = ";Gave: #{name} (#{quantity})" if gave.blank?
-      end rescue []
-      visit_str += gave unless gave.blank?
-      count+=1
-      demographics_str << visit_str
-    end
-
-    label = ZebraPrinter::StandardLabel.new
-    label.draw_2D_barcode(80,20,'P',700,600,'x2','y7','l100','r100','f0','s5',"#{demographics_str.join(',').gsub('/','')}")
-    label.print(1)
-  end
-
-  def patient_lab_orders_label(patient_id)
-    patient = Patient.find(patient_id)
-    lab_orders = Encounter.find(:last,:conditions =>["encounter_type = ? and patient_id = ?",
-        EncounterType.find_by_name("LAB ORDERS").id,patient.id]).observations
-      labels = []
-      i = 0
-
-      while i <= lab_orders.size do
-        accession_number = "#{lab_orders[i].accession_number rescue nil}"
-		patient_national_id_with_dashes = PatientService.get_national_id_with_dashes(patient) 
-        if accession_number != ""
-          label = 'label' + i.to_s
-          label = ZebraPrinter::Label.new(500,165)
-          label.font_size = 2
-          label.font_horizontal_multiplier = 1
-          label.font_vertical_multiplier = 1
-          label.left_margin = 300
-          label.draw_barcode(50,105,0,1,4,8,50,false,"#{accession_number}")
-          label.draw_multi_text("#{patient.person.name.titleize.delete("'")} #{patient_national_id_with_dashes}")
-          label.draw_multi_text("#{lab_orders[i].name rescue nil} - #{accession_number rescue nil}")
-          label.draw_multi_text("#{lab_orders[i].obs_datetime.strftime("%d-%b-%Y %H:%M")}")
-          labels << label
-          end
-          i = i + 1
-      end
-
-      print_labels = []
-      label = 0
-      while label <= labels.size
-        print_labels << labels[label].print(2) if labels[label] != nil
-        label = label + 1
-      end
-
-      return print_labels
-  end
-
-  def patient_filing_number_label(patient, num = 1)
-    file = PatientService.get_patient_identifier(patient, 'Filing Number')[0..9]
-    file_type = file.strip[3..4]
-    version_number=file.strip[2..2]
-    number = file
-    len = number.length - 5
-    number = number[len..len] + "   " + number[(len + 1)..(len + 2)]  + " " +  number[(len + 3)..(number.length)]
-
-    label = ZebraPrinter::StandardLabel.new
-    label.draw_text("#{number}",75, 30, 0, 4, 4, 4, false)
-    label.draw_text("Filing area #{file_type}",75, 150, 0, 2, 2, 2, false)
-    label.draw_text("Version number: #{version_number}",75, 200, 0, 2, 2, 2, false)
-    label.print(num)
-  end
-
-  def patient_visit_label(patient, date = Date.today)
-    result = Location.current_location.name.match(/outpatient/i).nil?
-
-    if result == false
-      return mastercard_visit_label(patient,date)
-    else
-      label = ZebraPrinter::StandardLabel.new
-      label.font_size = 3
-      label.font_horizontal_multiplier = 1
-      label.font_vertical_multiplier = 1
-      label.left_margin = 50
-      encs = patient.encounters.find(:all,:conditions =>["DATE(encounter_datetime) = ?",date])
-      return nil if encs.blank?
-
-      label.draw_multi_text("Visit: #{encs.first.encounter_datetime.strftime("%d/%b/%Y %H:%M")}", :font_reverse => true)
-      encs.each {|encounter|
-        next if encounter.name.humanize == "Registration"
-        label.draw_multi_text("#{encounter.name.humanize}: #{encounter.to_s}", :font_reverse => false)
-      }
-      label.print(1)
-    end
   end
 
   def mastercard_demographics(patient_obj)
@@ -677,50 +317,6 @@ class PatientsController < ApplicationController
     visits.hiv_test_date = visits.hiv_test_date.to_s.split(':')[1].strip rescue nil
     visits.hiv_test_location = visits.hiv_test_location.to_s.split(':')[1].strip rescue nil
     visits
-  end
-
-  def visits(patient_obj,encounter_date = nil)
-    patient_visits = {}
-    yes = ConceptName.find_by_name("YES")
-    if encounter_date.blank?
-      observations = Observation.find(:all,:conditions =>["voided = 0 AND person_id = ?",patient_obj.patient_id],:order =>"obs_datetime").map{|obs| obs if !obs.concept.nil?}
-    else
-      observations = Observation.find(:all,
-        :conditions =>["voided = 0 AND person_id = ? AND Date(obs_datetime) = ?",
-        patient_obj.patient_id,encounter_date.to_date],:order =>"obs_datetime").map{|obs| obs if !obs.concept.nil?}
-    end
-
-    clinic_encounters = ["APPOINTMENT", "HEIGHT","WEIGHT","PATIENT REGISTRATION","VISIT","BMI"]
-    clinic_encounters.map do |field|
-      gave_hash = Hash.new(0) 
-      observations.map do |obs|
-         encounter_name = obs.encounter.name rescue []
-         next if encounter_name.blank?
-         next if encounter_name.match(/REGISTRATION/i)
-         visit_date = obs.obs_datetime.to_date
-         patient_visits[visit_date] = Mastercard.new() if patient_visits[visit_date].blank?
-         case field
-          when 'APPOINTMENT'
-            concept_name = obs.concept.fullname
-            next unless concept_name.upcase == 'APPOINTMENT DATE' 
-            patient_visits[visit_date].appointment_date = obs.value_datetime
-          when 'HEIGHT'
-            concept_name = obs.concept.fullname rescue nil
-            next unless concept_name.upcase == 'HEIGHT (CM)' 
-            patient_visits[visit_date].height = obs.value_numeric
-          when "WEIGHT"
-            concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'WEIGHT (KG)' 
-            patient_visits[visit_date].weight = obs.value_numeric
-          when "BMI"
-            concept_name = obs.concept.fullname rescue []
-            next unless concept_name.upcase == 'BODY MASS INDEX, MEASURED' 
-            patient_visits[visit_date].bmi = obs.value_numeric
-         end
-      end
-    end
-
-    patient_visits
   end
 
   def save_mastercard_attribute(params)
