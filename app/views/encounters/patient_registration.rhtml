@@ -14,7 +14,7 @@
       margin-right:10px;
     }
 
-    #tt_page_summary_ .inputFrameClass { height:84%; }
+    #tt_page_ward_ .inputFrameClass { height:84%; }
   </style>
 
   <form action="/encounters/create">
@@ -25,8 +25,8 @@
 
     <%= touch_select_tag "WARD", @patient, options_for_select(@referral_sections),
         {:id => "ward",
-         :helptext =>"Select ward/department"} %>
-
+         :helptext =>"Select ward or department"} %>
+    
     <% if @retrospective %>
       <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
         <%= text_field "filter", 'provider',
