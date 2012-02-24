@@ -145,6 +145,8 @@ class PeopleController < ApplicationController
             print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient))
           end
         else
+        	#creating a registration encounter before printing the patient's national id
+        	#this can be done better.
 					encounter = Encounter.new()
 					encounter.location_id = Location.current_location.location_id
 					encounter.encounter_type = EncounterType.find_by_name("REGISTRATION").encounter_type_id
