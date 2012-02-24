@@ -1,99 +1,6 @@
 class EncountersController < ApplicationController
   def create(params=params, session=session)
     #raise params.to_yaml
-	
-    if params['encounter']['encounter_type_name'] == 'TB_INITIAL'
-      (params[:observations] || []).each do |observation|
-        if observation['concept_name'].upcase == 'TRANSFER IN' and observation['value_coded_or_text'] == "YES"
-          params[:observations] << {"concept_name" => "TB STATUS","value_coded_or_text" => "Confirmed TB on treatment"}
-        end
-      end
-    end
-
-    if params['encounter']['encounter_type_name'] == 'ART_INITIAL'
-      if params[:observations][0]['concept_name'].upcase == 'EVER RECEIVED ART' and params[:observations][0]['value_coded_or_text'].upcase == 'NO'
-        observations = []
-        (params[:observations] || []).each do |observation|
-          next if observation['concept_name'].upcase == 'HAS TRANSFER LETTER'
-          next if observation['concept_name'].upcase == 'HAS THE PATIENT TAKEN ART IN THE LAST TWO WEEKS'
-          next if observation['concept_name'].upcase == 'HAS THE PATIENT TAKEN ART IN THE LAST TWO MONTHS'
-          next if observation['concept_name'].upcase == 'ART NUMBER AT PREVIOUS LOCATION'
-          next if observation['concept_name'].upcase == 'DATE ART LAST TAKEN'
-          next if observation['concept_name'].upcase == 'LAST ART DRUGS TAKEN'
-          next if observation['concept_name'].upcase == 'TRANSFER IN'
-          next if observation['concept_name'].upcase == 'HAS THE PATIENT TAKEN ART IN THE LAST TWO WEEKS'
-          next if observation['concept_name'].upcase == 'HAS THE PATIENT TAKEN ART IN THE LAST TWO MONTHS'
-          observations << observation
-        end
-      elsif params[:observations][4]['concept_name'].upcase == 'DATE ART LAST TAKEN' and params[:observations][4]['value_datetime'] != 'Unknown'
-        observations = []
-        (params[:observations] || []).each do |observation|
-          next if observation['concept_name'].upcase == 'HAS THE PATIENT TAKEN ART IN THE LAST TWO WEEKS'
-          next if observation['concept_name'].upcase == 'HAS THE PATIENT TAKEN ART IN THE LAST TWO MONTHS'
-          observations << observation
-        end
-      end
-
-      params[:observations] = observations unless observations.blank?
-
-      observations = []
-      (params[:observations] || []).each do |observation|
-        if observation['concept_name'].upcase == 'LOCATION OF ART INITIATION' or observation['concept_name'].upcase == 'CONFIRMATORY HIV TEST LOCATION'
-          observation['value_numeric'] = observation['value_coded_or_text'] rescue nil
-          observation['value_text'] = Location.find(observation['value_coded_or_text']).name.to_s rescue ""
-          observation['value_coded_or_text'] = ""
-        end
-        observations << observation
-      end
-
-      params[:observations] = observations unless observations.blank?
-    end
-
-    if params['encounter']['encounter_type_name'].upcase == 'HIV STAGING'
-      observations = []
-      (params[:observations] || []).each do |observation|
-        if observation['concept_name'].upcase == 'CD4 COUNT'
-          observation['value_modifier'] = observation['value_numeric'].match(/<|>/)[0] rescue nil
-          observation['value_numeric'] = observation['value_numeric'].match(/[0-9](.*)/i)[0] rescue nil
-        end
-        if observation['concept_name'].upcase == 'CD4 COUNT LOCATION' or observation['concept_name'].upcase == 'LYMPHOCYTE COUNT LOCATION'
-          observation['value_numeric'] = observation['value_coded_or_text'] rescue nil
-          observation['value_text'] = Location.find(observation['value_coded_or_text']).name.to_s rescue ""
-          observation['value_coded_or_text'] = ""
-        end
-
-        observations << observation
-      end
-      
-      params[:observations] = observations unless observations.blank?
-    end
-
-    if params['encounter']['encounter_type_name'].upcase == 'ART ADHERENCE'
-      observations = []
-      (params[:observations] || []).each do |observation|
-        if observation['concept_name'].upcase == 'WHAT WAS THE PATIENTS ADHERENCE FOR THIS DRUG ORDER'
-          observation['value_numeric'] = observation['value_text'] rescue nil
-          observation['value_text'] =  ""
-        end
-        observations << observation
-      end
-      params[:observations] = observations unless observations.blank?
-    end
-
-   if params['encounter']['encounter_type_name'].upcase == 'REFER PATIENT OUT?'
-      observations = []
-      (params[:observations] || []).each do |observation|
-        if observation['concept_name'].upcase == 'REFERRAL CLINIC IF REFERRED'
-          observation['value_numeric'] = observation['value_coded_or_text'] rescue nil
-          observation['value_text'] = Location.find(observation['value_coded_or_text']).name.to_s rescue ""
-          observation['value_coded_or_text'] = ""
-        end
-
-        observations << observation
-      end
-
-      params[:observations] = observations unless observations.blank?
-    end
 
     @patient = Patient.find(params[:encounter][:patient_id]) rescue nil
     if params[:location]
@@ -106,17 +13,6 @@ class EncountersController < ApplicationController
 
       # set current location via params if given
       Location.current_location = Location.find(params[:location])
-    end
-    
-    if params['encounter']['encounter_type_name'].to_s.upcase == "APPOINTMENT" && !params[:report_url].nil? && !params[:report_url].match(/report/).nil?
-        concept_id = ConceptName.find_by_name("RETURN VISIT DATE").concept_id
-        encounter_id_s = Observation.find_by_sql("SELECT encounter_id
-                       FROM obs
-                       WHERE concept_id = #{concept_id} AND person_id = #{@patient.id}
-                            AND DATE(value_datetime) = DATE('#{params[:old_appointment]}') AND voided = 0
-                       ").map{|obs| obs.encounter_id}.each do |encounter_id|
-                                    Encounter.find(encounter_id).void
-                       end   
     end
 
     # Encounter handling
@@ -302,20 +198,15 @@ class EncountersController < ApplicationController
 		@patient = Patient.find(params[:patient_id] || session[:patient_id])
 		@patient_bean = PatientService.get_patient(@patient.person)
 		session_date = session[:datetime].to_date rescue Date.today
-
+		
 		if session[:datetime]
 			@retrospective = true 
 		else
 			@retrospective = false
 		end
-
+		
+		@programs = @patient.patient_programs.all
 		@referral_sections = patient_referral_sections(@patient_bean.age)
-
-		@current_height = PatientService.get_patient_attribute_value(@patient, "current_height")
-		@min_weight = PatientService.get_patient_attribute_value(@patient, "min_weight")
-    @max_weight = PatientService.get_patient_attribute_value(@patient, "max_weight")
-    @min_height = PatientService.get_patient_attribute_value(@patient, "min_height")
-    @max_height = PatientService.get_patient_attribute_value(@patient, "max_height")
 
     @current_encounters = @patient.encounters.find_by_date(session_date)   
 		@current_user_role = self.current_user_role

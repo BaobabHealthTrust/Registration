@@ -108,9 +108,7 @@ class ClinicController < ApplicationController
 
   def reports_tab
     @reports = [
-      ["Cohort","/cohort_tool/cohort_menu"]#,
-      #["Supervision","/clinic/supervision_tab"],
-      #["Data Cleaning Tools", "/clinic/data_cleaning_tab"]
+      ["Cohort","/cohort_tool/cohort_menu"]
     ]
 
     @reports = [
@@ -137,15 +135,8 @@ class ClinicController < ApplicationController
 
   def properties_tab
     @settings = [
-      #["Set Clinic Days","/properties/clinic_days"],
-      #["View Clinic Holidays","/properties/clinic_holidays"],
-      #["Set Clinic Holidays","/properties/set_clinic_holidays"],
       ["Set Site Code", "/properties/site_code"],
-      ["Manage Roles", "/properties/set_role_privileges"]#,
-      #["Use User Selected Task(s)", "/properties/creation?value=use_user_selected_activities"],
-      #["Use Filing Numbers", "/properties/creation?value=use_filing_numbers"],
-      #["Show Lab Results", "/properties/creation?value=show_lab_results"],
-      #["Set Appointment Limit", "/properties/set_appointment_limit"]
+      ["Manage Roles", "/properties/set_role_privileges"]
     ]
     render :layout => false
   end
@@ -155,11 +146,6 @@ class ClinicController < ApplicationController
                   ['/clinic/users_tab','User Accounts'],
                   ['/clinic/location_management_tab','Location Management'],
                 ]
-=begin
-    if User.current_user.admin?
-      @reports << ['/clinic/management_tab','Drug Management']
-    end
-=end
     @landing_dashboard = 'clinic_administration'
     render :layout => false
   end
