@@ -33,14 +33,6 @@ class PatientsControllerTest < ActionController::TestCase
         end
       end
 
-      should "show the number of booked patients" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite
-          get :number_of_booked_patients, {:id => patient(:evan).id, :date => Date.today}
-          assert_response :success
-        end
-      end
-
       should "get the mastercard_modify" do
         logged_in_as :mikmck, :registration do
 
@@ -94,14 +86,6 @@ class PatientsControllerTest < ActionController::TestCase
         logged_in_as :mikmck, :registration do
           #TODO rewrite the test
           get :programs_dashboard, {:patient_id => patient(:evan).patient_id}
-          assert_response :success
-        end
-    end
-
-    should "recent_lab_orders" do
-        logged_in_as :mikmck, :registration do
-          #TODO rewrite the test
-          get :recent_lab_orders, {:patient_id => patient(:evan).patient_id}
           assert_response :success
         end
     end
