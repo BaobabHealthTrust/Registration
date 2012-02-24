@@ -142,9 +142,17 @@ class PeopleController < ApplicationController
           unless message.blank?
             print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}" , next_task(person.patient),message,true,person.id)
           else
-            print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient)) 
+            print_and_redirect("/patients/filing_number_and_national_id?patient_id=#{person.id}", next_task(person.patient))
           end
         else
+					encounter = Encounter.new()
+					encounter.location_id = Location.current_location.location_id
+					encounter.encounter_type = EncounterType.find_by_name("REGISTRATION").encounter_type_id
+          encounter.encounter_datetime = session[:datetime].to_date rescue Date.today
+          encounter.patient_id = person.id
+          encounter.provider_id = Person.find_by_person_id(User.current_user.person_id).person_id
+          encounter_date_created = Date.today
+          encounter.save
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
         end
       end
