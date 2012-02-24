@@ -23,9 +23,14 @@
     <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
     <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-    <%= touch_select_tag "WARD", @patient, options_for_select(@referral_sections),
-        {:id => "ward",
-         :helptext =>"Select ward or department"} %>
+    <%= select_tag "observations[][value_text]", options_for_select(@referral_sections),
+					{:helpText =>"Select ward or department",
+				  :id => "ward",
+				  :allowFreeText => false,  
+				  :ttMatchFromBeginning => "true"}%>
+			<%= hidden_field_tag("observations[][concept_name]", "WARD") %>
+			<%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+	    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>  
     
     <% if @retrospective %>
       <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
