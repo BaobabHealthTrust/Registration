@@ -93,7 +93,7 @@ class ProgramsController < ApplicationController
     
     @names = @states.map{|state|
       name = state.concept.concept_names.typed("SHORT").first.name rescue state.concept.fullname
-      next if name.blank? 
+      next if !name.include?("Patient died")
       "<li value='#{state.id}'>#{name}</li>" unless name == params[:current_state]
     }
     render :text => @names.join('')  
@@ -146,8 +146,9 @@ class ProgramsController < ApplicationController
 
         updated_state = patient_state.program_workflow_state.concept.fullname
 
-		#disabled redirection during import in the code below
-		# Changed the terminal state conditions from hardcoded ones to terminal indicator from the updated state object
+				#disabled redirection during import in the code below
+				# Changed the terminal state conditions from hardcoded ones to terminal 
+				#indicator from the updated state object
         if patient_state.program_workflow_state.terminal == 1
           #the following code updates the person table to died yes if the state is Died/Death
           if updated_state.match(/DIED/i)
@@ -247,7 +248,51 @@ class ProgramsController < ApplicationController
     end
   end
 
-  # Looks for the most commonly used element in the database and sorts the results based on the first part of the string
+	#update patient status/outcome to patient died
+	#if patient is not enroled in any program, it will just update the person table
+	#otherwise all the programs the patient is enrolled in will be updated.
+	def update_states
+		flash[:error] = nil
+
+    if request.method == :post
+			person = Patient.find_by_patient_id(params[:patient_id]).person
+		  person.dead = 1
+		  
+		  unless params[:current_date].blank?
+		  	person.death_date = params[:current_date].to_date
+		  end
+		  person.save
+		
+			#updates the state of all patient_programs to patient died and save the
+		  #end_date of the last active state.
+		  current_programs = PatientProgram.find(:all,:conditions => ["patient_id = ?",@patient.id])
+		  current_programs.each do |program|
+		  	if program.to_s
+		    	current_active_state = program.patient_states.last
+		      current_active_state.end_date = params[:current_date].to_date
+
+		      Location.current_location = Location.find(params[:location]) if params[:location]
+
+		      patient_state = program.patient_states.build(
+		         :state => params[:current_state],
+		         :start_date => params[:current_date])
+		      
+		      if patient_state.save
+				    current_active_state.save
+
+						# date_completed = session[:datetime].to_time rescue Time.now()
+		        date_completed = params[:current_date].to_date rescue Time.now()
+		        PatientProgram.update_all "date_completed = '#{date_completed.strftime('%Y-%m-%d %H:%M:%S')}'",
+		                                     "patient_program_id = #{program.patient_program_id}"
+		     	end
+		    end
+		  end
+				redirect_to :controller => :patients, :action => :programs_dashboard, :patient_id => @patient.patient_id
+      end
+	end
+
+  # Looks for the most commonly used element in the database and sorts the results
+  # based on the first part of the string
   def most_common_program_locations(search)
     return (Location.find_by_sql([
       "SELECT DISTINCT location.name AS name, location.location_id AS location_id \
