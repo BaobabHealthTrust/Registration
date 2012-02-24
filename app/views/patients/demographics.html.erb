@@ -1,133 +1,75 @@
-<style>
-  #table_one {
-    border-style: solid;
-    border-width: 1px 0px 1px 0px;
-    width: 100%;
+<style type="text/css">
+  table { margin: 15px;}
+  td {
+    background: #F0F0F0;
+    font-size: 1.4em;
+    width: 250px;
+  }
+   a {text-decoration: none;}
+   a:visited{color:green;}
+  .label {
+    font-weight: bold;
+    padding: 25px;
   }
 
-  #table_one td {
-    background-color: #CCCCCC;
-    padding-left: 10px;
-    border: medium none;
-    color: #000000;
-    font-family: Arial,sans-serif;
-    font-size: 13px;
-    padding-right: 2px;
-    text-align: left;
-    -moz-user-select: none;
-    height: auto;
-  }
-
-  .color_white {width:15%;}
-
-  .color_blue {
-    width: 15%;
-    background-color: #E6E6FF;
-  }
-
-  #table_one_header td{
-    background-color:lightgrey;
-  }
 </style>
 
-<base target="_parent">
-
-<div id='demographic'>
-<h2>OPD CARD</h2>
-<table id='table_one'>
-  <tr>
-   <td><b>National ID</b></td>
-   <td><%= link_to "Name:", "/patients/mastercard_modify?field=name&id=#{@patient.id}&source=opd" -%></td>
-   <td><b>Birthdate</b></td>
-   <td><%= link_to "Age:", "/patients/mastercard_modify?field=age&id=#{@patient.id}&source=opd" -%></td>
-   <td><%= link_to "Sex:", "/patients/mastercard_modify?field=sex&id=#{@patient.id}&source=opd" -%></td>
-   <td><%= link_to "TA:", "/patients/mastercard_modify?field=ta&id=#{@patient.id}&source=opd" -%></td>
-  </tr>
-  <tr class="master_data">
-   <td class='demo_data'><%= @patient_bean.national_id_with_dashes rescue nil-%></td>
-   <td class='demo_data'><%= @patient_bean.name rescue nil-%></td>
-   <td class='demo_data'><%= @patient_bean.birth_date rescue nil-%></td>
-   <td class='demo_data'><%= @patient_bean.age rescue nil-%></td>
-   <td class='demo_data'><%= @patient_bean.sex rescue nil-%></td>
-   <td class='demo_data' colspan="10"><%= @patient_bean.traditional_authority -%></td>
-  </tr>
-  <tr>
-   <td><%= link_to "Location:", "/patients/mastercard_modify?field=location&id=#{@patient.id}&source=opd" -%></td>
-   <td colspan="3"><%= link_to "Landmark / Address (Physical / PO Box):", "/patients/mastercard_modify?field=address&id=#{@patient.id}&source=opd" -%></td>
-   <td colspan="5"><%= link_to "Occupation:", "/patients/mastercard_modify?field=occupation&id=#{@patient.id}&source=opd" -%></td>
-  </tr>
-  <tr class="master_data">
-   <td class='demo_data'><%= @patient_bean.current_residence rescue nil-%></td>
-   <td class='demo_data' colspan="3"><%= @patient_bean.home_district -%></td>
-   <td class='demo_data' colspan="5"><%= @patient_bean.occupation -%></td>
-  </tr>
-</table>
-</div>
-<div id='visits'>
-<% @visits = Outpatient.visits(@patient) rescue []
-  if @visits.blank? %>
-  <table id="table_two"><tr><td style="text-align:center;">No visits</td></tr></table>
-<% else %><br />
-  <table cellspacing="0" cellpadding="0" border="0" width="100%">
+<script type="text/javascript">
+  tt_cancel_destination = '<%=  "/patients/show/#{@patient.id}" %>';
+  tt_cancel_show = '<%=  "/patients/show/#{@patient.id}" %>';
+</script>
+<center><h2><%= "Demographics for #{@patient_bean.name} (#{@patient_bean.national_id_with_dashes})"%></h2></center>
+<h3> (You can update/change any detail by touching on the indicator and going through the update process)</h3>
+<%#= raise @patient_bean.to_yaml %>
+<table>
   <tr>
     <td>
-       <table cellspacing="0" cellpadding="1" border="0" width="100%" id="table_one_header">
-         <tr>
-            <td width="15%" style="text-align:left;">Visit date</td>
-            <td width="15%" style="text-align:left;">Patient present</td>
-            <td width="15%" style="text-align:left;">Diagnosis</td>
-            <td width="15%" style="text-align:left;">Treatment</td>
-            <td width="15%" style="text-align:left;">Referal</td>
-         </tr>
-       </table>
+    <%= link_to "Name:", "/patients/mastercard_modify?field=name&id=#{@patient.patient_id}" -%>
     </td>
+    <td class="label"><%= @patient_bean.name  %></td>
+    <td>
+      <%= link_to "Age:", "/patients/mastercard_modify?field=age&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @patient_bean.age %></td>
   </tr>
   <tr>
     <td>
-       <div style="width:100%; height:349px; overflow:auto;">
-         <table cellspacing="0" cellpadding="1" border="0" width="100%" >
-         <%total = 0  
-           color = 'blue'
-           @visits.sort.each{|date,value|
-             if color == 'blue'
-               color = 'white'
-             else
-               color='blue'
-             end  
-           %>
-           <tr>
-              <td class='color_<%=color%>' style="text-align:left;"><%= date.strftime('%d/%m/%Y') %></td>
-              <td class='color_<%=color%>'><%= value.patient_present || '&nbsp;' %></td>
-              <td class='color_<%=color%>'>
-                <%
-                  visit_value = nil    
-                  (value.primary_diagnosis || []).map do | val | 
-                    if visit_value.blank?
-                      visit_value = val
-                    else visit_value+="<br />#{val}" end
-                  end
-                %>
-                <%= visit_value || '&nbsp;' %>
-              </td>
-              <td class='color_<%=color%>'>
-                <%
-                  visit_value = nil    
-                  (value.treatment || []).map do | val | 
-                    if visit_value.blank?
-                      visit_value = val
-                    else visit_value+="<br />#{val}" end
-                  end
-                %>
-                <%= visit_value || '&nbsp;' %>
-              </td>
-              <td class='color_<%=color%>'><%= value.referal_destination || '&nbsp;' %></td>
-           </tr>
-         <%}%>
-         </table><hr /> 
-       </div>
+      <%= link_to "Gender:", "/patients/mastercard_modify?field=sex&id=#{@patient.patient_id}" -%>
     </td>
+    <td class="label"><%= @patient_bean.sex %></td>
+    <td>
+      <%= link_to "Occupation:", "/patients/mastercard_modify?field=occupation&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @patient_bean.occupation %></td>
   </tr>
+  <tr>
+    <td>
+      <%= link_to "Home District:", "/patients/mastercard_modify?field=home_district&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @patient_bean.home_district %></td>
+    <td>
+      <%= link_to "Ancenstral T/A:", "/patients/mastercard_modify?field=ta&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @patient_bean.traditional_authority %></td>
+  </tr>
+  <tr>
+    <td>
+      <%= link_to "Current District:", "/patients/mastercard_modify?field=city_village&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @patient_bean.current_residence %></td>
+    <td>
+      <%= link_to "Landmark:", "/patients/mastercard_modify?field=location&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @patient_bean.landmark %></td>
+  </tr>
+  <tr>
+    <td>
+      <%= link_to "Cell phone Number:", "/patients/mastercard_modify?field=cell_phone_number&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @cell_phone_number %></td>
+    <td>
+      <%= link_to "Ground phone Number:", "/patients/mastercard_modify?field=home_phone_number&id=#{@patient.patient_id}" -%>
+    </td>
+    <td class="label"><%= @home_phone_number %></td>
+  </tr> 
 </table>
-
-<% end %>
-</div>
