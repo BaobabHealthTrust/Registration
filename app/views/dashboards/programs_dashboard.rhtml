@@ -23,7 +23,7 @@
           <% unless flash[:error].nil? %>
             <p id="flash_error" style="color: red"><%= flash[:error] %></p>
           <% end %>
-            
+
           <table cellpadding=10>
             <tr>
               <th colspan=2>Patient Programs Dashboard</th>
@@ -47,7 +47,7 @@
               <option value='/patients/programs?patient_id=<%= @patient.id %>'>Outcomes</option>
             </select>
             <select id="links">
-            	<option value='/programs/update_states/<%=@patient.id%>'>Update State</option>
+							<option value='/programs/update_states/<%=@patient.id%>'>Set Dead</option>
             </select>
             <tr>
               <td align='center'>

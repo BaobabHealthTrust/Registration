@@ -256,38 +256,77 @@ class ProgramsController < ApplicationController
 
     if request.method == :post
 			person = Patient.find_by_patient_id(params[:patient_id]).person
-		  person.dead = 1
-		  
-		  unless params[:current_date].blank?
-		  	person.death_date = params[:current_date].to_date
+			if params[:current_state].match(/DIED/i)
+				person.dead = 1
+				unless params[:current_date].blank?
+					person.death_date = params[:current_date].to_date
+				end
+			else
+				person.dead = 0
+				person.death_date = nil
 		  end
+
 		  person.save
-		
+
 			#updates the state of all patient_programs to patient died and save the
 		  #end_date of the last active state.
 		  current_programs = PatientProgram.find(:all,:conditions => ["patient_id = ?",@patient.id])
-		  current_programs.each do |program|
-		  	if program.to_s
-		    	current_active_state = program.patient_states.last
-		      current_active_state.end_date = params[:current_date].to_date
 
-		      Location.current_location = Location.find(params[:location]) if params[:location]
+		  if params[:current_state].match(/DIED/i)
+				params[:current_state] = 3
 
-		      patient_state = program.patient_states.build(
-		         :state => params[:current_state],
-		         :start_date => params[:current_date])
-		      
-		      if patient_state.save
-				    current_active_state.save
+				current_programs.each do |program|
+					if program.to_s
+						current_active_state = program.patient_states.last
+						current_active_state.end_date = params[:current_date].to_date
 
-						# date_completed = session[:datetime].to_time rescue Time.now()
-		        date_completed = params[:current_date].to_date rescue Time.now()
-		        PatientProgram.update_all "date_completed = '#{date_completed.strftime('%Y-%m-%d %H:%M:%S')}'",
-		                                     "patient_program_id = #{program.patient_program_id}"
-		     	end
-		    end
-		  end
+						Location.current_location = Location.find(params[:location]) if params[:location]
+
+						patient_state = program.patient_statesbuild(
+				       :state => params[:current_state],
+				       :start_date => params[:current_date])
+
+				    if patient_state.save
+						  current_active_state.save
+
+							# date_completed = session[:datetime].to_time rescue Time.now()
+				      date_completed = params[:current_date].to_date rescue Time.now()
+				      PatientProgram.update_all "date_completed = '#{date_completed.strftime('%Y-%m-%d %H:%M:%S')}'",
+				                                   "patient_program_id = #{program.patient_program_id}"
+						end
+					end
+				end
+			else
+				current_programs.each do |program|
+					if program.to_s
+						current_active_state = program.patient_states.last
+						current_active_state.end_date = params[:current_date].to_date
+
+						Location.current_location = Location.find(params[:location]) if params[:location]
+
+						params[:current_state] = program.patient_states.first.state
+						patient_state = program.patient_states.build(
+				       :state => params[:current_state],
+				       :start_date => params[:current_date])
+
+						if patient_state.save
+							current_active_state.save
+
+							# date_completed = session[:datetime].to_time rescue Time.now()
+							date_completed = params[:current_date].to_date rescue Time.now()
+							PatientProgram.update_all "date_completed = '#{date_completed.strftime('%Y-%m-%d %H:%M:%S')}'",
+																"patient_program_id = #{program.patient_program_id}"
+						end
+					end
+				end
+			end
 				redirect_to :controller => :patients, :action => :programs_dashboard, :patient_id => @patient.patient_id
+			else
+				if @patient.person.dead == 1
+					@dead = true
+				else
+					@dead = false
+				end
       end
 	end
 

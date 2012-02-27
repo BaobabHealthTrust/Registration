@@ -64,19 +64,21 @@
   <%= hidden_field_tag :patient_program_id, @patient_program_id %>
   <%= hidden_field_tag :location_id, Location.current_health_center.id %>
 
-  <%= select_tag 'current_state', options_for_select([['Patient died','3']]),
-      {:id => 'initial_state',
-       :field_type => 'alpha',
-       :helpText => "New patient state",
-       :ajaxURL => "",
-       :allowFreeText => false } %>
-    
-    <% initial_date = "#{session[:datetime].strftime('%Y-%m-%d')}" rescue "#{(Date.today).strftime('%Y-%m-%d')}"%>
+	<%	if @dead
+				state = 'Alive'
+			else
+				state = 'Died'
+			end
+	%>
+  <%= hidden_field_tag :current_state, state, {:id => 'current_state'} %>
 
-  	<%= text_field_tag 'current_date', initial_date,
+	<% initial_date = "#{session[:datetime].strftime('%Y-%m-%d')}" rescue "#{(Date.today).strftime('%Y-%m-%d')}"%>
+
+	<%= text_field_tag 'current_date', initial_date,
         {:id => 'current_date',
          :field_type => 'date',
-         :helpText => "New patient state start date",
+         :condition => "$('current_state').value == 'Died';",
+         :helpText => "Date patient died",
          :max => "#{(Date.today).strftime('%Y-%m-%d')}",
          :tt_pageStyleClass => "Date DatesOnly"} %>
     <%= submit_tag "Finish" %> 
