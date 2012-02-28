@@ -10,12 +10,12 @@ class TaskTest < ActionController::TestCase
       @default = @task.url.gsub(/\{patient\}/, '1')
       GlobalProperty.create(:property => 'current_health_center_id', :property_value => location(:location_00002).id)
     end
-  
+=begin 
     should "be able to create a task" do
       assert_not_nil @task
     end  
 
-=begin
+
     #the next_task method was moved to the application_controller. trying to figure
     #out how it can be accessed from there.
     should "find the next task" do
