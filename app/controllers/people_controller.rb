@@ -200,10 +200,10 @@ class PeopleController < ApplicationController
     traditional_authorities = traditional_authorities.map do |t_a|
       "<li value='#{t_a.name}'>#{t_a.name}</li>"
     end
-    render :text => traditional_authorities.join('') and return
+    render :text => traditional_authorities.join('') + "<li value='Other'>Other</li>" and return
   end
 
-  # Regions containing the string given in params[:value]
+    # Regions containing the string given in params[:value]
   def region
     region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
 
@@ -214,7 +214,7 @@ class PeopleController < ApplicationController
     render :text => regions.join('') and return
   end
 
-  # Districts containing the string given in params[:value]
+    # Districts containing the string given in params[:value]
   def district
     region_id = Region.find_by_name("#{params[:filter_value]}").id
     region_conditions = ["name LIKE (?) AND region_id = ? ", "#{params[:search_string]}%", region_id]
@@ -223,10 +223,10 @@ class PeopleController < ApplicationController
     districts = districts.map do |d|
       "<li value='#{d.name}'>#{d.name}</li>"
     end
-    render :text => districts.join('') and return
+    render :text => districts.join('') + "<li value='Other'>Other</li>" and return
   end
 
-  # Villages containing the string given in params[:value]
+    # Villages containing the string given in params[:value]
   def village
     traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").id
     village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "#{params[:search_string]}%", traditional_authority_id]
@@ -235,7 +235,7 @@ class PeopleController < ApplicationController
     villages = villages.map do |v|
       "<li value='#{v.name}'>#{v.name}</li>"
     end
-    render :text => villages.join('') and return
+    render :text => villages.join('') + "<li value='Other'>Other</li>" and return
   end
   
   # Landmark containing the string given in params[:value]
@@ -244,7 +244,7 @@ class PeopleController < ApplicationController
     landmarks = landmarks.map do |v|
       "<li value='#{v.address1}'>#{v.address1}</li>"
     end
-    render :text => landmarks.join('') and return
+    render :text => landmarks.join('') + "<li value='Other'>Other</li>" and return
   end
 
   def edit
