@@ -1614,10 +1614,10 @@ function showMessage(aMessage, withCancel, timed) {
     var messageBar = tstMessageBar;
     messageBar.innerHTML = aMessage +
     "<br />" + (typeof(withCancel) != "undefined" ? (withCancel == true ?
-        "<button onmousedown='tstMessageBar.style.display = \"none\"; " +
-        "clearTimeout(tstTimerHandle);'><span>Cancel</span></button>" : "") : "") +
-    "<button style='width: 200px;' onmousedown='tstMessageBar.style.display = \"none\"; " +
-    "clearTimeout(tstTimerHandle); eval(tstTimerFunctionCall);'><span>Ok</span></button>";
+        "<button onmousedown=\"tstMessageBar.style.display = 'none'; " +
+        "clearTimeout(tstTimerHandle);\"><span>Cancel</span></button>" : "") : "") +
+    "<button style='width: 200px;' onmousedown=\"tstMessageBar.style.display = 'none'; " +
+    "clearTimeout(tstTimerHandle); eval(tstTimerFunctionCall);\"><span>OK</span></button>";
     if (aMessage.length > 0) {
         messageBar.style.display = 'block'
         if((typeof(timed) == "undefined" ? true : timed) == true){
