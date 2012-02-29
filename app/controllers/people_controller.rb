@@ -90,12 +90,17 @@ class PeopleController < ApplicationController
     session_date = session[:datetime] || Date.today
     if request.post?
       redirect_to search_complete_url(params[:found_person_id], params[:relation]) and return
+    #else
+    #	redirect_to "/encounters/new/patient_registration?patient_id=#{@person.patient.patient_id}"
     end
     @found_person_id = params[:found_person_id] 
     @relation = params[:relation]
     @person = Person.find(@found_person_id) rescue nil
     @task = main_next_task(Location.current_location, @person.patient, session_date.to_date)
 	  @patient_bean = PatientService.get_patient(@person)
+	  @service = PatientService.referral_section(@person) rescue ""
+	  @service_date = PatientService.referral_section_date_created(@person) rescue ""
+	  
     render :layout => 'menu'
   end
  
@@ -190,7 +195,7 @@ class PeopleController < ApplicationController
       redirect_to "/patients/show/#{params[:id]}" and return
     end
   end
-  
+
   # List traditional authority containing the string given in params[:value]
   def traditional_authority
     district_id = District.find_by_name("#{params[:filter_value]}").id

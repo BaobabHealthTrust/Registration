@@ -1165,5 +1165,21 @@ EOF
     id = self.get_national_id(patient, force)
     id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
   end
+  
+  def self.referral_section(person_obj)
+    service = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id])
+    if service.value_text
+        @service = service.value_text
+    else
+        @service = ConceptName.find_by_concept_id(service.value_coded).name
+    end
+  end
+  
+  def self.referral_section_date_created(person_obj)
+    service = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id])
+    if service.date_created
+        @service_date = service.date_created
+    end
+  end
 
 end

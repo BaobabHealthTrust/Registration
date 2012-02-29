@@ -1,3 +1,7 @@
+<script>
+  var tt_cancel_destination = "/encounters/new/patient_registration?patient_id=<%=@person.patient.patient_id%>"
+</script>
+
 <style>
   body {
     -moz-user-select:none;
@@ -226,6 +230,16 @@
   </tr>
   <tr>
     <th>National ID:</th><td><%= @patient_bean.national_id_with_dashes %></td>
+  </tr>
+  <tr>
+  	<% if @service %>
+    	<th>Previous Visit Service:</th><td><%= @service %></td>
+  	<% end %>
+  </tr>
+  <tr>
+  	<% if !@service_date.blank? %>
+    	<th>Previous Visit Date:</th><td><%= @service_date.to_date.strftime("%d-%b-%Y") %></td>
+    <% end %>
   </tr>
   </table>
   <div>
