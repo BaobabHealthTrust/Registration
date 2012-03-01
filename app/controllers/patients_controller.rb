@@ -8,7 +8,7 @@ class PatientsController < ApplicationController
 	  @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 	  @patient_bean = PatientService.get_patient(@patient.person)
 	  @encounters = @patient.encounters.find_by_date(session_date)
-    @ward = referral_section rescue 'None'
+    @service = PatientService.referral_section(@patient.person) rescue 'None'
     @prescriptions = @patient.orders.unfinished.prescriptions.all
     @programs = @patient.patient_programs.all
     @alerts = alerts(@patient, session_date) rescue nil
@@ -282,20 +282,9 @@ class PatientsController < ApplicationController
     alert
   end
 
-  def referral_section
-    @patient_bean = PatientService.get_patient(@patient.person)
-
-    ward = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", @patient.person.id, ConceptName.find_by_name("WARD").concept_id])
-    if ward.value_text
-        @ward = ward.value_text
-    else
-        @ward = ConceptName.find_by_concept_id(ward.value_coded).name
-    end
-  end
-
   def programs_dashboard
 	  @patient_bean = PatientService.get_patient(@patient.person)
-    @ward = referral_section rescue 'None'
+    @service = PatientService.referral_section(@patient.person) rescue 'None'
     render :template => 'dashboards/programs_dashboard', :layout => false
   end
 
