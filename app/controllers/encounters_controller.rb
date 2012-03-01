@@ -212,6 +212,7 @@ class EncountersController < ApplicationController
 		@current_user_role = self.current_user_role
 
 		@patient_is_child_bearing_female = is_child_bearing_female(@patient)
+		@select_options = select_options
 
 		@patients = nil
 
@@ -267,4 +268,20 @@ class EncountersController < ApplicationController
 
   end
 
+	def select_options
+    select_options = {
+     'services' => [
+        ['',''],
+        ['Casualty','Casualty'],
+        ['Eye','Eye'],
+        ['Family Planing','Family Planing'],
+        ['Medical','Medical'],
+        ['OB/Gyn','OB/Gyn'],
+        ['Orthopedics','Orthopedics'],
+        ['Pediatrics','Pediatrics'],
+        ['Skin','Skin'],
+        ['STI Clinic','STI Clinic'],
+        ['Surgical','Surgical'],
+        ['Other','Other']]}
+	end
 end
