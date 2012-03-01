@@ -23,12 +23,12 @@
     <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
     <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-    <%= select_tag "observations[][value_text]", options_for_select(@referral_sections),
-					{:helpText =>"Select ward or department",
-				  :id => "ward",
+    <%= select_tag "observations[][value_text]", options_for_select(@select_options['services']),
+					{:helpText =>"Select services",
+				  :id => "services",
 				  :allowFreeText => false,  
 				  :ttMatchFromBeginning => "true"}%>
-			<%= hidden_field_tag("observations[][concept_name]", "WARD") %>
+			<%= hidden_field_tag("observations[][concept_name]", "SERVICES") %>
 			<%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
 	    <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>  
     
