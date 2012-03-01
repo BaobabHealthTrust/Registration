@@ -167,13 +167,13 @@ class ApplicationController < ActionController::Base
   def main_next_task(location, patient, session_date = Date.today)
     task = Task.first rescue Task.new()
 
-    type = 'PATIENT REGISTRATION'
+    type = 'REGISTRATION'
     encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
                                      patient.id,EncounterType.find_by_name(type).id,session_date],
                                      :order =>'encounter_datetime DESC',:limit => 1)
       task.encounter_type = type 
       if encounter_available.blank? 
-        task.url = "/encounters/new/patient_registration?patient_id=#{patient.id}"
+        task.url = "/encounters/new/registration?patient_id=#{patient.id}"
       else 
         task.encounter_type = 'NONE'
         task.url = "/patients/show/#{patient.id}"
