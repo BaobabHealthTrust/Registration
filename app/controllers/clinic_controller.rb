@@ -86,13 +86,19 @@ class ClinicController < ApplicationController
       end
     end
 
-    @types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
-    @types = @types.split(/,/)
+    @types = EncounterType.all.map{|encounter_type| encounter_type.name if encounter_type.name == "REGISTRATION"}.to_s
 
-    @me = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW()) AND encounter.creator = ?', User.current_user.user_id])
-    @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW())'])
+    @me = Encounter.patient_registration(@types, :conditions => ['DATE(date_created) = DATE(NOW()) AND patient.creator = ?', User.current_user.user_id])
+    @today = Encounter.patient_registration(@types)
 
     if !simple_overview
+    	@types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
+    	@types = @types.split(/,/)
+
+    	@me = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW()) AND encounter.creator = ?', User.current_user.user_id])
+   	 @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW())'])
+
+    	
       @year = Encounter.statistics(@types, :conditions => ['YEAR(encounter_datetime) = YEAR(NOW())'])
       @ever = Encounter.statistics(@types)
     end
