@@ -14,6 +14,14 @@
   <% if @edit_page == "name" %>
     <%= render(:partial => "/patients/mastercard_modify_name" ) %>
   <% end %>
+  
+  <% if @edit_page == "first_name" %>
+    <%= render(:partial => "/patients/mastercard_modify_first_name" ) %>
+  <% end %>
+  
+  <% if @edit_page == "last_name" %>
+    <%= render(:partial => "/patients/mastercard_modify_last_name" ) %>
+  <% end %>
 
   <% if @edit_page == "age" %>
     <%= render(:partial => "/patients/mastercard_modify_age" ) %>

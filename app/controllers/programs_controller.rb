@@ -4,13 +4,14 @@ class ProgramsController < ApplicationController
   def new
     session[:return_to] = nil
     session[:return_to] = params[:return_to] unless params[:return_to].blank?
-    program_names = PatientProgram.find(:all,
-                                    :joins => "INNER JOIN location l ON l.location_id = patient_program.location_id
-                                               INNER JOIN program p ON p.program_id = patient_program.program_id",
-                                    :select => "p.name program_name ,l.name location_name,patient_program.date_completed date_completed",
-                                    :conditions =>["voided = 0 AND patient_id = ? AND date_completed IS NULL",params[:patient_id]]
-                                    ).map{|pat_program|
-                                      [pat_program.program_name,pat_program.location_name] if pat_program.date_completed.blank?
+		program_names = PatientProgram.find(:all,
+		     	:joins => "INNER JOIN location l ON l.location_id = patient_program.location_id
+         	INNER JOIN program p ON p.program_id = patient_program.program_id",
+          :select => "p.name program_name ,l.name location_name,patient_program.date_completed date_completed",
+          :conditions =>["voided = 0
+                         AND patient_id = ?
+                         AND date_completed IS NULL",params[:patient_id]]).map{|pat_program|
+                           [pat_program.program_name,pat_program.location_name] if pat_program.date_completed.blank?
                                     }
     @enrolled_program_names = program_names.to_json                                
     @patient_program = PatientProgram.new
@@ -21,12 +22,12 @@ class ProgramsController < ApplicationController
                                     @patient.id,params[:location_id],params[:program_id]])
     invalid_date = false
     initial_date = params[:initial_date].to_date
-    active_programs.map{ | program |
-		if !(program.date_completed.blank? and program.date_enrolled.blank?)
-			#raise "Initial date -> " + initial_date.to_s + " Date enrolled -> " + program.date_enrolled.to_date.to_s + " Date completed -> " + program.date_completed.to_date.to_s
-      		invalid_date = (initial_date >= program.date_enrolled.to_date and initial_date < program.date_completed.to_date)
-		end
-    }
+    
+    active_programs.map do | program |
+			if !(program.date_completed.blank? and program.date_enrolled.blank?)
+		  	invalid_date = (initial_date >= program.date_enrolled.to_date and initial_date < program.date_completed.to_date)
+			end
+    end
 
     if invalid_date
       error = "Already enrolled in that program around that time: #{initial_date}"
@@ -104,7 +105,8 @@ class ProgramsController < ApplicationController
 
     if request.method == :post
       patient_program = PatientProgram.find(params[:patient_program_id])
-      #we don't want to have more than one open states - so we have to close the current active on before opening/creating a new one
+      #we don't want to have more than one open states - so we have to close the
+      # current active on before opening/creating a new one
 
       current_active_state = patient_program.patient_states.last
       current_active_state.end_date = params[:current_date].to_date
@@ -282,7 +284,7 @@ class ProgramsController < ApplicationController
 
 						Location.current_location = Location.find(params[:location]) if params[:location]
 
-						patient_state = program.patient_statesbuild(
+						patient_state = program.patient_states.build(
 				       :state => params[:current_state],
 				       :start_date => params[:current_date])
 
@@ -297,28 +299,14 @@ class ProgramsController < ApplicationController
 					end
 				end
 			else
-				current_programs.each do |program|
-					if program.to_s
-						current_active_state = program.patient_states.last
-						current_active_state.end_date = params[:current_date].to_date
-
-						Location.current_location = Location.find(params[:location]) if params[:location]
-
-						params[:current_state] = program.patient_states.first.state
-						patient_state = program.patient_states.build(
-				       :state => params[:current_state],
-				       :start_date => params[:current_date])
-
-						if patient_state.save
-							current_active_state.save
-
-							# date_completed = session[:datetime].to_time rescue Time.now()
-							date_completed = params[:current_date].to_date rescue Time.now()
-							PatientProgram.update_all "date_completed = '#{date_completed.strftime('%Y-%m-%d %H:%M:%S')}'",
-																"patient_program_id = #{program.patient_program_id}"
-						end
-					end
-				end
+				#patient_state = []
+				#current_programs.each do |program|
+				#raise program.patient_states.second.to_yaml
+				#	if program.patient_states.state == 3
+				#		patient_states << program.patient_states
+				#	end
+				#	raise patient_states.to_yaml
+				#end
 			end
 				redirect_to :controller => :patients, :action => :programs_dashboard, :patient_id => @patient.patient_id
 			else

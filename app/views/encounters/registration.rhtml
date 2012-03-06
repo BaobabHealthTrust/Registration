@@ -18,7 +18,7 @@
   </style>
 
   <form action="/encounters/create">
-    <%= hidden_field_tag "encounter[encounter_type_name]", "PATIENT REGISTRATION" %>
+    <%= hidden_field_tag "encounter[encounter_type_name]", "REGISTRATION" %>
     <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
     <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
     <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>

@@ -22,6 +22,3 @@
   <%= text_field "person[addresses]" , 'county_district', :condition => '$("address2").value != "Other"', :helpText => 'Ancestral Traditional Authority (T/A) or area of residence',:tt_requireNextClick => false, :ajaxURL => '', :tt_onLoad => "set_ajaxURL_for_suggestions('/people/traditional_authority/TraditionalAuthority?filter_value=' ,document.getElementById('address2').value);$('nextButton').style.display = 'none';" %></p>
 
   <%= text_field "p[addresses]" , 'county_district_a', :tt_onUnLoad => '$("person_addresses_county_district").value = $("p_addresses_county_district_a").value', :condition => '$("address2").value == "Other"', :ajaxURL => '/person_addresses/traditional_authority?search_string=' , :helpText => 'Specify Ancestral Traditional Authority (T/A) or area of residence' , :allowFreeText => true, :tt_onLoad => "$('nextButton').style.display = 'block';"  %></p>>
-
-  <p><label for="person_addresses_county_district">Ancestral Traditional Authority (T/A) or area of residence</label></br>
-  <%= text_field "person[addresses]" , 'county_district', :xhelpText => 'Ancestral Traditional Authority (T/A)',:tt_requireNextClick => false, :ajaxURL => '', :tt_onLoad => "set_ajaxURL_for_suggestions('/people/traditional_authority/TraditionalAuthority?filter_value=' ,document.getElementById('address2').value);$('nextButton').style.display = 'none';" %></p>

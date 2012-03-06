@@ -94,6 +94,18 @@ class PatientsController < ApplicationController
 
     return traditional_authorities
   end
+  
+  def edit_demographics
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    @person = @patient.person
+    @patient_bean = PatientService.get_patient(@person)
+    render :layout => 'edit_demographics'
+  end
+  
+  def update_demographics
+   update_demo_graphics(params)
+   redirect_to :action => 'edit_demographics', :patient_id => params['person_id'] and return
+  end
 
   def patient_demographics
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
@@ -313,6 +325,12 @@ class PatientsController < ApplicationController
     case params[:field]
     when "name"
       names_params =  {"given_name" => params[:given_name].to_s,"family_name" => params[:family_name].to_s}
+      patient.person.names.first.update_attributes(names_params) if names_params
+    when "first_name"
+      names_params =  {"given_name" => params[:given_name].to_s}
+      patient.person.names.first.update_attributes(names_params) if names_params
+    when "last_name"
+      names_params =  {"family_name" => params[:family_name].to_s}
       patient.person.names.first.update_attributes(names_params) if names_params
     when "age"
       birthday_params = params[:person]
