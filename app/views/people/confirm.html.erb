@@ -16,7 +16,7 @@
     padding-left:10px;
     -moz-user-select:none;
   }
-
+  
   th {
     text-align:left;
     -moz-user-select:none;
@@ -54,6 +54,11 @@
     width: 300px;
     -moz-user-select:none;
   }
+  
+  .visit-summary{
+    text-align: right;
+    font-size:  1.5em;
+    padding-left:20px;
 </style>
 
 <%
@@ -266,11 +271,28 @@
     <div id="placeholder_details" style="height:50px;padding-top:15px;"></div>
   </div>
 <% end %>
-
-<div id="messageBar" class="messageBar">
-  Patient files in archive cabinets <br /> Move to active cabinets?
-  <br /><br />
-  <button onmousedown="hideMessage();go();"><span>No</span></button>&nbsp;
-  <button onmousedown="hideMessage();setNewFilingNumber();"><span>Yes</span></button>
+	<div class="visit-summary">
+  <%
+  	@services = []
+  	@services = PatientService.previous_referral_section(@person)
+  %>
+  
+  <table cellpadding ="5" cellspacing="5">
+		<tr style = "font-size:20px;">
+			<th>Previous Service</th>
+			<th>Previous Service Date</th>
+		</tr>
+		<% @services.each do |service| %>
+			<tr>
+				<td style="float:left;">
+					<%= service.value_text %>
+				</td>
+				<td style="align:left;">
+					<%= service.obs_datetime.to_date %>
+				</td>
+			</tr>
+		<% end %>
+	</table>
 </div>
+
 </body>
