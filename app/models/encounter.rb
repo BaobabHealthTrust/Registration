@@ -68,18 +68,31 @@ EOF
   end
 
   #TODO this method needs to be scrutinized
-  def self.patient_registration(encounter_type, opts={})
+  def self.patient_registration(encounter_type, current_user_id, opts={})
 		encounter_type = EncounterType.all(:conditions => ['name IN (?)', encounter_type])
 		encounter_types_hash = encounter_type.inject({}) {|result, row| result[row.encounter_type_id] = row.name; result }
 		encounter_type_id = EncounterType.find_by_name("REGiSTRATION").encounter_type_id
 		with_scope(:find => opts) do
       rows = Patient.all(
          :select => 'count(*) as number, patient_id',
-         :group => 'patient.creator') 
+         :group => 'patient.creator',
+         :conditions => ['patient.date_created >= ? AND patient.creator = ?', Date.today.to_datetime, current_user_id]) 
       return rows.inject({}) {|result, row| result[encounter_types_hash[encounter_type_id]] = row['number']; result }
-    end     
-		
- end
+    end
+ 	end
+ 	
+ 	#TODO this method needs to be scrutinized
+  def self.patient_registration_total(encounter_type, opts={})
+		encounter_type = EncounterType.all(:conditions => ['name IN (?)', encounter_type])
+		encounter_types_hash = encounter_type.inject({}) {|result, row| result[row.encounter_type_id] = row.name; result }
+		encounter_type_id = EncounterType.find_by_name("REGiSTRATION").encounter_type_id
+		with_scope(:find => opts) do
+      rows = Patient.all(
+         :select => 'count(*) as number, patient_id',
+         :conditions => ['patient.date_created >= ?', Date.today.to_datetime]) 
+      return rows.inject({}) {|result, row| result[encounter_types_hash[encounter_type_id]] = row['number']; result }
+    end
+ 	end
 
   def self.statistics(encounter_types, opts={})
 

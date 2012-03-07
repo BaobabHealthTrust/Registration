@@ -87,10 +87,11 @@ class ClinicController < ApplicationController
     end
 
     @types = EncounterType.all.map{|encounter_type| encounter_type.name if encounter_type.name == "REGISTRATION"}.to_s
+    @current_user_id = User.current_user.user_id
 
-    @me = Encounter.patient_registration(@types, :conditions => ['DATE(date_created) = DATE(NOW()) AND patient.creator = ?', User.current_user.user_id])
-    @today = Encounter.patient_registration(@types)
+    @me = Encounter.patient_registration(@types, @current_user_id, :conditions => ['DATE(patient.date_created) = DATE(NOW()) AND patient.creator = ?', User.current_user.user_id])
 
+    @today = Encounter.patient_registration_total(@types, :conditions => ['DATE(date_created) = DATE(NOW())'])
     if !simple_overview
     	@types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
     	@types = @types.split(/,/)
