@@ -214,20 +214,21 @@
   	 :validationJS => "validateDOB()",
   	 :validationMessage => 'Please enter a valid date'%>
 
-  <p><label for="region_region_name">Region of Origin</label></br>
-  <%= text_field "region" , 'region_name',
-  	 :xhelpText => 'Region',
-  	 :tt_requireNextClick => false,
-  	 :ajaxURL => '/people/region/Region?field=role&value=', :tt_onLoad => "$('nextButton').style.display = 'none';"%></p>
+	<%= text_field_tag "region_region_name" , nil,
+			{	:id => 'region_region_name',
+				:tt_requireNextClick => false,
+				:ajaxURL => '/people/region_of_origin/Region?field=role&value=',
+				:helpText => 'Region of origin' } %>
 
   <%= text_field_tag "person[addresses][address2]", params[:address2],
   	 {:id => 'address2',
   	 	:tt_requireNextClick => false,
+			:condition => '$("region_region_name").value != "Other"',
   	 	:ajaxURL => '',
   	  :field_type => 'alpha',
   	  :helpText => 'Home District',
   	  :allowFreeText => false,
-  	  :tt_onLoad => "seen(tstCurrentPage); set_ajaxURL_for_suggestions('/people/district/District?filter_value=' ,document.getElementById('region_region_name').value);$('nextButton').style.display = 'none';" } if ask_home_village %>  
+			:tt_onLoad => "seen(tstCurrentPage); set_ajaxURL_for_suggestions('/people/district/District?filter_value=' ,$('region_region_name').value);$('nextButton').style.display = 'none';" } if ask_home_village %>  
 
   <%= text_field_tag "p['address2_a']" , nil,
   	 {:id => 'address2_a',
@@ -240,7 +241,7 @@
   	  :tt_onLoad => "$('nextButton').style.display = 'block';" } if ask_home_village %>  
 
   <%= text_field "person[addresses]" , 'county_district',
-  	 :condition => '$("address2").value != "Other"',
+     :condition => '$("address2").value != "Other"  && $("region_region_name").value != "Other"',
   	 :helpText => 'Ancestral Traditional Authority (T/A) or area of residence',
   	 :tt_requireNextClick => false, :ajaxURL => '',
   	 :tt_pageStyleClass => "azButton",

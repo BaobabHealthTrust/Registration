@@ -197,6 +197,16 @@ class PeopleController < ApplicationController
   end
 
     # Regions containing the string given in params[:value]
+  def region_of_origin
+    region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
+
+    regions = Region.find(:all,:conditions => region_conditions, :order => 'name')
+    regions = regions.map do |r|
+      "<li value='#{r.name}'>#{r.name}</li>"
+    end
+    render :text => regions.join('') + "<li value='Other'>Other</li>" and return
+  end
+  
   def region
     region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
 
@@ -204,7 +214,7 @@ class PeopleController < ApplicationController
     regions = regions.map do |r|
       "<li value='#{r.name}'>#{r.name}</li>"
     end
-    render :text => regions.join('') and return
+    render :text => regions.join('')  and return
   end
 
     # Districts containing the string given in params[:value]
