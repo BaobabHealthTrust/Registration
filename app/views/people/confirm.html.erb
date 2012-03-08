@@ -226,7 +226,10 @@
   <%= hidden_field_tag(:found_person_id, @found_person_id) %>
   <%= hidden_field_tag(:relation, @relation) %>
 </form>
-
+	<%
+  	@services = []
+  	@services = PatientService.previous_referral_section(@person)
+  %>
 <div id ='header'>
   <h1><%= @patient_bean.name %>&nbsp;(<%= @patient_bean.sex %>)</h1>
   <table>
@@ -271,28 +274,25 @@
     <div id="placeholder_details" style="height:50px;padding-top:15px;"></div>
   </div>
 <% end %>
+<% if !@services.blank? %>	
 	<div class="visit-summary">
-  <%
-  	@services = []
-  	@services = PatientService.previous_referral_section(@person)
-  %>
   
-  <table cellpadding ="5" cellspacing="5">
-		<tr style = "font-size:20px;">
-			<th>Previous Service</th>
-			<th>Previous Service Date</th>
-		</tr>
-		<% @services.each do |service| %>
-			<tr>
-				<td style="float:left;">
-					<%= service.value_text %>
-				</td>
-				<td style="align:left;">
-					<%= service.obs_datetime.to_date %>
-				</td>
+		<table cellpadding ="5" cellspacing="5" align="center">
+			<tr style = "font-size:20px;">
+				<th>Previous Service</th>
+				<th>Previous Service Date</th>
 			</tr>
-		<% end %>
-	</table>
-</div>
-
+			<% @services.each do |service| %>
+				<tr>
+					<td style="float:left;">
+						<%= service.value_text %>
+					</td>
+					<td align="center">
+						<%= service.obs_datetime.to_date %>
+					</td>
+				</tr>
+			<% end %>
+		</table>
+	</div>
+<% end %>
 </body>
