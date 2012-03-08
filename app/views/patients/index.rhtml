@@ -35,8 +35,8 @@
             <span id='patient_gender'><%= @patient_bean.sex rescue "" %></span>
 
             <div id="patient_card">
-              <% if (@service rescue nil) != nil && (@service) != "" %>
-                <span value="<%= @service rescue "" %>">Triaged to:</span>
+              <% if (@referral_section rescue nil) != nil && (@referral_section) != "" %>
+                <span value="<%= @referral_section rescue "" %>">Triaged to:</span>
               <% end %>
 
               <%
