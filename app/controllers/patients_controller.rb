@@ -274,6 +274,8 @@ class PatientsController < ApplicationController
    
     alerts << "HIV Status : #{hiv_status}" if "#{hiv_status.strip}" == 'Unknown'
 
+    alerts << "Demographics: Area of residence has not been changed in the past 6 months" if PatientService.months_since_last_update_area_of_residence(patient_bean.person_id) >= 6
+
     alerts
   end
 

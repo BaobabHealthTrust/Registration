@@ -1153,6 +1153,13 @@ EOF
     end if prescribe_drugs
   end
 
+	def self.months_since_last_update_area_of_residence(person_id)
+    area_of_residence_date = PersonAddress.find(:last, :conditions => ["person_id = ?", person_id]).date_created rescue Date.today
+
+    months = (Date.today.year * 12 + Date.today.month) - (area_of_residence_date.year * 12 + area_of_residence_date.month) rescue nil
+    return months
+  end
+
   def self.get_national_id(patient, force = true)
     id = patient.patient_identifiers.find_by_identifier_type(PatientIdentifierType.find_by_name("National id").id).identifier rescue nil
     return id unless force
