@@ -47,7 +47,11 @@
               <option value='/patients/programs?patient_id=<%= @patient.id %>'>Outcomes</option>
             </select>
             <select id="links">
-							<option value='/programs/update_states/<%=@patient.id%>'>Set Dead</option>
+            	<% if @patient.person.dead == 0 %>
+								<option value='/programs/update_states/<%=@patient.id%>'>Set Dead</option>
+							<% else %>
+								<option value='/programs/update_states/<%=@patient.id%>'>Set Alive</option>
+							<% end %>
             </select>
             <tr>
               <td align='center'>
