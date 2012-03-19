@@ -15,6 +15,11 @@
     }
 
     #tt_page_ward_ .inputFrameClass { height:84%; }
+    
+    .tt_controls_select_services .keyboard{display:none;}
+    #tt_page_select_services .options{height:500px;}
+    #tt_page_select_services .options li{font-size:30px;}
+    #space {display:inline;}
   </style>
 
   <form action="/encounters/create">
@@ -26,7 +31,8 @@
     <%= select_tag "observations[][value_text]", options_for_select(@select_options['services']),
 					{:helpText =>"Select services",
 				  :id => "services",
-				  :allowFreeText => false,  
+				  :allowFreeText => false,
+				  :multiple => true,
 				  :ttMatchFromBeginning => "true"}%>
 			<%= hidden_field_tag("observations[][concept_name]", "SERVICES") %>
 			<%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
