@@ -218,7 +218,7 @@ class UserController < ApplicationController
   end
 
   def add_role
-     @user = User.find(params[:id])
+     @user = User.find(params[:id])    
      unless request.get?
         user_role=UserRole.new
         user_role.role = Role.find_by_role(params[:user_role][:role_id])
@@ -227,17 +227,17 @@ class UserController < ApplicationController
         flash[:notice] = "You have successfuly added the role of #{params[:user_role][:role_id]}"
         redirect_to :action => "show"
       else
-      user_roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role.role}
+      user_roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role}
       all_roles = Role.find(:all).collect{|r|r.role}
       @roles = (all_roles - user_roles)
-      @show_super_user = true if UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role.role != "superuser" }
+      @show_super_user = true if UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role != "superuser" }
    end
   end
 
   def delete_role
     @user = User.find(params[:id])
     unless request.post?
-      @roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role.role}
+      @roles = UserRole.find_all_by_user_id(@user.user_id).collect{|ur|ur.role}
     else
       role = Role.find_by_role(params[:user_role][:role_id]).role
       user_role =  UserRole.find_by_role_and_user_id(role,@user.user_id)  
