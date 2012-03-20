@@ -1359,11 +1359,34 @@ class CohortToolController < ApplicationController
   end
   
   def cohort
-    @quarter = params[:quarter]
-    start_date,end_date = Report.generate_cohort_date_range(@quarter)
-    cohort = Cohort.new(start_date,end_date)
+    @selSelect = params[:selSelect] rescue nil
+    @selYear = params[:selYear] rescue nil
+    @selMonth = params[:selMonth] rescue nil
+    @selQtr = "#{params[:selQtr].gsub(/&/, "_")}" rescue nil
+		@location =  Location.current_health_center.name rescue ''
+		
+		case params[:selSelect]
+		  when "month"
+		    @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
+		    @end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
+		      ("2010-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : 31) }").to_date.strftime("%Y-%m-%d")
+
+		  when "quarter"
+		    start_date = params[:selQtr].to_s.gsub(/&max=(.+)$/,'')
+		    end_date = params[:selQtr].to_s.gsub(/^min=(.+)&max=/,'')
+
+				@start_date = start_date.gsub(/^min=/,'')
+				@end_date		= end_date
+		  end
+
+    cohort = Cohort.new(@start_date,@end_date)
     @cohort = cohort.report
-    @survival_analysis = SurvivalAnalysis.report(cohort)
+    @services = cohort.registration_services
+		if @selSelect.include?('month')
+			@report_type =	@start_date.to_date.strftime("%B") + "  " + @selYear
+		else
+			@report_type = @start_date.to_date.strftime("%Y-%B-%d") + " to " + @end_date.to_date.strftime("%Y-%B-%d")
+		end
     render :layout => 'cohort'
   end
 

@@ -1,29 +1,144 @@
-<script>
-  var tt_cancel_destination = "/clinic" // /reports"
-</script>
-<form id='quarter' action="cohort" method='post'> 
-  <%
-    qtrs = ['']
-    current_qtr = ""
-    date = Date.today
-    if (date >= "#{date.year}-01-01".to_date and date <= "#{date.year}-03-31".to_date)
-      current_qtr = "1 #{date.year}"
-    elsif (date >= "#{date.year}-04-01".to_date and date <= "#{date.year}-06-30".to_date)
-      current_qtr = "2 #{date.year}"
-    elsif (date >= "#{date.year}-07-01".to_date and date <= "#{date.year}-09-30".to_date)
-      current_qtr = "3 #{date.year}"
-    else (date >= "#{date.year}-10-01".to_date and date <= "#{date.year}-12-31".to_date)
-      current_qtr = "4 #{date.year}"
+<html>
+  <head>
+    <title>Maternity Cohort Report Selection</title>
+    <script type="text/javascript" language="javascript">
+      <!--
+
+      var minYear = 2008;
+      
+      function $(id){
+        return document.getElementById(id);
+      }
+
+      //-->
+    </script>
+    <style>
+    	.tt_controls_select_month .keyboard{display:none;}
+	    	#tt_page_select_month .options{height:500px;}
+		    #tt_page_select_month .options li{font-size:30px;}
+		    #space {display:inline;}
+		    
+		  .tt_controls_select_quarter .keyboard{display:none;}
+	    	#tt_page_select_quarter .options{height:500px;}
+		    #tt_page_select_quarter .options li{font-size:30px;}
+		    #space {display:inline;}
+
+      #Unknown {display: none;}
+      #num {display: none;}
+    </style>
+  </head>
+  <body>
+    <%
+
+    min = 2010
+    max = Time.now.strftime("%Y").to_i
+
+    array = []
+
+    (min..max).each{|yr| array << yr}
+
+    quarters = []
+    qtr = []
+
+    i = 1
+
+    array.each do |a|
+      date = Date.parse("1.1.#{a}")
+
+      4.times do
+        if date > Date.today
+          break
+        end
+
+        qtr << {"name" => "Q" + i.to_s + " " + a.to_s,
+          "min" => date.strftime("%Y-%m-%d"),
+          "max" => (date+3.month-1.day).strftime("%Y-%m-%d")}
+
+        quarters << [date, date+3.month-1.day]
+        date += 3.month
+        i += 1
+      end
+
+      # Push year
+      qtr << a
+
+      i = 1
     end
-    count = current_qtr[0..0].to_i
-    20.times{|x|
-      qtrs << "Q#{count} #{date.year}"
-      count-=1 if count > 0
-      date = date - 1.year if count == 0
-    count+=4 if count == 0
-    }
+    quarters
 
-  %>
-  <%= select_tag 'quarter', options_for_select( qtrs ), {:helpText => "Select Quarter"} %>
+    open = false
 
-</form>
+    # raise qtr.to_yaml
+    %>
+
+    <form id="frmReport" action="cohort" method="post">
+      <select id="selSelect" name="selSelect" helpText="Report By:">
+        <option></option>
+        <option value="month">Month</option>
+        <option value="quarter">Quarter</option>
+      </select>
+
+      <select id="selYear" field_type="number" name="selYear" helpText="Select Year:"
+              condition="$('selSelect').value == 'month' || $('selSelect').value == 'year' || $('selSelect').value == 'week';">
+        <option></option>
+        <% array.reverse.each do |y| %>
+          <option><%= y %></option>
+        <% end %>
+      </select>
+
+      <select id="selMonth" name="selMonth" helpText="Select Month" condition="$('selSelect').value == 'month';">
+        <option></option>
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+
+      <select id="selQtr" name="selQtr" helpText="Select Quarter:" field_type="number"
+              condition="$('selSelect').value == 'quarter'" tt_pageStyleClass="NoKeyboard">
+        <option></option>
+        <% qtr.reverse.each{|q|
+
+          if q.to_s.match(/^\d{4}$/)
+            if open == true
+            %>
+              </optgroup>
+            <%
+            end
+            open = true
+          %>
+
+            <optgroup label="<%= q %>" style="padding:10px; border-bottom:1px dotted black;">
+
+            <% else %>
+
+              <option value="min=<%= q["min"] %>&max=<%= q["max"] %>" style="text-align:center; padding:10px">
+                <%= q["name"] %>
+              </option>
+
+            <%
+            end
+
+          }
+
+          if open == true
+          %>
+
+          </optgroup>
+
+        <%
+        end
+      %>
+      </select>
+
+    </form>
+  </body>
+</html>

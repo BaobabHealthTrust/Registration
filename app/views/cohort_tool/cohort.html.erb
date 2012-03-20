@@ -4,22 +4,6 @@
 <%= stylesheet_link_tag "cohort" %>
 <script>
   var tt_cancel_destination = "/"  
-
-  function showReport() {
-    cohort = document.getElementsByClassName('scrollTableContainer')[0]
-    survival_analysis = document.getElementsByClassName('survival-analysis')[0]
-    switch_button = $('switch_view')
-    if (switch_button.innerHTML.sub('<span>','').sub('</span>','') == 'Survival Analysis'){
-      cohort.style.display = 'none'
-      switch_button.innerHTML = "<span>Cohort</span>"
-      survival_analysis.style.display = 'inline'
-    } else {
-      cohort.style.display = 'inline'
-      switch_button.innerHTML = "<span>Survival Analysis</span>"
-      survival_analysis.style.display = 'none'
-    } 
-     
-  }
 </script>
 <style>
   table {
@@ -51,544 +35,86 @@
   }
 </style>
 
-<title>Cohort<%= Location.current_health_center.name + "  " + @quarter %></title>
+<title>Cohort<%= @location + "  " + @report_type %></title>
 </head>
 
 <body>
-<h1><%= Location.current_health_center.name + "  " + @quarter %></h1>
+<h1 align='center'>OPD Rigistry Total Attendances - <%= @location %></h1>
+<h1 align='center'><%= @report_type %></h1>
 <br />
 
 <div class='scrollTableContainer'>
-<table class='dataTable' cellspacing='0'>
-<thead>
-<tr>
-  <th>&nbsp;</th>
-  <th style = "text-align:left;">Patient's registration details</th>
-  <th>Newly registered in quarter</th>
-  <th>Cumulative ever registered</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td style ="border-width:0px">6</td>
-  <td style="text-align:left;">Total registered</td>
-
-  <td><%= link_to @cohort['Newly total registrated'], "/cohort_tool/list_patients_details?field=newly_total_registered&quarter=#{@quarter}" -%></td>
-
-  <td><%= link_to @cohort['Total registrated'], "/cohort_tool/list_patients_details?field=total_registered&quarter=#{@quarter}" -%></td>
-</tr>
-
-
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>7</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">Patients initiated on ART first time</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Patients initiated on ART'], "/cohort_tool/list_patients_details?field=newly_registered_patients_initiated_on_art_first_time&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Patients initiated on ART'], "/cohort_tool/list_patients_details?field=total_registered_patients_initiated_on_art_first_time&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>8</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Patients re-initiated on ART</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Patients reinitiated on ART'], "/cohort_tool/list_patients_details?field=newly_registered_patients_reinitiated_on_art&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Patients reinitiated on ART'], "/cohort_tool/list_patients_details?field=total_registered_patients_reinitiated_on_art&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>9</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px">Patients transfered in on ART</td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Newly transferred in patients'], "/cohort_tool/list_patients_details?field=newly_registered_patients_transfered_in_on_art&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Total transferred in patients'], "/cohort_tool/list_patients_details?field=total_registered_patients_transfered_in_on_art&quarter=#{@quarter}" -%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>10</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">Male (all ages)</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Newly registrated male'], "/cohort_tool/list_patients_details?field=newly_registered_male_all_ages&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total registrated male'], "/cohort_tool/list_patients_details?field=total_registered_male_all_ages&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>11</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Non-pregnant females (all ages)</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Newly registrated women (non-pregnant)'], "/cohort_tool/list_patients_details?field=newly_registered_non_pregnant_females_all_ages&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total registrated women (non-pregnant)'], "/cohort_tool/list_patients_details?field=total_registered_non_pregnant_females_all_ages&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>12</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px">Pregnant females (all ages)</td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Newly registrated women (pregnant)'], "/cohort_tool/list_patients_details?field=newly_registered_pregnant_females_all_ages&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Total registrated women (pregnant)'], "/cohort_tool/list_patients_details?field=total_registered_pregnant_females_all_ages&quarter=#{@quarter}" -%></td>
-</tr>
-
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>13</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">Children below 24 months at ART initiation</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Newly registrated infants'], "/cohort_tool/list_patients_details?field=newly_registered_infants&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total registrated infants'], "/cohort_tool/list_patients_details?field=total_registered_infants&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>14</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Children 24 months - 14yrs at ART initiation</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Newly registrated children'], "/cohort_tool/list_patients_details?field=newly_registered_children&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total registrated children'], "/cohort_tool/list_patients_details?field=total_registered_children&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>15</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Adult (15 years or older at ART initiation)</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Newly registrated adults'], "/cohort_tool/list_patients_details?field=newly_registered_adults&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total registrated adults'], "/cohort_tool/list_patients_details?field=total_registered_adults&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px">Unknown age</td>
-  <td style="border-width:1px 0px 1px 1px"><%=@cohort['']%></td>
-  <td style="border-width:1px 0px 1px 1px"><%=@cohort['']%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;">Reason for starting ART</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>16</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">Presumed severe HIV disease in infants</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Presumed severe HIV disease in infants'], "/cohort_tool/list_patients_details?field=presumed_severe_hiv_disease_in_infants&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Presumed severe HIV disease in infants'], "/cohort_tool/list_patients_details?field=total_presumed_severe_hiv_disease_in_infants&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>17</td>
-  
-  
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Confirmed HIV infection in infants (PCR)</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Confirmed HIV infection in infants (PCR)'], "/cohort_tool/list_patients_details?field=confirmed_hiv_infection_in_infants&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Confirmed HIV infection in infants (PCR)'], "/cohort_tool/list_patients_details?field=total_confirmed_hiv_infection_in_infants&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>18</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">WHO stage 1 or 2 ,CD4 below threshold</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['WHO stage 1 or 2, CD4 below threshold'], "/cohort_tool/list_patients_details?field=who_stage_1_or_2_cd4_below_threshold&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total WHO stage 1 or 2, CD4 below threshold'], "/cohort_tool/list_patients_details?field=total_who_stage_1_or_2_cd4_below_threshold&quarter=#{@quarter}" -%>
-</td>
-</tr>
-<tr class = 'row_break'>
-  <td>19</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">WHO stage 2,total lymphocytes < 1,200/mm3</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['WHO stage 2, total lymphocytes'], "/cohort_tool/list_patients_details?field=who_stage_2_total_lymphocytes&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total WHO stage 2, total lymphocytes'], "/cohort_tool/list_patients_details?field=total_who_stage_2_total_lymphocytes&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>20</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">WHO stage 3</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['WHO stage 3'], "/cohort_tool/list_patients_details?field=who_stage_3&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total WHO stage 3'], "/cohort_tool/list_patients_details?field=total_who_stage_3&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>21</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">WHO stage 4</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['WHO stage 4'], "/cohort_tool/list_patients_details?field=who_stage_4&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total WHO stage 4'], "/cohort_tool/list_patients_details?field=total_who_stage_4&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>22</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Breastfeeding</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Patient breastfeeding'], "/cohort_tool/list_patients_details?field=patient_breastfeeding&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Patient breastfeeding'], "/cohort_tool/list_patients_details?field=total_patient_breastfeeding&quarter=#{@quarter}" -%>
-</td>
-</tr>
-<tr class = 'row_break'>
-  <td>23</td>
-  
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Pregnant</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Patient pregnant'], "/cohort_tool/list_patients_details?field=patient_pregnant&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Patient pregnant'], "/cohort_tool/list_patients_details?field=total_patient_pregnant&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>24</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Children 12 - 23 months</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['HIV infected'], "/cohort_tool/list_patients_details?field=hiv_infected&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total HIV infected'], "/cohort_tool/list_patients_details?field=total_hiv_infected&quarter=#{@quarter}" -%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>25</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px">Unknown / other reason outside guidelines</td>
-  <td style="border-width:1px 0px 1px 1px"> <%= link_to @cohort['Unknown reason'], "/cohort_tool/list_patients_details?field=unknown_reason&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Total Unknown reason'], "/cohort_tool/list_patients_details?field=total_unknown_reason&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;">Stage defining conditions at ART initiation</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>26</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">Never TB or TB over 2yrs ago</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['No TB'], "/cohort_tool/list_patients_details?field=never_TB_or_TB_over_2_years_ago&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total No TB'], "/cohort_tool/list_patients_details?field=total_never_TB_or_TB_over_2_years_ago&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>27</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">TB within the LAST 2 yrs</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['TB within the last 2 years'], "/cohort_tool/list_patients_details?field=TB_within_the_last_2_years&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total TB within the last 2 years'], "/cohort_tool/list_patients_details?field=total_TB_within_the_last_2_years&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>28</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Current episode of TB</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Current episode of TB'], "/cohort_tool/list_patients_details?field=current_episode_of_tb&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Current episode of TB'], "/cohort_tool/list_patients_details?field=total_current_episode_of_tb&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>29</td>
-
-  <td style="text-align:left;border-width:0px 0px 1px 1px">Kaposis Sarcoma</td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Kaposis Sarcoma'], "/cohort_tool/list_patients_details?field=kaposis_sarcoma&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Total Kaposis Sarcoma'], "/cohort_tool/list_patients_details?field=total_kaposis_sarcoma&quarter=#{@quarter}" -%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;">Primary outcomes as of the end of the quarter evaluated (only cumulative)</td>
-  <td>&nbsp;</td>
-  <td style="text-align:center;">Cumulative ever registrated</td>
-</tr>
-
-
-<tr class = 'row_break'>
-  <td>30</td>
-  <td style="text-align:left;border-width:1px 0px 1px 1px">Total alive and on ART</td>
-  <td style="border-width:1px 0px 1px 0px">&nbsp;</td>
-  <td style="border-width:1px"><%= link_to @cohort['Total alive and on ART'], "/cohort_tool/list_patients_details?field=total_alive_and_on_art&quarter=#{@quarter}" -%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>31</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">Died within the 1st month of ART initiation</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Died within the 1st month after ART initiation'], "/cohort_tool/list_patients_details?field=died_within_the_first_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Died within the 1st month after ART initiation'], "/cohort_tool/list_patients_details?field=total_died_within_the_first_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>32</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Died within the 2nd month of ART initiation</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Died within the 2nd month after ART initiation'], "/cohort_tool/list_patients_details?field=died_within_the_second_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Died within the 2nd month after ART initiation'], "/cohort_tool/list_patients_details?field=total_died_within_the_second_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>33</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Died within the 3rd month of ART initiation</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Died within the 3rd month after ART initiation'], "/cohort_tool/list_patients_details?field=died_within_the_third_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Total Died within the 3rd month after ART initiation'], "/cohort_tool/list_patients_details?field=total_died_within_the_third_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>34</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px">Died after the 3rd month of ART initiation</td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Died after the end of the 3rd month after ART initiation'], "/cohort_tool/list_patients_details?field=died_after_the_third_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Total Died after the end of the 3rd month after ART initiation'], "/cohort_tool/list_patients_details?field=total_died_after_the_third_month_of_ART_initiation&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>35</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">Died Total</td>
-  <td style="border-width:1px 0px 0px 0px">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Died total'], "/cohort_tool/list_patients_details?field=total_patients_died&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>36</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Defaulted (more than 2 months overdue after expected to have run out of ARVs)</td>
-  <td style="border-width:0px">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Defaulted'], "/cohort_tool/list_patients_details?field=total_art_defaulted_patients&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>37</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px">Stopped taking ARVs (clinician or patient own decision,last known alive)</td>
-  <td style="border-width:0px">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['Stopped taking ARVs'], "/cohort_tool/list_patients_details?field=total_patients_who_stopped_treatment&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>38</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px">Transfered out</td>
-  <td style="border-width:0px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['Transferred out'], "/cohort_tool/list_patients_details?field=total_patients_transfered_out&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px;">Unknown outcome</td>
-  <td style="border-width:0px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:0px 1px 1px 1px;"><%=@cohort['']%></td>
-</tr>
-
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;">Secondary outcomes of those alive on ART as of last visit before end of quarter</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>39</td>
-  <td style="text-align:left;">ARV regimens</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px">d4T/3TC/NVP</font></td>
-  <td style="border-width:1px 0px 0px 1px">1A<br />1P</td>
-  <td style="border-width:1px 0px 0px 1px">
-    <%= link_to @cohort['Regimens']['A1'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_1A&quarter=#{@quarter}" -%>
-<br />
-    <%= link_to @cohort['Regimens']['P1'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_1P&quarter=#{@quarter}" -%>
-<br />
-  </td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:1px 0px 1px 1px;">AZT/3TC/NVP</td>
-  <td style="border-width:1px 0px 0px 1px;">2A<br />2P</td>
-  <td style="border-width:1px 0px 0px 1px">
-    <%= link_to @cohort['Regimens']['A2'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_2A&quarter=#{@quarter}" -%><br />
-    <%= link_to @cohort['Regimens']['P2'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_2P&quarter=#{@quarter}" -%>
-  </td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="border-width:0px 0px 1px 1px;text-align:left;">d4T/3TC/EFV</td>
-  <td style="border-width:1px 0px 0px 1px;">3A<br />3P</td>
-  <td style="border-width:1px 0px 0px 1px">
-    <%= link_to @cohort['Regimens']['A3'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_3A&quarter=#{@quarter}" -%><br />
-    <%= link_to @cohort['Regimens']['P3'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_3P&quarter=#{@quarter}" -%>
-  </td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="border-width:0px 0px 0px 1px;text-align:left;">AZT/3TC+EFV</td>
-  <td style="border-width:1px 0px 1px 1px;">4A<br />4P</td>
-  <td style="border-width:1px 0px 0px 1px">
-    <%= link_to @cohort['Regimens']['A4'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_4A&quarter=#{@quarter}" -%><br />
-    <%= link_to @cohort['Regimens']['P4'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_4P&quarter=#{@quarter}" -%>
-  </td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:1px 0px 1px 1px;">TDF/3TC/EFV</td>
-  <td style="border-width:0px 0px 1px 1px;">5A<br /><!--P5--></td>
-  <td style="border-width:1px 0px 0px 1px">
-    <%= link_to @cohort['Regimens']['A5'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_5A&quarter=#{@quarter}" -%><br />
-    <%#=@cohort['Regimens']['P5'] || '0'%>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:0px 0px 0px 1px;">TDF/3TC+NVP</td>
-  <td style="border-width:0px 0px 1px 1px;">6A<br /><!--P6--></td>
-  <td style="border-width:1px 0px 1px 1px">
-    <%= link_to @cohort['Regimens']['A6'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_6A&quarter=#{@quarter}" -%><br />
-    <%#=@cohort['Regimens']['P6'] || '0'%>
-  </td>
-</tr>
-
-<!-- start -->
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px;">TDF/3TC+LPV/r</td>
-  <td style="border-width:0px 0px 1px 1px;">7A<br /><!--P7--></td>
-  <td style="border-width:0px 0px 1px 1px">
-    <%= link_to @cohort['Regimens']['A7'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_7A&quarter=#{@quarter}" -%><br />
-    <%#=@cohort['Regimens']['P7'] || '0'%>
-  </td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px;">AZT/3TC+LPV/R</td>
-  <td style="border-width:0px 0px 1px 1px;">8A<br /><!--P8--></td>
-  <td style="border-width:0px 0px 1px 1px">
-    <%= link_to @cohort['Regimens']['A8'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_8A&quarter=#{@quarter}" -%><br />
-    <%#=@cohort['Regimens']['P8'] || '0'%>
-  </td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px;">ABC/3TC+LPV/r</td>
-  <td style="border-width:0px 0px 1px 1px;"><!--A9--><br />9P</td>
-  <td style="border-width:0px 0px 1px 1px">
-    <%#=@cohort['Regimens']['A9'] || '0'%><br />
-    <%= link_to @cohort['Regimens']['P9'] || '0', "/cohort_tool/list_patients_details?field=ARV_regimen_9P&quarter=#{@quarter}" -%>
-  </td>
-</tr>
-<!-- end -->
-
-<tr class = 'row_break'>
-  <td>40</td>
-  <td style="text-align:left;border-width:1px 0px 1px 1px;">Non-standard</td>
-  <td style="border-width:0px 0px 1px 1px;">(Patients on any other regimens)</td>
-  <td style="border-width:0px 1px 1px 1px;"><%= link_to @cohort['Regimens']['UNKNOWN ANTIRETROVIRAL DRUG'] || '0', "/cohort_tool/list_patients_details?field=patients_on_any_other_regimens&quarter=#{@quarter}" -%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>41</td>
-  <td style="text-align:left;border-width:1px 0px 1px 1px;">Total patients with side effects</td>
-  <td style="border-width:1px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:1px"><%=@cohort['']%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:0px">Adherence</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>42</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px;">Patients with 0 - 6 doses missed at their last visit (before end of quarter evaluated)</td>
-  <td style="border-width:1px 0px 0px 0px;">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px;"><%=@cohort['']%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>43</td>
-  <td style="text-align:left;border-width:1px 0px 1px 1px;">Patients with 7+ doses missed at their last visit (before end of quarter evaluated)</td>
-  <td style="border-width:1px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:1px"><%=@cohort['']%></td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:0px">Current TB status,any form of TB</td>
-  <td>&nbsp;</td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr class = 'row_break'>
-  <td>44</td>
-  <td style="text-align:left;border-width:1px 0px 0px 1px;">TB not suspected</td>
-  <td style="border-width:1px 0px 0px 0px;">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['TB not suspected'], "/cohort_tool/list_patients_details?field=tb_not_suspected&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>45</td>
-  <td style="text-align:left;border-width:1px 0px 1px 1px;">TB suspected</td>
-  <td style="border-width:1px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['TB suspected'], "/cohort_tool/list_patients_details?field=tb_suspected&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>46</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px;">TB confirmed, currently not yet on TB treatment</td>
-  <td style="border-width:0px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['TB confirmed not treatment'], "/cohort_tool/list_patients_details?field=confirmed_tb_not_on_treatment&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>47</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px;">TB confirmed, on TB treatment</td>
-  <td style="border-width:0px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:1px 0px 0px 1px"><%= link_to @cohort['TB confirmed on treatment'], "/cohort_tool/list_patients_details?field=confirmed_tb_on_treatment&quarter=#{@quarter}" -%></td>
-</tr>
-<tr class = 'row_break'>
-  <td>&nbsp;</td>
-  <td style="text-align:left;border-width:0px 0px 1px 1px;">Unknown TB status</td>
-  <td style="border-width:0px 0px 1px 0px;">&nbsp;</td>
-  <td style="border-width:1px 0px 1px 1px"><%= link_to @cohort['TB Unknown'], "/cohort_tool/list_patients_details?field=unknown_tb_status&quarter=#{@quarter}" -%></td>
-</tr>
-
-</tbody>
-</table>
+	<table class='dataTable' cellspacing='0'>
+		<thead>
+		<tr>
+			<th>&nbsp;</th>
+			<th>Department Name</th>
+			<th>Total Count</th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;">Casualty</td>
+			<td><%= @services['SERVICES']['Casualty'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Dental</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Dental'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Eye</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Eye'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Family Planing</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Family Planing'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Medical</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Medical'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">OB/Gyn</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['OB/Gyn'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Orthopedics</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Orthopedics'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Pediatrics</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Pediatrics'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Skin</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Skin'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">STI Clinic</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['STI Clinic'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Surgical</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Surgical'] -%></td>
+		</tr>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 0px 0px 1px">Other</td>
+			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Other'] -%></td>
+		</tr>
+		</tbody>
+	</table>
 </div>
-
-<div class = 'survival-analysis'>
-<table>
-<% @survival_analysis.each do | key , values | %>
-  <tr>
-    <th><%=key%></th>
-    <th>&nbsp;</th>
-  </tr>
-  <tr>
-    <td>New patients registered for ART</td>
-    <td style = "text-align:right;"><%=values['New patients registered for ART']%></td>
-  </tr>
-  <tr>
-    <td>Number Alive and on ART</td>
-    <td style = "text-align:right;"><%=values['Number Alive and on ART']%></td>
-  </tr>
-  <tr>
-    <td>Number Dead</td>
-    <td style = "text-align:right;"><%=values['Number Dead']%></td>
-  </tr>
-  <tr>
-    <td>Number Defaulted</td>
-    <td style = "text-align:right;"><%=values['Unknown']%></td>
-  </tr>
-  <tr>
-    <td>Number Stopped Treatment</td>
-    <td style = "text-align:right;"><%=values['Number Stopped Treatment']%></td>
-  </tr>
-  <tr>
-    <td>Number Transferred out</td>
-    <td style = "text-align:right;"><%=values['Number Transferred out']%></td>
-  </tr>
-  <tr>
-    <td>Number Unknown</td>
-    <td style = "text-align:right;"><%=values['Unknown']%></td>
-  </tr>
-<% end rescue nil%>
-</table>
-</div>
-
-
-
 </body>
 </html>

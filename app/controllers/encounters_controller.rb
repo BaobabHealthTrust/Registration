@@ -271,15 +271,16 @@ class EncountersController < ApplicationController
      'services' => [
         ['',''],
         ['Casualty','Casualty'],
+        ['Dental','Dental'],
         ['Eye','Eye'],
         ['Family Planing','Family Planing'],
         ['Medical','Medical'],
         ['OB/Gyn','OB/Gyn'],
         ['Orthopedics','Orthopedics'],
         ['Pediatrics','Pediatrics'],
-        ['Skin','Skin'],
+        ['Skin',' Skin '],
         ['STI Clinic','STI Clinic'],
         ['Surgical','Surgical'],
-        ['Other','Other']]}
+        ['Other',' Other ']]}
 	end
 end

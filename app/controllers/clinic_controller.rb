@@ -115,7 +115,7 @@ class ClinicController < ApplicationController
 
   def reports_tab
     @reports = [
-      ["Cohort","/cohort_tool/cohort_menu"]
+      ["Registry reports","/cohort_tool/cohort_menu"]
     ]
 
     @reports = [
