@@ -216,8 +216,14 @@ class PatientsController < ApplicationController
   end
 
  	def get_referral_section(person_obj, session_date)
+		referral_services = Observation.find(:all, :conditions => ["person_id = ? AND concept_id = ? AND DATE(obs_datetime) = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id, session_date.to_date])
 
-   services = Observation.find(:all, :conditions => ["person_id = ? AND concept_id = ? AND DATE(obs_datetime) = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id, session_date.to_date])
+		if referral_services.blank?
+			services = PatientService.previous_referral_section(person_obj)
+		else
+			services = referral_services
+		end
+
 		return services
   end
 
