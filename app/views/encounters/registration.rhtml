@@ -28,7 +28,7 @@
     <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
     <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-    <%= touch_select_tag "SERVICES ORDERED", @patient, options_for_select(@select_options['services']),
+    <%= touch_select_tag "SERVICES", @patient, options_for_select(@select_options['services']),
       {:id => 'services',
        :optional => true,
        :multiple => true,

@@ -96,9 +96,6 @@ class PeopleController < ApplicationController
     @person = Person.find(@found_person_id) rescue nil
     @task = main_next_task(Location.current_location, @person.patient, session_date.to_date)
 	  @patient_bean = PatientService.get_patient(@person)
-	  #@service = 
-	  #raise PatientService.previous_referral_section(@person).to_yaml
-	  #@service_date = PatientService.previous_referral_section_date_created(@person) rescue ""
 	  
     render :layout => 'menu'
   end

@@ -362,7 +362,7 @@ class UserController < ApplicationController
       end
       encounter_privilege_hash
   end
-  
+
   def generate_privilege_encounter_map
       encounter_privilege_map = CoreService.get_global_property_value("encounter_privilege_map").to_s rescue ''
       encounter_privilege_map = encounter_privilege_map.split(",")

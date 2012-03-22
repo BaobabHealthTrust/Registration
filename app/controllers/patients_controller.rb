@@ -8,7 +8,7 @@ class PatientsController < ApplicationController
 	  @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
 	  @patient_bean = PatientService.get_patient(@patient.person)
 	  @encounters = @patient.encounters.find_by_date(session_date)
-	  @referral_section = PatientService.previous_referral_section(@patient.person).first.value_text  rescue 'None'
+	  @referral_section = get_referral_section(@patient.person, session_date).map{|service| service.value_text}.join(', ')  rescue 'None'
     @prescriptions = @patient.orders.unfinished.prescriptions.all
     @programs = @patient.patient_programs.all
     @alerts = alerts(@patient, session_date) rescue nil
@@ -213,6 +213,12 @@ class PatientsController < ApplicationController
         redirect_to :action => "patient_demographics",:patient_id => @patient_id and return
       end
     end
+  end
+
+ 	def get_referral_section(person_obj, session_date)
+
+   services = Observation.find(:all, :conditions => ["person_id = ? AND concept_id = ? AND DATE(obs_datetime) = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id, session_date.to_date])
+		return services
   end
 
   def summary
