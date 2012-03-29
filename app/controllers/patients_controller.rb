@@ -12,6 +12,7 @@ class PatientsController < ApplicationController
     @prescriptions = @patient.orders.unfinished.prescriptions.all
     @programs = @patient.patient_programs.all
     @alerts = alerts(@patient, session_date) rescue nil
+
     @restricted = ProgramLocationRestriction.all(:conditions => {:location_id => Location.current_health_center.id })
     @restricted.each do |restriction|    
       @encounters = restriction.filter_encounters(@encounters)
@@ -266,25 +267,22 @@ class PatientsController < ApplicationController
     # cd4 due
 		patient_bean = PatientService.get_patient(patient.person)
     alerts = []
+		
+		weight = 0; height = 0
 
-    type = EncounterType.find_by_name("APPOINTMENT")
-    next_appt = Observation.find(:first,:order => "encounter_datetime DESC,encounter.date_created DESC",
-               :joins => "INNER JOIN encounter ON obs.encounter_id = encounter.encounter_id",
-               :conditions => ["concept_id = ? AND encounter_type = ? AND patient_id = ?",
-               ConceptName.find_by_name('Appointment date').concept_id,
-               type.id,patient.id]).to_s rescue nil
-    alerts << ('Next ' + next_appt).capitalize unless next_appt.blank?
+		if !PatientService.get_patient_attribute_value(patient, "current_weight").blank?
+			weight = PatientService.get_patient_attribute_value(patient, "current_weight")
+		end
+
+		if !PatientService.get_patient_attribute_value(patient, "current_height").blank?
+			height = PatientService.get_patient_attribute_value(patient, "current_weight")
+		end
 
     # BMI alerts
     if patient_bean.age >= 15
-      bmi_alert = current_bmi_alert(PatientService.get_patient_attribute_value(patient, "current_weight"), PatientService.get_patient_attribute_value(patient, "current_height"))
+      bmi_alert = current_bmi_alert(weight, height)
       alerts << bmi_alert if bmi_alert
     end
-
-    hiv_status = PatientService.patient_hiv_status(patient)
-    alerts << "HIV Status : #{hiv_status} more than 3 months" if ("#{hiv_status.strip}" == 'Negative' && PatientService.months_since_last_hiv_test(patient.id) > 3)
-   
-    alerts << "HIV Status : #{hiv_status}" if "#{hiv_status.strip}" == 'Unknown'
 
     alerts << "Demographics: Area of residence has not been changed in the past 6 months" if PatientService.months_since_last_update_area_of_residence(patient_bean.person_id) >= 6
 
