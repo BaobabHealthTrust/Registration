@@ -1724,6 +1724,21 @@ function showBestKeyboard(aPageNum) {
         case "boolean":
             __$("keyboard").innerHTML = "";
             break;
+        case "calendar":
+            __$("keyboard").innerHTML = "";
+            __$("page" + aPageNum).innerHTML = "";
+            
+            var selected = {};
+            var selecteddate = null;
+            
+            if(inputElement.getAttribute("selecteddays")){
+                selected = eval(inputElement.getAttribute("selecteddays"));
+            }
+            
+            selecteddate = inputElement.value;
+            
+            createCalendar("page" + aPageNum, inputElement.id, selecteddate, selected);            
+            break;
         default:
             __$("keyboard").innerHTML = getPreferredKeyboard();
             break;

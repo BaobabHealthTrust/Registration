@@ -37,8 +37,7 @@ function init(){
         "QNOON":"Once a day at noon (QNOON)", 
         "QOD":"Every other day (QOD)", 
         "QPM":"In the evening (QPM)", 
-        "QWK":"Once a week (QWK)",
-        "Stat Dose":"Stat Dose"
+        "QWK":"Once a week (QWK)"
     }
     
     generateGenerics();
@@ -285,7 +284,7 @@ function searchDrug(){
             current_concept_id = __$(this.id).getAttribute("concept_id");
             
             __$("inputTxt").value = this.innerHTML;
-            askDosage();
+            askFormulation();
         }
 
         __$("ulDrugs").appendChild(li);
@@ -316,7 +315,7 @@ function checkState(button, control){
     }
 }
 
-function askDosage(){
+function askFormulation(){
     if(!__$("divShield")){
         var divShield = document.createElement("div");
         divShield.id = "divShield";
@@ -339,8 +338,8 @@ function askDosage(){
     var question = document.createElement("div");
     question.id = "dosageQuestion";
     question.style.position = "absolute";
-    question.style.left = "180px";
-    question.style.top = "110px";
+    question.style.left = "80px";
+    question.style.top = "80px";
     question.style.width = "600px";
     question.style.height = "400px";
     question.style.backgroundColor = "#fff";
@@ -403,12 +402,10 @@ function askDosage(){
     
     var f = 0;
     for(var dose in drugslist[current_concept_id]){
-        // if(dose == 0 || dose.match(/^0[a-z]/i)){
-        //    continue;
-        // }
-        
         var li = document.createElement("li");
-        li.innerHTML = drugslist[current_concept_id][dose];
+        li.innerHTML = dose; //drugslist[current_concept_id][dose];
+        li.setAttribute("strength", drugslist[current_concept_id][dose][0]);
+        li.setAttribute("units", drugslist[current_concept_id][dose][1]);
         
         if(f % 2 > 0){
             li.className = "oddf";
@@ -418,6 +415,8 @@ function askDosage(){
             highlightSelected(__$("ulDosages"), this);
             
             __$("editDosage").value = this.innerHTML;
+            __$("editDosage").setAttribute("strength", this.getAttribute("strength"));
+            __$("editDosage").setAttribute("units", this.getAttribute("units"));
         }
         
         __$("ulDosages").appendChild(li);
@@ -454,7 +453,7 @@ function askDosage(){
         if(this.className == "button gray"){
             showMessage("Please select a value first", false, false)
         } else {
-            askFrequency();            
+            askPrescriptionType();            
         }
     }
     
@@ -463,7 +462,7 @@ function askDosage(){
     setTimeout("checkState(__$(\"btnForwardDosage\"), __$(\"editDosage\"))", timerTime);
 }
 
-function askFrequency(){
+function askPrescriptionType(){
     if(!__$("divShield")){
         var divShield = document.createElement("div");
         divShield.id = "divShield";
@@ -482,16 +481,890 @@ function askFrequency(){
     __$("divShield").style.zIndex = 102; 
     __$("divShield").style.display = "block";
     
+    if(!__$("prescriptionQuestion")){
+        var question = document.createElement("div");
+        question.id = "prescriptionQuestion";
+        question.style.position = "absolute";
+        question.style.left = "110px";
+        question.style.top = "110px";
+        question.style.width = "600px";
+        question.style.height = "400px";
+        question.style.backgroundColor = "#fff";
+        //question.style.border = "1px solid #000";
+        question.style.zIndex = 102;
+        question.className = "dialog  no-selection";
+    
+        __$("content").appendChild(question);
+    
+        var cancelImg = document.createElement("img");
+        cancelImg.setAttribute("src", "lib/images/cancel_flat_red.png");
+        cancelImg.setAttribute("alt", "X");
+        cancelImg.style.cssFloat = "right";
+        cancelImg.style.margin = "-65px";
+        cancelImg.style.marginTop = "-65px";
+        cancelImg.style.cursor = "pointer";
+        cancelImg.onclick = function(){
+            closePopUps();
+        }
+    
+        question.appendChild(cancelImg);
+    
+        var qtbl = document.createElement("div");
+        qtbl.className = "table";
+    
+        question.appendChild(qtbl);
+    
+        var qtblrow1 = document.createElement("div");
+        qtblrow1.className = "row";
+    
+        qtbl.appendChild(qtblrow1);
+    
+        var qtblcell1_1 = document.createElement("div");
+        qtblcell1_1.className = "cell";
+        qtblcell1_1.innerHTML = "Type of Prescription";
+    
+        qtblrow1.appendChild(qtblcell1_1);
+    
+        var qtblrow2 = document.createElement("div");
+        qtblrow2.className = "row";
+    
+        qtbl.appendChild(qtblrow2);
+    
+        var qtblcell2_1 = document.createElement("div");
+        qtblcell2_1.className = "cell";
+        qtblcell2_1.innerHTML = "<input type='text' id='editPrescriptionType' value='' class='inputBox' />";
+    
+        qtblrow2.appendChild(qtblcell2_1);
+    
+        var qtblrow3 = document.createElement("div");
+        qtblrow3.className = "row";
+    
+        qtbl.appendChild(qtblrow3);
+    
+        var qtblcell3_1 = document.createElement("div");
+        qtblcell3_1.className = "cell";
+        qtblcell3_1.innerHTML = "<ul id='ulPrescriptionType' class='popup'><li>" + 
+        "Standard</li><li class='oddf'>Variable</li><li>Stat Dose</li></ul>";
+    
+        qtblrow3.appendChild(qtblcell3_1);
+            
+        for(var li in __$("ulPrescriptionType").children){            
+            __$("ulPrescriptionType").children[li].onclick = function(){
+                highlightSelected(__$("ulPrescriptionType"), this);
+            
+                __$("editPrescriptionType").value = this.innerHTML;
+                
+                if(this.innerHTML == "Stat Dose"){
+                    __$("btnForwardPrescriptionType").innerHTML = "<span>Done</span>";
+                } else {
+                    __$("btnForwardPrescriptionType").innerHTML = "<span>Forward</span>";
+                }
+            }       
+        }
+            
+        var qtblrow4 = document.createElement("div");
+        qtblrow4.className = "row";
+    
+        qtbl.appendChild(qtblrow4);
+    
+        var qtblcell4_1 = document.createElement("div");
+        qtblcell4_1.className = "cell";
+    
+        qtblrow4.appendChild(qtblcell4_1);
+    
+        var btnForward = document.createElement("button");
+        btnForward.className = "button gray";
+        btnForward.innerHTML = "<span>Forward</span>";
+        btnForward.style.cssFloat = "right";
+        btnForward.id = "btnForwardPrescriptionType";
+        btnForward.onclick = function(){
+            if(this.className == "button gray"){
+                showMessage("Please select a value first", false, false)
+            } else {
+                if(__$("btnForwardPrescriptionType").innerHTML == "<span>Done</span>"){
+                    processDrug(current_concept_id);
+                } else if(__$("editPrescriptionType").value == "Variable"){
+                    askMorningDose();
+                } else {
+                    askDoseStrength();
+                }   
+            }
+        }
+    
+        qtblcell4_1.appendChild(btnForward);
+        var btnBack = document.createElement("button");
+        btnBack.className = "button";
+        btnBack.innerHTML = "<span>Back</span>";
+        btnBack.style.cssFloat = "right";
+        btnBack.onclick = function(){
+            __$("prescriptionQuestion").style.display = "none";
+            __$("divShield").style.zIndex = 101;
+        }
+    
+        qtblcell4_1.appendChild(btnBack);
+    
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "button red";
+        btnCancel.innerHTML = "<span>Cancel</span>";
+        btnCancel.style.cssFloat = "left";
+        btnCancel.onclick = function(){
+            closePopUps();
+        }
+    
+        qtblcell4_1.appendChild(btnCancel);
+    
+    } else {
+        highlightSelected(__$("ulPrescriptionType"));
+        __$("prescriptionQuestion").style.display = "block";
+        __$("editPrescriptionType").value = "";
+    }
+    
+    setTimeout("checkState(__$(\"btnForwardPrescriptionType\"), __$(\"editPrescriptionType\"))", timerTime);
+}
+
+function askMorningDose(){
+    if(!__$("divShield")){
+        var divShield = document.createElement("div");
+        divShield.id = "divShield";
+        divShield.style.position = "absolute";
+        divShield.style.left = "0px";
+        divShield.style.top = "0px";
+        divShield.style.opacity = 0.6;
+        divShield.style.backgroundColor = "#ccf";
+        divShield.style.width = __$("content").offsetWidth + "px";
+        divShield.style.height = __$("content").offsetHeight + "px"; 
+        divShield.style.display = "none";
+        
+        __$("content").appendChild(divShield);
+    }
+    
+    __$("divShield").style.zIndex = 104; 
+    __$("divShield").style.display = "block";
+    
+    if(!__$("morningQuestion")){
+        var question = document.createElement("div");
+        question.id = "morningQuestion";
+        question.style.position = "absolute";
+        question.style.left = "140px";
+        question.style.top = "140px";
+        question.style.width = "390px";
+        question.style.height = "420px";
+        question.style.backgroundColor = "#fff";
+        question.style.zIndex = 104;
+        question.className = "dialog  no-selection";
+    
+        __$("content").appendChild(question);
+    
+        var cancelImg = document.createElement("img");
+        cancelImg.setAttribute("src", "lib/images/cancel_flat_red.png");
+        cancelImg.setAttribute("alt", "X");
+        cancelImg.style.cssFloat = "right";
+        cancelImg.style.margin = "-65px";
+        cancelImg.style.marginTop = "-65px";
+        cancelImg.style.cursor = "pointer";
+        cancelImg.onclick = function(){
+            closePopUps();
+        }
+    
+        question.appendChild(cancelImg);
+    
+        var qtbl = document.createElement("div");
+        qtbl.className = "table";
+    
+        question.appendChild(qtbl);
+    
+        var qtblrow1 = document.createElement("div");
+        qtblrow1.className = "row";
+    
+        qtbl.appendChild(qtblrow1);
+    
+        var qtblcell1_1 = document.createElement("div");
+        qtblcell1_1.className = "cell";
+        qtblcell1_1.innerHTML = "Morning Dose Strength";
+    
+        qtblrow1.appendChild(qtblcell1_1);
+    
+        var qtblrow2 = document.createElement("div");
+        qtblrow2.className = "row";
+    
+        qtbl.appendChild(qtblrow2);
+    
+        var qtblcell2_1 = document.createElement("div");
+        qtblcell2_1.className = "cell";
+        qtblcell2_1.innerHTML = "<input type='text' id='editMorningDose' value='' class='inputBox' />";
+    
+        qtblrow2.appendChild(qtblcell2_1);
+    
+        var qtblrow3 = document.createElement("div");
+        qtblrow3.className = "row";
+    
+        qtbl.appendChild(qtblrow3);
+    
+        var qtblcell3_1 = document.createElement("div");
+        qtblcell3_1.className = "cell";
+        qtblcell3_1.id = "ulMorningDose";
+        // qtblcell3_1.style.paddingLeft = "60px";
+    
+        qtblrow3.appendChild(qtblcell3_1);
+    
+        showNumber("ulMorningDose", "editMorningDose", true);
+    
+        var qtblrow4 = document.createElement("div");
+        qtblrow4.className = "row";
+    
+        qtbl.appendChild(qtblrow4);
+    
+        var qtblcell4_1 = document.createElement("div");
+        qtblcell4_1.className = "cell";
+    
+        qtblrow4.appendChild(qtblcell4_1);
+    
+        var btnForward = document.createElement("button");
+        btnForward.className = "button gray";
+        btnForward.innerHTML = "<span>Forward</span>";
+        btnForward.style.cssFloat = "right";
+        btnForward.id = "btnForwardMorningDose";
+        btnForward.onclick = function(){
+            if(this.className == "button gray"){
+                showMessage("Please enter a value first", false, false)
+            } else {            
+                askAfternoonDose();
+            }
+        }
+    
+        qtblcell4_1.appendChild(btnForward);
+        var btnBack = document.createElement("button");
+        btnBack.className = "button";
+        btnBack.innerHTML = "<span>Back</span>";
+        btnBack.style.cssFloat = "right";
+        btnBack.onclick = function(){
+            __$("morningQuestion").style.display = "none";
+            __$("divShield").style.zIndex = 102;
+        }
+    
+        qtblcell4_1.appendChild(btnBack);
+    
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "button red";
+        btnCancel.innerHTML = "<span>Cancel</span>";
+        btnCancel.style.cssFloat = "left";
+        btnCancel.onclick = function(){
+            closePopUps();
+        }
+    
+        qtblcell4_1.appendChild(btnCancel);
+    
+    } else {
+        __$("morningQuestion").style.display = "block";
+        __$("editMorningDose").value = "";
+    }
+    
+    updateDosage("ulMorningDose");
+    
+    setTimeout("checkState(__$(\"btnForwardMorningDose\"), __$(\"editMorningDose\"))", timerTime);
+}
+
+function askAfternoonDose(){
+    if(!__$("divShield")){
+        var divShield = document.createElement("div");
+        divShield.id = "divShield";
+        divShield.style.position = "absolute";
+        divShield.style.left = "0px";
+        divShield.style.top = "0px";
+        divShield.style.opacity = 0.6;
+        divShield.style.backgroundColor = "#ccf";
+        divShield.style.width = __$("content").offsetWidth + "px";
+        divShield.style.height = __$("content").offsetHeight + "px"; 
+        divShield.style.display = "none";
+        
+        __$("content").appendChild(divShield);
+    }
+    
+    __$("divShield").style.zIndex = 105; 
+    __$("divShield").style.display = "block";
+    
+    if(!__$("afternoonQuestion")){
+        var question = document.createElement("div");
+        question.id = "afternoonQuestion";
+        question.style.position = "absolute";
+        question.style.left = "170px";
+        question.style.top = "170px";
+        question.style.width = "390px";
+        question.style.height = "420px";
+        question.style.backgroundColor = "#fff";
+        question.style.zIndex = 105;
+        question.className = "dialog  no-selection";
+    
+        __$("content").appendChild(question);
+    
+        var cancelImg = document.createElement("img");
+        cancelImg.setAttribute("src", "lib/images/cancel_flat_red.png");
+        cancelImg.setAttribute("alt", "X");
+        cancelImg.style.cssFloat = "right";
+        cancelImg.style.margin = "-65px";
+        cancelImg.style.marginTop = "-65px";
+        cancelImg.style.cursor = "pointer";
+        cancelImg.onclick = function(){
+            closePopUps();
+        }
+    
+        question.appendChild(cancelImg);
+    
+        var qtbl = document.createElement("div");
+        qtbl.className = "table";
+    
+        question.appendChild(qtbl);
+    
+        var qtblrow1 = document.createElement("div");
+        qtblrow1.className = "row";
+    
+        qtbl.appendChild(qtblrow1);
+    
+        var qtblcell1_1 = document.createElement("div");
+        qtblcell1_1.className = "cell";
+        qtblcell1_1.innerHTML = "Afternoon Dose Strength";
+    
+        qtblrow1.appendChild(qtblcell1_1);
+    
+        var qtblrow2 = document.createElement("div");
+        qtblrow2.className = "row";
+    
+        qtbl.appendChild(qtblrow2);
+    
+        var qtblcell2_1 = document.createElement("div");
+        qtblcell2_1.className = "cell";
+        qtblcell2_1.innerHTML = "<input type='text' id='editAfternoonDose' value='' class='inputBox' />";
+    
+        qtblrow2.appendChild(qtblcell2_1);
+    
+        var qtblrow3 = document.createElement("div");
+        qtblrow3.className = "row";
+    
+        qtbl.appendChild(qtblrow3);
+    
+        var qtblcell3_1 = document.createElement("div");
+        qtblcell3_1.className = "cell";
+        qtblcell3_1.id = "ulAfternoonDose";
+        // qtblcell3_1.style.paddingLeft = "60px";
+    
+        qtblrow3.appendChild(qtblcell3_1);
+    
+        showNumber("ulAfternoonDose", "editAfternoonDose", true);
+    
+        var qtblrow4 = document.createElement("div");
+        qtblrow4.className = "row";
+    
+        qtbl.appendChild(qtblrow4);
+    
+        var qtblcell4_1 = document.createElement("div");
+        qtblcell4_1.className = "cell";
+    
+        qtblrow4.appendChild(qtblcell4_1);
+    
+        var btnForward = document.createElement("button");
+        btnForward.className = "button gray";
+        btnForward.innerHTML = "<span>Forward</span>";
+        btnForward.style.cssFloat = "right";
+        btnForward.id = "btnForwardAfternoonDose";
+        btnForward.onclick = function(){
+            if(this.className == "button gray"){
+                showMessage("Please enter a value first", false, false)
+            } else {            
+                askEveningDose();
+            }
+        }
+    
+        qtblcell4_1.appendChild(btnForward);
+        var btnBack = document.createElement("button");
+        btnBack.className = "button";
+        btnBack.innerHTML = "<span>Back</span>";
+        btnBack.style.cssFloat = "right";
+        btnBack.onclick = function(){
+            __$("afternoonQuestion").style.display = "none";
+            __$("divShield").style.zIndex = 104;
+        }
+    
+        qtblcell4_1.appendChild(btnBack);
+    
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "button red";
+        btnCancel.innerHTML = "<span>Cancel</span>";
+        btnCancel.style.cssFloat = "left";
+        btnCancel.onclick = function(){
+            closePopUps();
+        }
+    
+        qtblcell4_1.appendChild(btnCancel);
+    
+    } else {
+        __$("afternoonQuestion").style.display = "block";
+        __$("editAfternoonDose").value = "";
+    }
+    
+    updateDosage("ulAfternoonDose");
+    
+    setTimeout("checkState(__$(\"btnForwardAfternoonDose\"), __$(\"editAfternoonDose\"))", timerTime);
+}
+
+function askEveningDose(){
+    if(!__$("divShield")){
+        var divShield = document.createElement("div");
+        divShield.id = "divShield";
+        divShield.style.position = "absolute";
+        divShield.style.left = "0px";
+        divShield.style.top = "0px";
+        divShield.style.opacity = 0.6;
+        divShield.style.backgroundColor = "#ccf";
+        divShield.style.width = __$("content").offsetWidth + "px";
+        divShield.style.height = __$("content").offsetHeight + "px"; 
+        divShield.style.display = "none";
+        
+        __$("content").appendChild(divShield);
+    }
+    
+    __$("divShield").style.zIndex = 106; 
+    __$("divShield").style.display = "block";
+    
+    if(!__$("eveningQuestion")){
+        var question = document.createElement("div");
+        question.id = "eveningQuestion";
+        question.style.position = "absolute";
+        question.style.left = "200px";
+        question.style.top = "200px";
+        question.style.width = "390px";
+        question.style.height = "420px";
+        question.style.backgroundColor = "#fff";
+        question.style.zIndex = 106;
+        question.className = "dialog  no-selection";
+    
+        __$("content").appendChild(question);
+    
+        var cancelImg = document.createElement("img");
+        cancelImg.setAttribute("src", "lib/images/cancel_flat_red.png");
+        cancelImg.setAttribute("alt", "X");
+        cancelImg.style.cssFloat = "right";
+        cancelImg.style.margin = "-65px";
+        cancelImg.style.marginTop = "-65px";
+        cancelImg.style.cursor = "pointer";
+        cancelImg.onclick = function(){
+            closePopUps();
+        }
+    
+        question.appendChild(cancelImg);
+    
+        var qtbl = document.createElement("div");
+        qtbl.className = "table";
+    
+        question.appendChild(qtbl);
+    
+        var qtblrow1 = document.createElement("div");
+        qtblrow1.className = "row";
+    
+        qtbl.appendChild(qtblrow1);
+    
+        var qtblcell1_1 = document.createElement("div");
+        qtblcell1_1.className = "cell";
+        qtblcell1_1.innerHTML = "Evening Dose Strength";
+    
+        qtblrow1.appendChild(qtblcell1_1);
+    
+        var qtblrow2 = document.createElement("div");
+        qtblrow2.className = "row";
+    
+        qtbl.appendChild(qtblrow2);
+    
+        var qtblcell2_1 = document.createElement("div");
+        qtblcell2_1.className = "cell";
+        qtblcell2_1.innerHTML = "<input type='text' id='editEveningDose' value='' class='inputBox' />";
+    
+        qtblrow2.appendChild(qtblcell2_1);
+    
+        var qtblrow3 = document.createElement("div");
+        qtblrow3.className = "row";
+    
+        qtbl.appendChild(qtblrow3);
+    
+        var qtblcell3_1 = document.createElement("div");
+        qtblcell3_1.className = "cell";
+        qtblcell3_1.id = "ulEveningDose";
+        // qtblcell3_1.style.paddingLeft = "60px";
+    
+        qtblrow3.appendChild(qtblcell3_1);
+    
+        showNumber("ulEveningDose", "editEveningDose", true);
+    
+        var qtblrow4 = document.createElement("div");
+        qtblrow4.className = "row";
+    
+        qtbl.appendChild(qtblrow4);
+    
+        var qtblcell4_1 = document.createElement("div");
+        qtblcell4_1.className = "cell";
+    
+        qtblrow4.appendChild(qtblcell4_1);
+    
+        var btnForward = document.createElement("button");
+        btnForward.className = "button gray";
+        btnForward.innerHTML = "<span>Forward</span>";
+        btnForward.style.cssFloat = "right";
+        btnForward.id = "btnForwardEveningDose";
+        btnForward.onclick = function(){
+            if(this.className == "button gray"){
+                showMessage("Please enter a value first", false, false)
+            } else {            
+                askNightDose();
+            }
+        }
+    
+        qtblcell4_1.appendChild(btnForward);
+        var btnBack = document.createElement("button");
+        btnBack.className = "button";
+        btnBack.innerHTML = "<span>Back</span>";
+        btnBack.style.cssFloat = "right";
+        btnBack.onclick = function(){
+            __$("eveningQuestion").style.display = "none";
+            __$("divShield").style.zIndex = 105;
+        }
+    
+        qtblcell4_1.appendChild(btnBack);
+    
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "button red";
+        btnCancel.innerHTML = "<span>Cancel</span>";
+        btnCancel.style.cssFloat = "left";
+        btnCancel.onclick = function(){
+            closePopUps();
+        }
+    
+        qtblcell4_1.appendChild(btnCancel);
+    
+    } else {
+        __$("eveningQuestion").style.display = "block";
+        __$("editEveningDose").value = "";
+    }
+    
+    updateDosage("ulEveningDose");
+    
+    setTimeout("checkState(__$(\"btnForwardEveningDose\"), __$(\"editEveningDose\"))", timerTime);
+}
+
+function askNightDose(){
+    if(!__$("divShield")){
+        var divShield = document.createElement("div");
+        divShield.id = "divShield";
+        divShield.style.position = "absolute";
+        divShield.style.left = "0px";
+        divShield.style.top = "0px";
+        divShield.style.opacity = 0.6;
+        divShield.style.backgroundColor = "#ccf";
+        divShield.style.width = __$("content").offsetWidth + "px";
+        divShield.style.height = __$("content").offsetHeight + "px"; 
+        divShield.style.display = "none";
+        
+        __$("content").appendChild(divShield);
+    }
+    
+    __$("divShield").style.zIndex = 107; 
+    __$("divShield").style.display = "block";
+    
+    if(!__$("nightQuestion")){
+        var question = document.createElement("div");
+        question.id = "nightQuestion";
+        question.style.position = "absolute";
+        question.style.left = "230px";
+        question.style.top = "230px";
+        question.style.width = "390px";
+        question.style.height = "420px";
+        question.style.backgroundColor = "#fff";
+        question.style.zIndex = 107;
+        question.className = "dialog  no-selection";
+    
+        __$("content").appendChild(question);
+    
+        var cancelImg = document.createElement("img");
+        cancelImg.setAttribute("src", "lib/images/cancel_flat_red.png");
+        cancelImg.setAttribute("alt", "X");
+        cancelImg.style.cssFloat = "right";
+        cancelImg.style.margin = "-65px";
+        cancelImg.style.marginTop = "-65px";
+        cancelImg.style.cursor = "pointer";
+        cancelImg.onclick = function(){
+            closePopUps();
+        }
+    
+        question.appendChild(cancelImg);
+    
+        var qtbl = document.createElement("div");
+        qtbl.className = "table";
+    
+        question.appendChild(qtbl);
+    
+        var qtblrow1 = document.createElement("div");
+        qtblrow1.className = "row";
+    
+        qtbl.appendChild(qtblrow1);
+    
+        var qtblcell1_1 = document.createElement("div");
+        qtblcell1_1.className = "cell";
+        qtblcell1_1.innerHTML = "Night Dose Strength";
+    
+        qtblrow1.appendChild(qtblcell1_1);
+    
+        var qtblrow2 = document.createElement("div");
+        qtblrow2.className = "row";
+    
+        qtbl.appendChild(qtblrow2);
+    
+        var qtblcell2_1 = document.createElement("div");
+        qtblcell2_1.className = "cell";
+        qtblcell2_1.innerHTML = "<input type='text' id='editNightDose' value='' class='inputBox' />";
+    
+        qtblrow2.appendChild(qtblcell2_1);
+    
+        var qtblrow3 = document.createElement("div");
+        qtblrow3.className = "row";
+    
+        qtbl.appendChild(qtblrow3);
+    
+        var qtblcell3_1 = document.createElement("div");
+        qtblcell3_1.className = "cell";
+        qtblcell3_1.id = "ulNightDose";
+        // qtblcell3_1.style.paddingLeft = "60px";
+    
+        qtblrow3.appendChild(qtblcell3_1);
+    
+        showNumber("ulNightDose", "editNightDose", true);
+    
+        var qtblrow4 = document.createElement("div");
+        qtblrow4.className = "row";
+    
+        qtbl.appendChild(qtblrow4);
+    
+        var qtblcell4_1 = document.createElement("div");
+        qtblcell4_1.className = "cell";
+    
+        qtblrow4.appendChild(qtblcell4_1);
+    
+        var btnForward = document.createElement("button");
+        btnForward.className = "button gray";
+        btnForward.innerHTML = "<span>Forward</span>";
+        btnForward.style.cssFloat = "right";
+        btnForward.id = "btnForwardNightDose";
+        btnForward.onclick = function(){
+            if(this.className == "button gray"){
+                showMessage("Please enter a value first", false, false)
+            } else {            
+                askDuration();
+            }
+        }
+    
+        qtblcell4_1.appendChild(btnForward);
+        var btnBack = document.createElement("button");
+        btnBack.className = "button";
+        btnBack.innerHTML = "<span>Back</span>";
+        btnBack.style.cssFloat = "right";
+        btnBack.onclick = function(){
+            __$("nightQuestion").style.display = "none";
+            __$("divShield").style.zIndex = 106;
+        }
+    
+        qtblcell4_1.appendChild(btnBack);
+    
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "button red";
+        btnCancel.innerHTML = "<span>Cancel</span>";
+        btnCancel.style.cssFloat = "left";
+        btnCancel.onclick = function(){
+            closePopUps();
+        }
+    
+        qtblcell4_1.appendChild(btnCancel);
+    
+    } else {
+        __$("nightQuestion").style.display = "block";
+        __$("editNightDose").value = "";
+    }
+    
+    updateDosage("ulNightDose");
+    
+    setTimeout("checkState(__$(\"btnForwardNightDose\"), __$(\"editNightDose\"))", timerTime);
+}
+
+function askDoseStrength(){
+    if(!__$("divShield")){
+        var divShield = document.createElement("div");
+        divShield.id = "divShield";
+        divShield.style.position = "absolute";
+        divShield.style.left = "0px";
+        divShield.style.top = "0px";
+        divShield.style.opacity = 0.6;
+        divShield.style.backgroundColor = "#ccf";
+        divShield.style.width = __$("content").offsetWidth + "px";
+        divShield.style.height = __$("content").offsetHeight + "px"; 
+        divShield.style.display = "none";
+        
+        __$("content").appendChild(divShield);
+    }
+    
+    __$("divShield").style.zIndex = 103; 
+    __$("divShield").style.display = "block";
+    
+    if(!__$("doseStrengthQuestion")){
+        var question = document.createElement("div");
+        question.id = "doseStrengthQuestion";
+        question.style.position = "absolute";
+        question.style.left = "140px";
+        question.style.top = "140px";
+        question.style.width = "390px";
+        question.style.height = "420px";
+        question.style.backgroundColor = "#fff";
+        question.style.zIndex = 103;
+        question.className = "dialog  no-selection";
+    
+        __$("content").appendChild(question);
+    
+        var cancelImg = document.createElement("img");
+        cancelImg.setAttribute("src", "lib/images/cancel_flat_red.png");
+        cancelImg.setAttribute("alt", "X");
+        cancelImg.style.cssFloat = "right";
+        cancelImg.style.margin = "-65px";
+        cancelImg.style.marginTop = "-65px";
+        cancelImg.style.cursor = "pointer";
+        cancelImg.onclick = function(){
+            closePopUps();
+        }
+    
+        question.appendChild(cancelImg);
+    
+        var qtbl = document.createElement("div");
+        qtbl.className = "table";
+    
+        question.appendChild(qtbl);
+    
+        var qtblrow1 = document.createElement("div");
+        qtblrow1.className = "row";
+    
+        qtbl.appendChild(qtblrow1);
+    
+        var qtblcell1_1 = document.createElement("div");
+        qtblcell1_1.className = "cell";
+        qtblcell1_1.innerHTML = "Dose Strength" + (__$("editDosage").getAttribute("units").trim() != "" ? 
+            " in " + __$("editDosage").getAttribute("units") : "");
+        qtblcell1_1.id = "labelDose";
+    
+        qtblrow1.appendChild(qtblcell1_1);
+    
+        var qtblrow2 = document.createElement("div");
+        qtblrow2.className = "row";
+    
+        qtbl.appendChild(qtblrow2);
+    
+        var qtblcell2_1 = document.createElement("div");
+        qtblcell2_1.className = "cell";
+        qtblcell2_1.innerHTML = "<input type='text' id='editDoseStrength' value='' class='inputBox' />";
+    
+        qtblrow2.appendChild(qtblcell2_1);
+    
+        var qtblrow3 = document.createElement("div");
+        qtblrow3.className = "row";
+    
+        qtbl.appendChild(qtblrow3);
+    
+        var qtblcell3_1 = document.createElement("div");
+        qtblcell3_1.className = "cell";
+        qtblcell3_1.id = "ulDoseStrength";
+    
+        qtblrow3.appendChild(qtblcell3_1);
+    
+        showNumber("ulDoseStrength", "editDoseStrength", true);
+    
+        var qtblrow4 = document.createElement("div");
+        qtblrow4.className = "row";
+    
+        qtbl.appendChild(qtblrow4);
+    
+        var qtblcell4_1 = document.createElement("div");
+        qtblcell4_1.className = "cell";
+    
+        qtblrow4.appendChild(qtblcell4_1);
+    
+        var btnForward = document.createElement("button");
+        btnForward.className = "button gray";
+        btnForward.innerHTML = "<span>Forward</span>";
+        btnForward.style.cssFloat = "right";
+        btnForward.id = "btnForwardDoseStrength";
+        btnForward.onclick = function(){
+            if(this.className == "button gray"){
+                showMessage("Please enter a value first", false, false)
+            } else {            
+                askFrequency();
+            }
+        }
+    
+        qtblcell4_1.appendChild(btnForward);
+        var btnBack = document.createElement("button");
+        btnBack.className = "button";
+        btnBack.innerHTML = "<span>Back</span>";
+        btnBack.style.cssFloat = "right";
+        btnBack.onclick = function(){
+            __$("doseStrengthQuestion").style.display = "none";
+            __$("divShield").style.zIndex = 102;
+        }
+    
+        qtblcell4_1.appendChild(btnBack);
+    
+        var btnCancel = document.createElement("button");
+        btnCancel.className = "button red";
+        btnCancel.innerHTML = "<span>Cancel</span>";
+        btnCancel.style.cssFloat = "left";
+        btnCancel.onclick = function(){
+            closePopUps();
+        }
+    
+        qtblcell4_1.appendChild(btnCancel);
+    
+    } else {
+        __$("doseStrengthQuestion").style.display = "block";
+        __$("editDoseStrength").value = "";
+        __$("labelDose").innerHTML = "Dose Strength" + (__$("editDosage").getAttribute("units").trim() != "" ? 
+            " in " + __$("editDosage").getAttribute("units") : "");
+    }
+    
+    updateDosage("ulDoseStrength");
+    
+    setTimeout("checkState(__$(\"btnForwardDoseStrength\"), __$(\"editDoseStrength\"))", timerTime);
+}
+
+function askFrequency(){
+    if(!__$("divShield")){
+        var divShield = document.createElement("div");
+        divShield.id = "divShield";
+        divShield.style.position = "absolute";
+        divShield.style.left = "0px";
+        divShield.style.top = "0px";
+        divShield.style.opacity = 0.6;
+        divShield.style.backgroundColor = "#ccf";
+        divShield.style.width = __$("content").offsetWidth + "px";
+        divShield.style.height = __$("content").offsetHeight + "px"; 
+        divShield.style.display = "none";
+        
+        __$("content").appendChild(divShield);
+    }
+    
+    __$("divShield").style.zIndex = 108; 
+    __$("divShield").style.display = "block";
+    
     if(!__$("frequencyQuestion")){
         var question = document.createElement("div");
         question.id = "frequencyQuestion";
         question.style.position = "absolute";
-        question.style.left = "200px";
-        question.style.top = "130px";
+        question.style.left = "170px";
+        question.style.top = "170px";
         question.style.width = "600px";
         question.style.height = "400px";
         question.style.backgroundColor = "#fff";
-        question.style.zIndex = 102;
+        question.style.zIndex = 108;
+        question.style.display = "block";
         question.className = "dialog  no-selection";
     
         __$("content").appendChild(question);
@@ -593,12 +1466,7 @@ function askFrequency(){
             if(this.className == "button gray"){
                 showMessage("Please select a value first", false, false)
             } else {
-                if(__$("btnForwardFreq").innerHTML == "<span>Done</span>"){
-                    __$("editFrequency").value = "OD";
-                    processDrug(current_concept_id);
-                } else {
-                    askDuration();
-                }                
+                askDuration();                             
             }
         }
     
@@ -609,7 +1477,7 @@ function askFrequency(){
         btnBack.style.cssFloat = "right";
         btnBack.onclick = function(){
             __$("frequencyQuestion").style.display = "none";
-            __$("divShield").style.zIndex = 101;
+            __$("divShield").style.zIndex = 103;
         }
     
         qtblcell4_1.appendChild(btnBack);
@@ -649,20 +1517,20 @@ function askDuration(){
         __$("content").appendChild(divShield);
     }
     
-    __$("divShield").style.zIndex = 103; 
+    __$("divShield").style.zIndex = 109; 
     __$("divShield").style.display = "block";
     
     if(!__$("durationQuestion")){
         var question = document.createElement("div");
         question.id = "durationQuestion";
         question.style.position = "absolute";
-        question.style.left = "320px";
-        question.style.top = "130px";
+        question.style.left = "200px";
+        question.style.top = "200px";
         question.style.width = "390px";
         question.style.height = "420px";
         question.style.backgroundColor = "#fff";
         //question.style.border = "1px solid #000";
-        question.style.zIndex = 103;
+        question.style.zIndex = 109;
         question.className = "dialog  no-selection";
     
         __$("content").appendChild(question);
@@ -715,7 +1583,7 @@ function askDuration(){
         var qtblcell3_1 = document.createElement("div");
         qtblcell3_1.className = "cell";
         qtblcell3_1.id = "ulDuration";
-        qtblcell3_1.style.paddingLeft = "60px";
+        // qtblcell3_1.style.paddingLeft = "60px";
     
         qtblrow3.appendChild(qtblcell3_1);
     
@@ -751,7 +1619,7 @@ function askDuration(){
         btnBack.style.cssFloat = "right";
         btnBack.onclick = function(){
             __$("durationQuestion").style.display = "none";
-            __$("divShield").style.zIndex = 102;
+            __$("divShield").style.zIndex = 107;
         }
     
         qtblcell4_1.appendChild(btnBack);
@@ -769,6 +1637,19 @@ function askDuration(){
     } else {
         __$("durationQuestion").style.display = "block";
         __$("editDuration").value = "";
+    }
+    
+    if(__$("frequencyQuestion")){
+        if(__$("frequencyQuestion").style.display == "block"){
+            __$("durationQuestion").style.left = "200px";
+            __$("durationQuestion").style.top = "200px";
+        } else {
+            __$("durationQuestion").style.left = "260px";
+            __$("durationQuestion").style.top = "200px";        
+        }
+    } else {
+        __$("durationQuestion").style.left = "260px";
+        __$("durationQuestion").style.top = "200px";        
     }
     
     setTimeout("checkState(__$(\"btnForwardDuration\"), __$(\"editDuration\"))", timerTime);
@@ -790,20 +1671,20 @@ function askPRN(){
         __$("content").appendChild(divShield);
     }
     
-    __$("divShield").style.zIndex = 104; 
+    __$("divShield").style.zIndex = 110; 
     __$("divShield").style.display = "block";
     
     if(!__$("prnQuestion")){
         var question = document.createElement("div");
         question.id = "prnQuestion";
         question.style.position = "absolute";
-        question.style.left = "240px";
-        question.style.top = "170px";
+        question.style.left = "230px";
+        question.style.top = "230px";
         question.style.width = "600px";
         question.style.height = "400px";
         question.style.backgroundColor = "#fff";
         //question.style.border = "1px solid #000";
-        question.style.zIndex = 104;
+        question.style.zIndex = 110;
         question.className = "dialog  no-selection";
     
         __$("content").appendChild(question);
@@ -833,7 +1714,7 @@ function askPRN(){
     
         var qtblcell1_1 = document.createElement("div");
         qtblcell1_1.className = "cell";
-        qtblcell1_1.innerHTML = "Take as required";
+        qtblcell1_1.innerHTML = "Take as required (PRN)";
     
         qtblrow1.appendChild(qtblcell1_1);
     
@@ -897,7 +1778,7 @@ function askPRN(){
         btnBack.style.cssFloat = "right";
         btnBack.onclick = function(){
             __$("prnQuestion").style.display = "none";
-            __$("divShield").style.zIndex = 103;
+            __$("divShield").style.zIndex = 109;
         }
     
         qtblcell4_1.appendChild(btnBack);
@@ -916,6 +1797,19 @@ function askPRN(){
         highlightSelected(__$("ulPRN"));
         __$("prnQuestion").style.display = "block";
         __$("editPRN").value = "";
+    }
+    
+    if(__$("frequencyQuestion")){
+        if(__$("frequencyQuestion").style.display == "block"){
+            __$("prnQuestion").style.left = "230px";
+            __$("prnQuestion").style.top = "230px";
+        } else {
+            __$("prnQuestion").style.left = "290px";
+            __$("prnQuestion").style.top = "170px";        
+        }
+    } else {
+        __$("prnQuestion").style.left = "290px";
+        __$("prnQuestion").style.top = "170px";        
     }
     
     setTimeout("checkState(__$(\"btnForwardPRN\"), __$(\"editPRN\"))", timerTime);
@@ -938,6 +1832,30 @@ function closePopUps(){
         __$("prnQuestion").style.display = "none";
     }
     
+    if(__$("prescriptionQuestion")){
+        __$("prescriptionQuestion").style.display = "none";
+    }
+    
+    if(__$("doseStrengthQuestion")){
+        __$("doseStrengthQuestion").style.display = "none";
+    }
+    
+    if(__$("morningQuestion")){
+        __$("morningQuestion").style.display = "none";
+    }
+    
+    if(__$("afternoonQuestion")){
+        __$("afternoonQuestion").style.display = "none";
+    }
+    
+    if(__$("eveningQuestion")){
+        __$("eveningQuestion").style.display = "none";
+    }
+    
+    if(__$("nightQuestion")){
+        __$("nightQuestion").style.display = "none";
+    }
+    
     if(__$("divShield")){
         __$("divShield").style.display = "none";
     }
@@ -956,23 +1874,35 @@ function processDrug(concept_id){
     
     var drug = "";
     
-    /*
-    for(var i = 0; i < generics.length; i++){
-        if(generics[i][1] == concept_id){
-            drug = "Drug: <i>" + generics[i][0] + "</i>";
-            break;
-        }
-    }
-    */
-   
     var duration = (__$("editDuration") ? __$("editDuration").value : "1");
     var prn = (__$("editPRN") ? __$("editPRN").value : "No");
+    var type = (__$("editPrescriptionType") ? (__$("editPrescriptionType").value == 
+        "Stat Dose" ? "Standard" : __$("editPrescriptionType").value) : "Standard");
+    var dose_strength = (__$("editDoseStrength") ? __$("editDoseStrength").value : 
+        __$("editDosage").getAttribute("strength"));
+    var frequency = (__$("editFrequency") ? __$("editFrequency").value : "1");
+    var morning = (__$("editMorningDose") ? __$("editMorningDose").value : null);
+    var afternoon = (__$("editAfternoonDose") ? __$("editAfternoonDose").value : null);
+    var evening = (__$("editEveningDose") ? __$("editEveningDose").value : null);
+    var night = (__$("editNightDose") ? __$("editNightDose").value : null);
     
-    drug += "Drug: <i>" + __$("editDosage").value + "</i>; Freq.: <i>" + __$("editFrequency").value + 
+    drug += "Drug: <i>" + __$("editDosage").value + "</i>; Type: <i>" + type + 
     "</i>; Dur.: <i>" + duration + "</i>; PRN: <i>" + prn + "</i>";
      
     li.id = "li" + concept_id;
     
+    li.setAttribute("generic", __$("inputTxt").value.trim());
+    li.setAttribute("formulation", __$("editDosage").value.trim());
+    li.setAttribute("type_of_prescription", type.toLowerCase());
+    li.setAttribute("dose_strength", dose_strength);
+    li.setAttribute("frequency", frequency);
+    li.setAttribute("morning_dose", morning);
+    li.setAttribute("afternoon_dose", afternoon);
+    li.setAttribute("evening_dose", evening);
+    li.setAttribute("night_dose", night);
+    li.setAttribute("duration", duration);
+    li.setAttribute("prn", prn);
+        
     li.setAttribute("concept_id", concept_id);
     
     __$("ulDoses").appendChild(li);
@@ -1019,6 +1949,15 @@ function processDrug(concept_id){
     closePopUps();
 }
 
+function updateDosage(global_control){
+    
+    if(__$("defaultButton" + global_control) && __$("editDosage")){
+        __$("defaultButton" + global_control).innerHTML = "<span>" + 
+        __$("editDosage").getAttribute("strength") + "</span>";
+    }
+    
+}
+
 function clearTextInput(){
     __$("inputTxt").value = "";
     searchDrug();
@@ -1032,7 +1971,36 @@ function removeDrug(){
 
 // Remove the created interface and create corresponding controls ready for storage
 function removeGenerics(){    
-    for(var i in __$("ulDoses").children){
+    /*     
+    li.setAttribute("generic", __$("inputTxt").value.trim());
+    li.setAttribute("formulation", __$("editDosage").value.trim());
+    li.setAttribute("type_of_prescription", type.toLowerCase());
+    li.setAttribute("dose_strength", dose_strength);
+    li.setAttribute("frequency", frequency);
+    li.setAttribute("morning_dose", morning);
+    li.setAttribute("afternoon_dose", afternoon);
+    li.setAttribute("evening_dose", evening);
+    li.setAttribute("night_dose", night);
+    li.setAttribute("duration", duration);
+    li.setAttribute("prn", prn);        
+     */
+    
+    var fields = ["generic", "formulation", "type_of_prescription", "dose_strength", 
+    "frequency", "morning_dose", "afternoon_dose", "evening_dose", "night_dose",
+    "duration", "prn"];
+    
+    for(var i in __$("ulDoses").children){        
+        for(var j = 0; j < fields.length; j++){            
+            var field = document.createElement("input");
+            field.type = "hidden";
+            field.name = fields[j];
+            field.value = __$("ulDoses").children[i].getAttribute(fields[j]);
+
+            document.forms[0].appendChild(field);
+        }
+    }
+    
+/*for(var i in __$("ulDoses").children){        
         var formulation = 
         __$("ulDoses").children[i].children[0].children[0]
         .children[0].innerHTML.replace(/\<i\>/gi, "").replace(/\<\/i\>/gi, "").split(";")
@@ -1093,13 +2061,14 @@ function removeGenerics(){
         prnFld.name = "prescriptions[][prn]";
         prnFld.value = prn;
 
-        document.forms[0].appendChild(prnFld);        
-    }
+        document.forms[0].appendChild(prnFld);   
+        
+    }*/
 }
 
 /*
- * We create a custom keyboard for the interface to fit on the available space
- */
+     * We create a custom keyboard for the interface to fit on the available space
+     */
 function showFixedKeyboard(ctrl, global_control){
     var full_keyboard = "full";
     
@@ -1264,7 +2233,7 @@ function showFixedKeyboard(ctrl, global_control){
 
 }
 
-function showNumber(id, global_control){
+function showNumber(id, global_control, showDefault){
     
     var row1 = ["1","2","3"];
     var row2 = ["4","5","6"];
@@ -1279,6 +2248,37 @@ function showNumber(id, global_control){
 
     var tr1 = document.createElement("tr");
 
+    var td = document.createElement("td");
+    td.rowSpan = "4";
+    td.style.minWidth = "60px";
+    td.style.textAlign = "center";
+    td.style.verticalAlign = "top";
+    
+    tr1.appendChild(td);
+
+    if(typeof(showDefault) != "undefined"){
+        if(showDefault == true){
+            td.innerHTML = "<span style='font-size: 1.1em; font-style: italic;'>Default</span>";
+            
+            var defaultButton = document.createElement("button");
+            defaultButton.id = "defaultButton" + id;
+            defaultButton.className = "blue";
+            defaultButton.innerHTML = "<span>0</span>";
+            defaultButton.style.fontWeight = "normal";
+            defaultButton.onclick = function(){
+                var value = this.innerHTML.replace(/\<span\>/i, "").replace(/\<\/span\>/i, "");
+        
+                if(value != "Default"){
+                    __$(global_control).value = value;
+                } else {
+                    __$(global_control).value = 0; 
+                }
+            }
+        
+            td.appendChild(defaultButton);
+        }
+    } 
+    
     for(var i = 0; i < row1.length; i++){
         var td1 = document.createElement("td");
         td1.align = "center";
