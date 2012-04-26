@@ -1,9 +1,28 @@
 <html>
 <head>
+<title>Patient Registration Report Selection</title>
 <%= javascript_include_tag "prototype" %>
 <%= stylesheet_link_tag "cohort" %>
 <script>
   var tt_cancel_destination = "/"  
+  
+  var tt_cancel_destination = "/"  
+
+  function showReport() {
+    cohort = document.getElementsByClassName('scrollTableContainer')[0]
+    survival_analysis = document.getElementsByClassName('survival-analysis')[0]
+    switch_button = $('switch_view')
+    if (switch_button.innerHTML.sub('<span>','').sub('</span>','') == 'Survival Analysis'){
+      cohort.style.display = 'none'
+      switch_button.innerHTML = "<span>Cohort</span>"
+      survival_analysis.style.display = 'inline'
+    } else {
+      cohort.style.display = 'inline'
+      switch_button.innerHTML = "<span>Survival Analysis</span>"
+      survival_analysis.style.display = 'none'
+    } 
+     
+  }
 </script>
 <style>
   table {
@@ -61,7 +80,7 @@
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
 			<td style="text-align:left;border-width:1px 0px 0px 1px">Dental</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Dental'] -%></td>
+			<td style="border-width:1px 0px 0px 1px"><%= link_to @services['SERVICES']['Dental'], "/cohort_tool/list_patients_details?field=dental&report_type=#{@eport_type}" -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
