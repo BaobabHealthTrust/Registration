@@ -1,0 +1,92 @@
+body{
+  font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
+  -moz-user-select:none;
+}
+
+.main-table table {
+  font-size: 12px;
+}
+
+/*td { border-top:1px dotted silver }*/
+
+tr.header{
+  background-color: lightgray;
+  font-weight: bold;
+  vertical-align: bottom;
+}
+
+table{
+  width: 100%;
+  border-bottom:2px solid black;
+}
+
+.valueCol {
+  float: right;
+  padding-right:20;
+}
+
+.color_white{
+  padding-right:10px;
+  vertical-align: top;
+}
+
+.color_blue{
+  background-color:AliceBlue;
+  padding-right:10px;
+  vertical-align: top;
+}
+
+.patient_link{
+  padding:10px;
+  width:100%;
+}
+
+.caldata {
+  text-align:right; 
+  text-align:right;
+}
+
+#keypad{
+ background-color:#FFFF99;
+ position:absolute;
+ top:10px;
+ width:330px;
+ right:500px;
+ height:440px;
+ display:none;
+ border-bottom-color-value:lightblue;
+ border-top-color-value:lightblue;
+ border-right-color-value:lightblue;
+ border-left-color-value:lightblue;
+ border-style:solid;
+}
+
+#press{
+  font-size:75px;
+  height:80px;
+  position:absolute;
+  right:13px;
+  top:35px;
+  width:300px;
+}
+
+/*span {
+  left:0;
+  position:absolute;
+  right:13px;
+  text-align:left;
+  top:120px;
+  width:312px;
+} */
+
+.keypadbutton{
+  /*width:55px;*/
+}
+
+.inner-data {
+  border-style: none;
+}
+
+#btnNext {
+ /*width: 350px;*/
+}

@@ -408,10 +408,15 @@ class CohortToolController < ApplicationController
     @selSelect = params[:selSelect] rescue nil
     @selYear = params[:selYear] rescue nil
     @selMonth = params[:selMonth] rescue nil
+    @day = 			params[:day] rescue nil
     @selQtr = "#{par      	  raise patient.to_yamlams[:selQtr].gsub(/&/, "_")}" rescue nil
 		@location =  Location.current_health_center.name rescue ''
 
 		case params[:selSelect]
+		  when "day"
+	      @start_date = params[:day]
+	      @end_date = params[:day]
+
 		  when "month"
 		    @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
 		    @end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
@@ -433,6 +438,8 @@ class CohortToolController < ApplicationController
     
 		if @selSelect.include?('month')
 			@report_type =	@start_date.to_date.strftime("%B") + "  " + @selYear
+		elsif @selSelect.include?('day')
+			@report_type = @day.to_date.strftime("%d-%B-%Y") + " report "
 		else
 			@report_type = @start_date.to_date.strftime("%Y-%B-%d") + " to " + @end_date.to_date.strftime("%Y-%B-%d")
 		end

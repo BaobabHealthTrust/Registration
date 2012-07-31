@@ -39,6 +39,7 @@
     text-align:center;
     border-style:solid;
     border-width:1px;
+    font-size:22px;
   }
 
   .row_break td {
@@ -58,10 +59,8 @@
 </head>
 
 <body>
-<h1 align='center'>OPD Rigistry Total Attendances - <%= @location %></h1>
-<h1 align='center'><%= @report_type %></h1>
-<br />
-
+	<h1 align='center'>OPD Registry Total Attendances - <%= @location %></h1>
+	<h1 align='center'><%= @report_type %></h1>
 <div class='scrollTableContainer'>
 	<table class='dataTable' cellspacing='0'>
 		<thead>
@@ -77,60 +76,60 @@
 			<td style="text-align:left;">Casualty</td>
 			<td><%= @services['SERVICES']['Casualty'] -%></td>
 		</tr>
-		<tr class = 'row_break'>
+		<tr >
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Dental</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Dental'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Dental</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Dental'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Eye</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Eye'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Eye</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Eye'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Family Planing</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Family Planing'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Family Planing</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Family Planing'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Medical</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Medical'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Medical</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Medical'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">OB/Gyn</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['OB/Gyn'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">OB/Gyn</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['OB/Gyn'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Orthopedics</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Orthopedics'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Orthopedics</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Orthopedics'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Pediatrics</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Pediatrics'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Pediatrics</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Pediatrics'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Skin</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Skin'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Skin</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Skin'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">STI Clinic</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['STI Clinic'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">STI Clinic</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['STI Clinic'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Surgical</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Surgical'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Surgical</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Surgical'] -%></td>
 		</tr>
 		<tr class = 'row_break'>
 			<td style ="border-width:0px"></td>
-			<td style="text-align:left;border-width:1px 0px 0px 1px">Other</td>
-			<td style="border-width:1px 0px 0px 1px"><%= @services['SERVICES']['Other'] -%></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px">Other</td>
+			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Other'] -%></td>
 		</tr>
 		</tbody>
 	</table>

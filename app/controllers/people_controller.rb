@@ -194,7 +194,7 @@ class PeopleController < ApplicationController
     render :text => traditional_authorities.join('') + "<li value='Other'>Other</li>" and return
   end
 
-    # Regions containing the string given in params[:value]
+  # Regions containing the string given in params[:value]
   def region_of_origin
     region_conditions = ["name LIKE (?)", "#{params[:value]}%"]
 

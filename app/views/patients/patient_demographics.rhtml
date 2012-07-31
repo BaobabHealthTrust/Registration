@@ -71,10 +71,12 @@
 						<td class='title'><a href="/patients/mastercard_modify?field=city_village&id=<%=@patient.patient_id%>"> Current Location/Village</a></td>
 						<td class='data'> <%=@patient_bean.current_residence%></td>
 					</tr>
+<!--
 					<tr>
 						<td class='title'><a href="/patients/mastercard_modify?field=location&id=<%=@patient.patient_id%>">Landmark</a></td>
 						<td class='data'><%= @patient_bean.landmark %></td>
 					</tr>
+-->
 					<tr> 
 						<td class='title'><a href="/patients/mastercard_modify?field=home_district&id=<%=@patient.patient_id%>"> Home District</a> </td> 
 						<td class='data'> <%= @patient_bean.home_district %></td>
@@ -83,6 +85,7 @@
 						<td class='title'><a href="/patients/mastercard_modify?field=ta&id=<%=@patient.patient_id%>">Ancenstral Traditional Authority</a></td> 
 						<td class='data'><%= @patient_bean.traditional_authority %></td>
 					</tr>
+<!--
 					<tr> 
 						<td class='title'> <a href="/patients/mastercard_modify?field=cell_phone_number&id=<%= @patient.patient_id %>">Primary Phone</a></td> 
 						<td class='data'><%= @patient_bean.cell_phone_number %></td>
@@ -93,6 +96,7 @@
 						<a href= "/patients/mastercard_modify?field=occupation&id=<%= @patient.patient_id %>">Occupation</a></td>
 						<td class='data'><%=@patient_bean.occupation%><br/> </td>
 					</tr>
+-->
 				</table>
 			</div>
 		</div>

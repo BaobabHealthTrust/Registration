@@ -504,11 +504,12 @@
 
 
   function showRecordedAppointments(setdate) {                                  
-    msgBox = $('information');                                                  
+    var msgBox = $('information');                                                  
     msgBox.style.display = 'block';                                             
+    var year = parseFloat(document.getElementById("app_date").innerHTML);         
+    msgBox.innerHTML = "<span id ='app_date'>" + year + "</span>&nbsp;Querying database - please wait ......";
     new Ajax.Request("/patients/number_of_booked_patients?date=" + setdate ,{method:'get',onSuccess: function(transport){
       count = JSON.parse(transport.responseText) || "";                         
-      year = parseFloat(document.getElementById("app_date").innerHTML);         
       if (count) {                                                              
         msgBox.innerHTML = "<span id ='app_date'>" + year + "</span>&nbsp;Total number of booked patients on this day:&nbsp;" + count;
       }else{                                                                    
