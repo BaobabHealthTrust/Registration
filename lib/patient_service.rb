@@ -113,6 +113,49 @@ module PatientService
     Encounter.find_by_sql("SELECT * FROM encounter ORDER BY encounter_datetime LIMIT 1").first
   end
   
+  def self.services
+  	services_concept_id = ConceptName.find_by_name('SERVICES').concept_id
+    
+    @start_date = Date.today.to_date
+    @end_date = Date.today.to_date
+		
+    registration_services_hash = {} ; services = []
+    registration_services_hash['SERVICES'] = {'Casualty' => 0,'Dental' => 0,'Eye' => 0,'Family Planing' => 0,'Medical' => 0,'OB/Gyn' => 0,'Orthopedics' => 0,'Other' => 0,'Pediatrics' => 0,'Skin' => 0,'STI Clinic' => 0,'Surgical' => 0} 
+
+    
+    services = Observation.find(:all, :conditions => ["DATE(obs_datetime) = ? AND concept_id = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc")#.uniq.reverse.first(5) rescue []
+    
+    ( services || [] ).each do | service |
+				  if service.value_text.capitalize == 'Casualty'
+				    registration_services_hash['SERVICES']['Casualty'] += 1
+				  elsif service.value_text.capitalize == 'Eye'
+				    registration_services_hash['SERVICES']['Eye'] += 1
+				  elsif service.value_text.capitalize == 'Family Planing'
+				    registration_services_hash['SERVICES']['Family Planing'] += 1
+				  elsif service.value_text.capitalize == 'Dental'
+				    registration_services_hash['SERVICES']['Dental'] += 1
+				  elsif service.value_text.capitalize == 'Medical'
+				    registration_services_hash['SERVICES']['Medical'] += 1
+				  elsif service.value_text.capitalize == 'OB/Gyn'
+				    registration_services_hash['SERVICES']['OB/Gyn'] += 1
+				  elsif service.value_text.capitalize == 'Orthopedics'
+				    registration_services_hash['SERVICES']['Orthopedics'] += 1
+				  elsif service.value_text.capitalize == 'Pediatrics'
+				    registration_services_hash['SERVICES']['Pediatrics'] += 1
+				  elsif service.value_text.capitalize == ' Skin '
+				    registration_services_hash['SERVICES']['Skin'] += 1
+				  elsif service.value_text.capitalize == 'STI Clinic'
+				    registration_services_hash['SERVICES']['STI Clinic'] += 1
+				  elsif service.value_text.capitalize == 'Surgical'
+				    registration_services_hash['SERVICES']['Surgical'] += 1
+				  else
+						registration_services_hash['SERVICES']['Other'] += 1
+				  end
+				end
+
+  	return services
+  end
+  
   def self.create_remote_person(received_params)
     #raise known_demographics.to_yaml
 

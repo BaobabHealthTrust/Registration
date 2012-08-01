@@ -85,8 +85,45 @@ class ClinicController < ApplicationController
         simple_overview = true
       end
     end
+			
+				
+		@services = PatientService.services
+#raise @services.to_yaml
+		@casualty = []; @dental = []; @eye = []; @family_planing = []; @medical = []; @ob_gyn = [];
+		@orthopedics = []; @other = []; @pediatrics = []; @skin = []; @sti_clinic = []; @surgical = []
+ 		
+ 		PatientService.services.each do |service|
+ 			if service.value_text.capitalize.include?("Casualty")
+ 				@casualty << service
+ 			elsif service.value_text.capitalize.include?("Dental")
+ 				@dental << service
+ 			elsif service.value_text.capitalize.include?("Eye")
+ 				@eye << service
+ 			elsif service.value_text.capitalize.include?("Family Planing")
+ 				@family_planing << service
+ 			elsif service.value_text.capitalize.include?("Medical")
+ 				@medical << service
+ 			elsif service.value_text.capitalize.include?("OB/Gyn")
+ 				@ob_gyn << service
+ 			elsif service.value_text.capitalize.include?("Orthopedics")
+ 				@orthopedics << service
+ 			elsif service.value_text.capitalize.include?("Pediatrics")
+ 				@pediatrics << service
+ 			elsif service.value_text.capitalize.include?(" Skin ")
+ 				@skin << service
+ 			elsif service.value_text.capitalize.include?("STI Clinic")
+ 				@sti_clinic << service
+ 			elsif service.value_text.capitalize.include?("Surgical")
+ 				@surgical << service
+ 			else service.value_text.capitalize.include?(" Other ")
+ 				@other << service
+ 			end
+ 		end
 
+
+		
     @types = EncounterType.all.map{|encounter_type| encounter_type.name if encounter_type.name == "REGISTRATION"}.to_s
+
     @current_user_id = User.current_user.user_id
 
     @me = Encounter.patient_registration(@types, @current_user_id, :conditions => ['DATE(patient.date_created) = DATE(NOW()) AND patient.creator = ?', User.current_user.user_id])
