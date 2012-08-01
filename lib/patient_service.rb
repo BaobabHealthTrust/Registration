@@ -1180,7 +1180,7 @@ EOF
   
   def self.previous_referral_section(person_obj)
     
-    services = Observation.find(:all, :conditions => ["person_id = ? AND concept_id = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id]).uniq.reverse.first(3) rescue []
+    services = Observation.find(:all, :conditions => ["person_id = ? AND concept_id = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc").uniq.reverse.first(5) rescue []
 
 		return services
   end

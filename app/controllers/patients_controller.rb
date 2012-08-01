@@ -70,6 +70,26 @@ class PatientsController < ApplicationController
     render :template => 'dashboards/overview_tab', :layout => false
   end
 
+	def past_visits_summary
+    #@previous_visits  = get_previous_encounters(params[:patient_id])
+
+    #@encounter_dates = @previous_visits.map{|encounter| encounter.encounter_datetime.to_date}.uniq.first(6) rescue []
+
+    #@past_encounter_dates = @encounter_dates
+    @person = Patient.find_by_patient_id(params[:patient_id]).person
+    @session_date = Date.today if !session[:datetime]
+	  @patient_bean = PatientService.get_patient(@person)
+  	@services = []
+  	PatientService.previous_referral_section(@person).map do |service| 
+  		if service.obs_datetime.to_date != @session_date.to_date
+  			@services << service
+  		end 
+  	end
+
+    render :template => 'dashboards/past_visits_summary_tab', :layout => false
+  end
+
+	
   def all_districts
    districts = []
 
