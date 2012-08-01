@@ -231,14 +231,21 @@
   	@services = PatientService.previous_referral_section(@person)
   %>
 <div id ='header'>
-  <h1><%= @patient_bean.name %>&nbsp;(<%= @patient_bean.sex %>)</h1>
+  <h1><%= @patient_bean.name %>&nbsp;(<%= @patient_bean.sex %>)&nbsp;<%= @patient_bean.age%> yrs</h1>
   <table>
   <tr>
-    <th>Age:</th><td><%= @patient_bean.age %></td>
+		<th>National ID:</th><td><%= @patient_bean.national_id_with_dashes %></td>
   </tr>
   <tr>
-    <th>National ID:</th><td><%= @patient_bean.national_id_with_dashes %></td>
+    <th>Current Residence:</th><td><%= @patient_bean.current_residence %></td>
+    <td></td><td></td>
   </tr>
+  <tr>
+		<th>Home District:</th><td><%= @patient_bean.home_district %></td>
+    <td></td><td></td>
+    <th>T/A:</th><td><%= @patient_bean.traditional_authority %></td>
+  </tr>
+  <tr></tr><tr></tr>
   <tr>
   	<% if @service %>
     	<th>Previous Visit Service:</th><td><%= @service %></td>

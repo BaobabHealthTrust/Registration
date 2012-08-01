@@ -1,39 +1,48 @@
 <script>
   var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>";
+	
+	function checkSelectServices() {
+    var status = "";
+    if ($('select_services').value == "") {
+      status = 'true';
+    } else {
+    	status = 'false';
+    }
+    return status;
+  }
+
 </script>
-  <style type="text/css">
-    #summary {
-      padding:10px;
-      font-size:1.8em;
-    }
-    #char {
-      display: none;
-    }
-    .title {
-      text-decoration:underline;
-      margin-right:10px;
-    }
+<style>
+  .tt_controls_select_services #keyboard{
+    display:none;
+  }
 
-    #tt_page_ward_ .inputFrameClass { height:84%; }
-    
-    .tt_controls_select_services .keyboard{display:none;}
-    #tt_page_select_services .options{height:500px;}
-    #tt_page_select_services .options li{font-size:30px;}
-    #space {display:inline;}
-  </style>
+	#tt_page_services .options{ height:500px; }
+  #tt_page_select_services .options li{font-size:30px;}
+ 	#space { 
+ 		display:inline;
+ 	}
+ 	
+ 	.tt_controls_select_services .keyboard{ display:none; }
+  #tt_page_select_services .options{height:550px;}
+  #tt_page_select_services .options li{font-size:30px;}
+</style>
+<form action="/encounters/create">
+	<%= hidden_field_tag "encounter[encounter_type_name]", "REGISTRATION" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
 
-  <form action="/encounters/create">
-    <%= hidden_field_tag "encounter[encounter_type_name]", "REGISTRATION" %>
-    <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
-    <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-    <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
-
-    <%= touch_select_tag "SERVICES", @patient, options_for_select(@select_options['services']),
-      {:id => 'services',
-       :optional => true,
-       :multiple => true,
-       :ttMatchFromBeginning => "true",
-       :helpText => "Select Services" } %> 
+	<label for='select_services'>Select Services</label>
+	<%= select_tag "observations[][value_text]", options_for_select(@select_options['services']),
+				{	:id => 'select_services',
+					:ttMatchFromBeginning => "true",
+					:helpText => "Select Services"}%>
+        
+        <%= hidden_field_tag("observations[][value_coded_or_text]", nil) %>
+        <%= hidden_field_tag("observations[][concept_name]", "SERVICES") %>
+        <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+        <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
     
     <% if @retrospective %>
       <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
@@ -46,4 +55,4 @@
     <%end%>
 
     <%= submit_tag "Finish" %>    
-  </form>
+</form>

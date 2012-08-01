@@ -47,7 +47,7 @@
             </div>
             <select id="tabs">
               <option value='/patients/overview?patient_id=<%= @patient.id %>'>Overview</option>
-              <option value='/patients/personal/<%= @patient.id -%>'>Printouts and Other</option>
+              <!--<option value='/patients/personal/<%= @patient.id -%>'>Printouts and Other</option> -->
             </select>
             <% if @patient.person.dead == 1%>
               <select id="links">
@@ -62,6 +62,8 @@
                 <select id="links">
                  <!-- <option value='/patients/programs_dashboard/<%= @patient.id -%>'>States</option> -->
                   <option value='/patients/patient_demographics?patient_id=<%=@patient.id%>'>Edit Demograghics</option>
+                  <option value='/patients/dashboard_print_national_id/<%=@patient.id%>'>Print National ID</option>
+                  
                 </select>
                 <select id="navigation_links">
                     <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
