@@ -116,6 +116,22 @@ class PatientsController < ApplicationController
     return traditional_authorities
   end
   
+  def all_state_province
+    patient_bean = PatientService.get_patient(@patient.person)
+    
+    traditional_authorities = []
+    district_id = District.find_by_name("#{patient_bean.home_district}").id
+    traditional_authority_conditions = ["district_id = ?}%", district_id]
+
+    all_traditional_authorities = TraditionalAuthority.find(:all, :conditions => ["district_id = ?", District.find_by_name("#{patient_bean.home_district}").id], :order => 'name')
+   
+    all_traditional_authorities.map do |ta|
+      traditional_authorities << ta.name
+    end
+
+    return traditional_authorities
+  end
+  
   def edit_demographics
     @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
     @person = @patient.person
@@ -398,6 +414,9 @@ class PatientsController < ApplicationController
     when "city_village"
       city_village = params[:person][:addresses]
       patient.person.addresses.first.update_attributes(city_village) if city_village
+    when "state_province"
+      state_province = params[:person][:addresses]
+      patient.person.addresses.first.update_attributes(city_village) if state_province
     when "ta"
       county_district = params[:person][:addresses]
       patient.person.addresses.first.update_attributes(county_district) if county_district
