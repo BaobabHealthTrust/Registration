@@ -70,6 +70,10 @@
   <% if @edit_page == "home_phone_number" %>
     <%= render(:partial => "/patients/mastercard_modify_home_phone_number" ) %>
   <% end %>
+  
+  <% if @edit_page == "state_province" %>
+    <%= render(:partial => "/patients/mastercard_modify_state_province" ) %>
+  <% end %>
 
   <%= hidden_field_tag "patient_id", @patient_id %>
   <%= hidden_field_tag "field", @edit_page %>

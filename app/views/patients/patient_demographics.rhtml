@@ -43,7 +43,6 @@
     <form>
       <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
   	</form>
-
 		<div>
 			<h2><%= "Demographics for #{@patient_bean.name}"%></h2>
 			<h3>
@@ -51,7 +50,7 @@
 			</h3>
 			<div style="border-top:1px solid black; height:465px; overflow:auto;">
 				<table>
-					<tr>
+					<tr><%#= raise @patient_bean.to_yaml %>
 						<td class='title' style='border-width:1px 1px 1px'><a href="/patients/mastercard_modify?field=first_name&id=<%=@patient.patient_id%>">First Name</a></td>
 						<td class='data' style='border-width:1px 1px 1px'><%= @patient_bean.first_name %></td>
 					</tr>
@@ -71,12 +70,10 @@
 						<td class='title'><a href="/patients/mastercard_modify?field=city_village&id=<%=@patient.patient_id%>"> Current Location/Village</a></td>
 						<td class='data'> <%=@patient_bean.current_residence%></td>
 					</tr>
-<!--
 					<tr>
-						<td class='title'><a href="/patients/mastercard_modify?field=location&id=<%=@patient.patient_id%>">Landmark</a></td>
-						<td class='data'><%= @patient_bean.landmark %></td>
+						<td class='title'><a href="/patients/mastercard_modify?field=state_province&id=<%=@patient.patient_id%>">Current T/A or Ward</a></td>
+						<td class='data'><%= @patient_bean.address %></td>
 					</tr>
--->
 					<tr> 
 						<td class='title'><a href="/patients/mastercard_modify?field=home_district&id=<%=@patient.patient_id%>"> Home District</a> </td> 
 						<td class='data'> <%= @patient_bean.home_district %></td>
