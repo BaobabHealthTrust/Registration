@@ -5,7 +5,7 @@ class GenericClinicController < ApplicationController
 
     @location = Location.find(session[:location_id]).name rescue ""
 
-    @date = (session[:datetime].to_date rescue Date.today).strftime("%Y-%m-%d")
+    @date = session[:datetime].to_date rescue Date.today.to_date
 
     @user = current_user.name rescue ""
 
@@ -89,10 +89,10 @@ def overview_tab
 			
 				
 		@services = PatientService.services
-#raise @services.to_yaml
+
 		@casualty = []; @dental = []; @eye = []; @family_planing = []; @medical = []; @ob_gyn = [];
 		@orthopedics = []; @other = []; @pediatrics = []; @skin = []; @sti_clinic = []; @surgical = []
- 		
+ 		#raise @services.map{|p| p.value_text}.to_yaml
  		PatientService.services.each do |service|
  			if service.value_text.capitalize.include?("Casualty")
  				@casualty << service
@@ -100,19 +100,19 @@ def overview_tab
  				@dental << service
  			elsif service.value_text.capitalize.include?("Eye")
  				@eye << service
- 			elsif service.value_text.capitalize.include?("Family Planing")
+ 			elsif service.value_text.include?("Family Planing")
  				@family_planing << service
  			elsif service.value_text.capitalize.include?("Medical")
  				@medical << service
- 			elsif service.value_text.capitalize.include?("OB/Gyn")
+ 			elsif service.value_text.include?("OB/Gyn")
  				@ob_gyn << service
  			elsif service.value_text.capitalize.include?("Orthopedics")
  				@orthopedics << service
  			elsif service.value_text.capitalize.include?("Pediatrics")
  				@pediatrics << service
- 			elsif service.value_text.capitalize.include?(" Skin ")
+ 			elsif service.value_text.include?(" Skin ")
  				@skin << service
- 			elsif service.value_text.capitalize.include?("STI Clinic")
+ 			elsif service.value_text.include?("STI Clinic")
  				@sti_clinic << service
  			elsif service.value_text.capitalize.include?("Surgical")
  				@surgical << service

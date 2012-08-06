@@ -40,7 +40,6 @@
               <% end %>
 
               <%
-                 session_date = session[:datetime].to_date rescue Date.today
                  task = @task
                  task_name = (task.encounter_type || 'NONE').upcase rescue 'NONE'
               %>
