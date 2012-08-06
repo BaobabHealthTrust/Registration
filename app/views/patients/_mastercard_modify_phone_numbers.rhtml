@@ -1,0 +1,12 @@
+<style>
+  #date,#qwerty,#decimal,#comma,#Unknown,#char,#percent,#slash,#plus,#minus,#star {
+    display: none;
+  }
+</style>
+
+<%= text_field_tag "person[#{params[:field]}]",  nil, 
+  {:field_type => 'number', :helpText => "#{params[:field].gsub('_',' ').humanize}", 
+   :allowFreeText => true, 
+   :tt_pageStyleClass => "nota", 
+   :validationRule => "^0\\d{7,9}$|Unknown|Not Available|N\/A", 
+   :validationMessage => "Not a valid phone number" } %>

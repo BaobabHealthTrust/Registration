@@ -1,0 +1,340 @@
+<%= javascript_include_tag "dateformat" %>
+
+<style>
+	.summary div {
+	padding-left:25px;
+	font-size:22px;
+	}
+  .title {
+    margin-right:10px;
+    font-weight:bold;
+    font-size:30px;
+  }
+  .recommendation {
+    font-style:italic;
+  }
+  .warning {
+    color:red;
+  }
+  .values {
+    font-size:25px;
+  }
+
+  #tt_page_summary .inputFrameClass {                                                            
+    top: 60px; 
+  }  
+
+	#qwerty {
+		display: none;
+	}
+
+	.unknownButton .numericKeyboard #char, #decimal, #slash, #star, #plus, #date, #minus, #comma, #percent {
+				display: none;
+		  }
+</style>
+
+<%ask_pills_remaining_at_home =  CoreService.get_global_property_value("ask.pills.remaining.at.home").to_s == "true" rescue false %>
+<script>
+	var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+  /* 
+  var adherence_ids = new Array
+  var drug_names = new Array
+  var drug_orders = new Array 
+  var equivalent_daily_dose = new Array
+  var order_start_date = new Array
+  var drug_order_quantity = new Array
+  var order_auto_expire_date = new Array
+  var amount_brought_ids = new Array
+  var amount_other_ids = new Array
+  var auto_expire_date = new Array
+  */
+  var drug_names = {}
+  var daily_consumption = {}
+  var order_start_date = {}
+  var amount_given_last_time = {}
+  var order_auto_expire_date = {}
+  var amount_brought_ids = {}
+  var amount_other_ids = {}
+  var auto_expire_date = {}
+
+	function dateCreate(date_str){
+		intyear = 0 ; intmonth = 0 ; intday = 0;
+		intyear = parseInt(date_str.substring(0,4))
+		intmonth = (parseInt(date_str.substring(5,7)) - 1)
+		intday = (parseInt(date_str.substring(8,10)))
+
+		if (intmonth == -1)
+		  intmonth = (parseInt(date_str.substring(5,7).substring(1,2)) - 1)
+
+		if (intday == 0)
+		  intday = parseInt(date_str.substring(8,10).substring(1,2))
+
+		return new Date(intyear,intmonth,intday)
+	}
+
+  function setAttributes() {
+    page = $("page"+tstCurrentPage);
+    page.style.cssText = "height: 95% !important;";
+    divSummary = document.getElementsByClassName("summary")[0];
+    divSummary.style.cssText = "height: 95%;"
+    flame = document.getElementsByClassName("inputFrameClass")[0];
+    flame.style.cssText = "height: 90%;overflow: auto !important;"
+   /* flame.style.cssText = "overflow: auto !important;"
+    flame2 = document.getElementById("inputFrame2");
+    flame2.style.cssText = "height: 90%;overflow: auto !important;"*/
+  }
+
+</script>
+
+<form id='art_adherence' action="/encounters/create" method='post'>
+	<%= hidden_field_tag "encounter[encounter_type_name]", "ART ADHERENCE" %>
+	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+	<%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
+  	<%session_date = session[:datetime] || Time.now() %>
+
+	<% PatientService.drug_given_before(@patient, session_date.to_date).uniq.each do |order| 
+       next unless MedicationService.arv(order.drug_order.drug)
+  %>
+  	<% if @retrospective %>
+			<%= touch_numeric_tag "AMOUNT OF DRUG BROUGHT TO CLINIC", @patient, nil,
+				{	:id        => "amount_brought_#{order.order_id}",
+					:units     => "#{order.drug_order.units}",
+					:order_id  => "#{order.order_id}",
+					:tt_pageStyleClass => "unknownButton",
+					:helpText  => "Total #{order.drug_order.units} of #{order.drug_order.drug.name} brought to clinic"} %>
+
+		  <%if  ask_pills_remaining_at_home %>
+				<%= touch_text_field_tag "AMOUNT OF DRUG REMAINING AT HOME", @patient, nil,
+					{	:id        => "amount_other_#{order.order_id}",
+						:units     => "#{order.drug_order.units}",
+						:field_type=> "number",
+						:order_id  => "#{order.order_id}",
+						:tt_pageStyleClass => "unknownButton",
+						:helpText  => "Total #{order.drug_order.units} of #{order.drug_order.drug.name} <span style='color:red;'>left at home</span>" } %>
+		  <% else %>
+		  	<%= touch_hidden_tag "AMOUNT OF DRUG REMAINING AT HOME", @patient, nil,
+					{	:id        => "amount_other_#{order.order_id}",
+						:units     => "#{order.drug_order.units}",
+						:order_id  => "#{order.order_id}",
+						:tt_pageStyleClass => "NoControls"} %>
+		  <%end%>
+		<% else %>
+			<%= touch_numeric_tag "AMOUNT OF DRUG BROUGHT TO CLINIC", @patient, nil,
+				{	:id        => "amount_brought_#{order.order_id}",
+					:units     => "#{order.drug_order.units}",
+					:order_id  => "#{order.order_id}",
+					:helpText  => "Total #{order.drug_order.units} of #{order.drug_order.drug.name} brought to clinic"} %>
+
+		  <%if  ask_pills_remaining_at_home %>
+				<%= touch_text_field_tag "AMOUNT OF DRUG REMAINING AT HOME", @patient, nil,
+				{	:id        => "amount_other_#{order.order_id}",
+					:field_type=> "number",
+					:units     => "#{order.drug_order.units}",
+					:order_id  => "#{order.order_id}",
+					:tt_pageStyleClass => "unknownButton",
+					:helpText  => "Total #{order.drug_order.units} of #{order.drug_order.drug.name} <span style='color:red;'>left at home</span>" } %>
+			<% else %>
+				<%= touch_hidden_tag "AMOUNT OF DRUG REMAINING AT HOME", @patient, nil,
+					{	:id        => "amount_other_#{order.order_id}",
+						:units     => "#{order.drug_order.units}",
+						:order_id  => "#{order.order_id}",
+						:tt_pageStyleClass => "NoControls"} %>		
+		  <%end%>
+		<% end %>
+      
+		<%= touch_hidden_tag "WHAT WAS THE PATIENTS ADHERENCE FOR THIS DRUG ORDER", @patient, nil,
+			{	:id          => "adherence_#{order.order_id}",
+				:helpText    => "Adherence summary for #{order.drug_order.drug.name}",
+				:optional    => "true",
+				:order_id    => "#{order.order_id}",
+				:tt_pageStyleClass => "NoControls"} %>
+				
+		<%= touch_hidden_tag "MISSED HIV DRUG CONSTRUCT", @patient, nil,
+			{	:id          => "doses_missed_#{order.order_id}",
+				:helpText    => "Amount of Doses Missed #{order.drug_order.drug.name}",
+				:optional    => "true",
+				:order_id    => "#{order.order_id}",
+				:tt_pageStyleClass => "NoControls"} %>
+				
+			<script>
+        drug_names['<%=order.order_id%>'] = "<%=order.drug_order.drug.name %>";
+        daily_consumption['<%=order.order_id%>'] = "<%=order.drug_order.equivalent_daily_dose %>";
+        order_start_date['<%=order.order_id%>'] = "<%=order.start_date.strftime('%Y-%m-%d') %>";
+        order_auto_expire_date['<%=order.order_id%>'] = "<%= order.auto_expire_date.strftime('%Y-%m-%d') %>";
+        amount_given_last_time['<%=order.order_id%>'] = "<%=order.drug_order.quantity %>";
+      </script>
+
+	<% end rescue [] %>
+
+  <label for='summary'>Adherence Report</label>
+    <%= text_field_tag :summary, nil,
+      { :tt_onLoad => "adherenceReport();setAttributes();",
+        :optional => "true",
+        :tt_pageStyleClass => "NoControls" } %>
+
+	<script>
+		
+		function adherenceReport(){
+		  var i = 0;
+      var amount_remaining = 0;
+		  var summary = new Array;
+
+       var summary = "<div class='summary' style='height:670px'>";
+		   var amount_brought = 0;
+		   var amount_others = 0;
+
+		   //for (var i=0; i <  drug_names.length; i++){
+       for(i in drug_names){
+          if ($("amount_brought_" + i).value == "Unknown"){
+          	amount_brought = 0;
+          } else {
+          	amount_brought = $("amount_brought_" + i).value;
+          }
+
+          if ($("amount_other_" + i).value == "Unknown" || $("amount_other_" + i).value == ""){
+          	amount_others = 0;
+          } else {
+          	amount_others = $("amount_other_" + i).value;
+          }
+          
+          <% if ask_pills_remaining_at_home %>
+		        amount_remaining = parseFloat(amount_brought);
+		        amount_remaining += parseFloat(amount_others);
+		      <%else%>
+		        amount_remaining = parseFloat(amount_brought);
+		      <%end%>
+
+		      var days_overdue_for_visit = since(auto_expire_date[i]);
+          var doses_missed = 0;
+		      var last_visit_date = dateCreate(order_start_date[i]);
+			    var num_days = since(last_visit_date);
+			    var expected_amount_remaining = parseFloat(amount_given_last_time[i] - (num_days * daily_consumption[i]));
+
+					expected_amount_remaining = expected_amount_remaining.toFixed(2);
+
+          if(expected_amount_remaining == amount_remaining) {
+            doses_missed = 0;
+          }else{
+            doses_missed = parseFloat((expected_amount_remaining - amount_remaining) / daily_consumption[i]);
+            doses_missed = Math.round(doses_missed);
+          }          
+
+          var adherence = Math.round(100*(amount_given_last_time[i] - amount_remaining) / (amount_given_last_time[i] - expected_amount_remaining))
+
+
+          if (adherence > 100){                                           
+            adherence = 100 - (adherence - 100);
+          }  
+
+          if (adherence < 0){                                           
+            adherence = 0;
+          }  
+
+
+          $('adherence_'+i).value = adherence;
+
+			    var drug_name = drug_names[i];
+		      var warning = (adherence < 95) ? 'warning' : '';
+
+		      summary += "<div><span class='title'></span><span class='title'>"+drug_name+"</span></div>"
+			    summary += "<div><span >Last visit date:&nbsp;</span><span class='value'>"+dateFormat(last_visit_date,"dddd, mmmm dS, yyyy")+"</span></div>"
+			    if (doses_missed >= 0){
+			     summary += "<div><span class='value'>Doses unaccounted for:&nbsp;</span><span class='value'>"+doses_missed+"</span></div>"
+			     	document.getElementById("doses_missed_" + i).value = doses_missed;
+			     }
+			     
+			    if (doses_missed < 0) {
+			    	summary += "<div><span>Doses missed:&nbsp;</span><span class='value'>"+(-doses_missed)+"</span></div>"
+			    	document.getElementById("doses_missed_" + i).value = (-doses_missed);
+			    }
+			    summary += "<div><span>Tablets given last time:&nbsp;</span><span class='value'>"+(amount_given_last_time[i])+"</span></div>"
+			    summary += "<div><span>Daily consumption:&nbsp;</span><span class='value'>"+(daily_consumption[i])+"</span></div>"
+			    if (expected_amount_remaining >= 0) summary += "<div><span >Expected tablets remaining:&nbsp;</span><span class='value'>"+expected_amount_remaining+"</span></div>"
+			    if (expected_amount_remaining < 0 && days_overdue_for_visit > 0) summary += "<div><span>Days overdue for visit:&nbsp;</span><span class='value'>"+days_overdue_for_visit+"</span></div>"
+			    summary += "<div><span>Actual tablets remaining:&nbsp;</span><span class='value'>"+amount_remaining+"</span></div>"
+
+			    document.getElementById("doses_missed_" + i).value = doses_missed;
+
+			    summary += "<div class='value'><span>Percentage of doses taken:&nbsp;</span><span class='value'>"+ adherence +"%</span></div>"
+			    if (adherence < 95 || adherence > 105) summary += "<div class='" + warning + "'><span style='color:red' class='recommendation'>Patient needs counseling</span></div><br /><br />"
+			    
+		    }
+        summary += "</div>"
+
+      $('inputFrame'+tstCurrentPage).innerHTML = '<div id="summary">' + summary + '</div>' ;    
+      $("clearButton").style.display = 'none';
+		}
+
+		function since(date) {
+			var today = dateCreate('<%=session_date.to_date%>');
+			return (today - date) / (1000 * 60 * 60 * 24);
+		}
+
+		function strdate(date) {
+			var months = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+			return ""+date.getDate()+"-"+months[date.getMonth()]+"-"+date.getFullYear();
+		}
+	</script>
+
+  <%
+
+    date = session[:datetime].to_date rescue Date.today                           
+    start_date = date.strftime("%Y-%m-%d 00:00:00")                               
+    end_date = date.strftime("%Y-%m-%d 23:59:59")                                 
+    reception = Encounter.find(:first,:order => "encounter_datetime DESC,date_created DESC",
+    :conditions =>["patient_id = ? AND DATE(encounter_datetime) = ? AND encounter_type = ?
+    AND encounter_datetime >= ? AND encounter_datetime <=?",@patient.id,date,     
+    EncounterType.find_by_name('HIV RECEPTION').id,start_date,end_date])          
+                                                                                  
+    reception = reception.observations.collect{|r|r.to_s.squish}.join(',') rescue ''
+    patient_present = reception.match(/PATIENT PRESENT FOR CONSULTATION: YES/i)   
+
+                                                            
+    e = EncounterType.find_by_name('HIV CLINIC CONSULTATION')          
+    encounter = Encounter.find(:first, 
+      :conditions =>["encounter_type = ? AND patient_id =? AND
+      encounter_datetime >= ? AND encounter_datetime <= ?",
+      e.id,@patient.id,date.strftime("%Y-%m-%d 00:00:00"),
+      date.strftime("%Y-%m-%d 23:59:59")]) 
+
+   hiv_clinic_consultation = encounter.observations.collect{|r|r.to_s.squish}.join(',') rescue ''
+   refer_to_clinician_already_asked = hiv_clinic_consultation.match(/REFER TO ART CLINICIAN/i) 
+
+  %>                                                                         
+                                                                                
+  <% if current_user_roles.include?('Nurse') and patient_present %>             
+    <%= touch_yes_no_tag "REFER TO ART CLINICIAN", @patient, nil,               
+      {:id => "refer_to_clinician",                                             
+      :helpText => "Refer patient to clinician?" } %>                           
+  <%else%>                                                                      
+    <%= touch_hidden_tag "REFER TO ART CLINICIAN", @patient, "NO", :id => "refer_to_clinician" %>
+  <%end unless refer_to_clinician_already_asked %> 
+
+  <%if @obs_ans.match(/Prescribe drugs: Yes/i) %>                               
+    <%= touch_hidden_tag "Prescribe drugs", @patient, "YES", :id => "prescribe_drugs" %>
+  <%else%>                                                                      
+    <%= touch_yes_no_unknown_tag "Prescribe drugs", @patient, nil,              
+      {:id => "prescribe_drugs",                                                
+       :condition => "$('refer_to_clinician').value == 'NO'" ,                  
+       :helpText => "Prescribe drugs during this visit" } %>                    
+  <%end unless refer_to_clinician_already_asked %>                                      
+                                                                                
+  <%if @allergic_to_sulphur.match(/Allergic to sulphur:/i).blank? %>            
+    <%= touch_yes_no_unknown_tag "Allergic to sulphur", @patient, nil,          
+      { :id => "allergic_to_sulphur",                                           
+        :condition => "$('refer_to_clinician').value == 'NO'" ,                 
+        :helpText => "Is patient allergic to sulphur" } %>                      
+  <%end unless refer_to_clinician_already_asked %> 
+
+
+  <% session_date = session[:datetime].to_date rescue nil                       
+    if session_date %>
+
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', :ajaxURL => '/user/username?username=' %></p>
+    <% else %>
+      <%= hidden_field_tag "filter[provider]", nil %>
+    <%end%>
+
+</form>

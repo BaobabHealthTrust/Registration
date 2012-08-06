@@ -1,0 +1,382 @@
+<html>
+<head>
+<%= javascript_include_tag "prototype" %>
+<style>
+.color_lightblue{
+  border-style:solid;
+  background-color:lightblue;
+}
+.color_white{
+  border-style:solid;
+}
+
+body{
+  -moz-user-select:none;
+}
+
+#mainBar{ 
+  background-color:lightgray;
+  height:75px;
+  left:0;
+  position:absolute;
+  width: 99%;
+  padding-left:10px;
+  font-size:20px;
+  -moz-user-select:none;
+}
+
+#data_table {
+  position:absolute;
+  width:100%;
+  left:0;
+  top:75px;
+  -moz-user-select:none;
+}
+
+#data_table td , #data_table th{
+  border-style:solid;
+  border-width:thin; 
+  text-align:center;
+  -moz-user-select:none;
+}
+
+#data_table td {
+ vertical-align: top; 
+  -moz-user-select:none;
+}
+
+#finish_button{
+  font-size:25px;
+  height:60px;
+  display: none;
+  margin:10px;
+  position:absolute;
+  right:13px;
+  top:1px;
+}
+
+#missed_app_button{
+  font-size:25px;
+  height:60px;
+  display: none;
+  margin:10px;
+  position:absolute;
+  right:125px;
+  top:1px;
+}
+
+#table-container {
+ background-color: transparent;
+ height: 75%;
+ overflow: auto;
+ -moz-user-select:none;
+}
+
+.td_button {
+  background-color: #ffffff;
+  text-align: center; 
+  width: 30px; 
+  vertical-align: middle;
+  cursor: pointer;
+}
+</style>
+
+
+<%= stylesheet_link_tag "demo_table" %>
+<%= stylesheet_link_tag "demo_table_jui" %>
+<%= stylesheet_link_tag "demo_page" %>
+
+<%=javascript_include_tag "jquery_data_table" %>
+<%=javascript_include_tag "jquery.dataTables.min" %>
+
+<script>
+
+
+var tt_cancel_destination = "/clinic";
+
+
+function dataT(){
+ $('#data_table').dataTable();
+}
+</script>  
+<title>Appointments</title>
+</head>
+<body>
+<div id="mainBar">
+<%=
+"Appointments scheduled on</br>" +
+@select_date.strftime('%A, %d %b %Y') + ": " + @patients.length.to_s + " patient(s)"
+%>
+<button id="missed_app_button" onmousedown="javascript:document.location='/reports/missed_appointments?date=<%=@date%>'">Missed app</button>
+<button id="finish_button" onmousedown="javascript:document.location='/reports/app_dates_date_selector'">Finish</button>
+</div>
+<%="</br>"*5%>
+<div id="table-container">
+
+<table id="data_table">
+  <thead>
+    <tr>
+      <th class='tb_art'>Identifier</th>
+      <th class='tb'>First name</th>
+      <th class='tb'>Last name</th>
+      <th>Gender</th>
+      <th>Birthdate</th>
+      <th>Visit date</th>
+      <th>&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% 
+#    raise @patients.last.name
+    color = 'white'
+    @patients.each do |obs_id,patient|
+      color = color == "white" ? "lightblue" : "white"
+  %>
+<tr>
+  <td class='<%="color_#{color}" %>' onclick=''><%=patient[:identifier] || '&nbsp;'%></td>
+  <td class='<%="color_#{color}" %>' onclick=''><%=patient[:first_name] || '&nbsp;'%></td>
+  <td class='<%="color_#{color}" %>' onclick=''><%=patient[:last_name] || '&nbsp;'%></td>
+  <td class='<%="color_#{color}" %>' onclick=''><%=patient[:gender] || '&nbsp;'%></td>
+  <td class='<%="color_#{color}" %>' onclick=''><%=patient[:birthdate].to_date.strftime('%Y-%m-%d') rescue '&nbsp;'%></td>
+  <td class='<%="color_#{color}" %>' onclick=''><%=patient[:visit_date].to_date.strftime('%Y-%m-%d') || '&nbsp;'%></td>
+  <td class='<%="color_#{color}" %>' onclick=''><input class='patient_link' type="button" onmousedown="document.location='/patients/show/<%=patient[:patient_id]%>'" value='Show' /></td>
+</tr>
+  <% end %>
+</tbody>
+</table>
+
+</div>
+
+<div id="keypad">
+ <span class="keypad">
+ </span>
+ </center>
+</div>
+
+
+</body>
+<script>
+
+ keyboard = document.getElementsByClassName("keypad")[0]
+ search_box = $('#data_table').dataTable()
+
+ function getButtonString(id,string){
+  return "<td class='td_button'><a href='#' onMouseDown='press(this.id);' id='" + id + "'>" + string + "</a></td>";
+  }
+
+  function getCharButtonSetID(character,id){                                     
+    return '<td class="td_button"><a href="#" onMouseDown="press(\''+character+'\');" id="'+id+'"><span>' +character+ "</span></a></td>";
+  } 
+
+ function getButtons(chars){
+   var buttonLine = "";
+   for(var i=0; i<chars.length; i++){
+     character = chars.substring(i,i+1)
+     buttonLine += getCharButtonSetID(character,character);
+   }
+   return "<tr>" + buttonLine + "</tr>";
+ }
+
+ showAlphaKeypad();
+
+ function showAlphaKeypad(){
+   document.getElementById("keypad").style.height = "230px";
+   if (tstUserKeyboardPref == "qwerty") {
+     document.getElementById("keypad").style.width = "663px";
+     var innerHTML = getButtons("QWERTYUIOP");
+     innerHTML+= getButtons("ASDFGHJKL");
+     innerHTML+= getButtons("ZXCVBNM").gsub("</tr>","");
+     innerHTML+= getButtonString('backspace','Bksp') + "</tr>";
+     innerHTML+= "<tr>" + getButtonString('space','Space');
+     innerHTML+= getButtonString('clear','Clear');
+     innerHTML+= getButtonString('num','Num') + "</tr>";
+     keyboard.innerHTML = "<table><tbody>" + innerHTML + "</tbody></table>";
+   }else{
+     var innerHTML = getButtons("ABCDEFGHI");
+     document.getElementById("keypad").style.width = "600px";
+     innerHTML+= getButtons("JKLMNOPQR");
+     innerHTML+= getButtons("STUVWXYZ").gsub("</tr>","");
+     innerHTML+= getButtonString('backspace','Bksp') + "</tr>";
+     innerHTML+= "<tr>" + getButtonString('space','Space');
+     innerHTML+= getButtonString('clear','Clear');
+     innerHTML+= getButtonString('num','Num') + "</tr>";
+     keyboard.innerHTML = "<table><tbody>" + innerHTML + "</tbody></table>";
+   }
+   return keyboard.innerHTML
+   /*keyboard.innerHTML+= getButtonString('backspace','Bksp') 
+   keyboard.innerHTML+= getButtonString('space','Space') 
+   keyboard.innerHTML+= getButtonString('clear','Clear') 
+   keyboard.innerHTML+= getButtonString('num','Num') */
+ }
+ 
+function showNumericKeypad(){
+  document.getElementById("keypad").style.height = "128px";
+  document.getElementById("keypad").style.width = "600px";
+  var innerHTML = getButtons("123456789");
+  innerHTML+= getButtons("0").gsub("</tr>","");
+  innerHTML+= getButtonString('backspace','Bksp');
+  innerHTML+= getButtonString('space','Space');
+  innerHTML+= getButtonString('clear','Clear');
+  innerHTML+= getButtonString('backspace','Bksp');
+  innerHTML+= getButtonString('abc','abc');
+  innerHTML+= getButtonString('dash','-');
+  innerHTML+= getButtonString('slash','/') + "</tr>";
+  keyboard.innerHTML = "<table><tbody>" + innerHTML + "</tbody></table>";
+  /*keyboard.innerHTML+= getButtonString('space','Space') 
+  keyboard.innerHTML+= getButtonString('clear','Clear') 
+  keyboard.innerHTML+= getButtonString('backspace','Bksp') 
+  keyboard.innerHTML+= getButtonString('abc','abc') 
+  keyboard.innerHTML+= getButtonString('dash','-') 
+  keyboard.innerHTML+= getButtonString('slash','/') */
+}
+
+ dataT();
+
+ data_table_length =document.getElementsByName('data_table_length')[0];
+ data_table_length.setAttribute("style","font-size:20px;");
+
+ table_length = document.getElementById("data_table_length");
+ table_length.setAttribute("style","width:100px;");
+
+ search = document.getElementsByTagName("input")[0];
+ search.setAttribute("id","search");
+ document.getElementById('search').setAttribute("onclick","showKeyboard();");
+  
+ function showKeyboard(){
+   key = document.getElementById("keypad")
+   if(key.style.display == 'none' || key.style.display == ""){
+    key.style.display = "inline";
+    return
+   }
+
+    key.style.display = "none";
+ }
+
+
+ <%if @patients.length > 100 %>
+  var tottal_patients = <%=@patients.length%>
+  var x = 200
+  while(x < tottal_patients){
+    data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
+    x+=100
+  }
+  data_table_length.innerHTML+="<option value='" + x + "'>" + x + "</option>";
+ <%end%>
+
+  function press(pressedChar){
+    switch (pressedChar) {
+      case 'backspace':
+        search.value = search.value.substring(0,search.value.length-1);
+        search_box.fnFilter(search.value)
+        return;
+      case 'space':
+        search.value+= " "
+        search_box.fnFilter(search.value)
+        return
+      case 'clear':
+        search.value = ""
+        search_box.fnFilter(search.value)
+        return
+      case 'num':
+        showNumericKeypad();
+        return
+      case 'slash':
+        search.value+= "/"
+        search_box.fnFilter(search.value)
+        return
+      case 'dash':
+        search.value+= "-"
+        search_box.fnFilter(search.value)
+        return
+      case 'abc':
+        showAlphaKeypad();
+        return
+    }
+    search.value+= pressedChar
+    search_box.fnFilter(search.value)
+  }
+
+</script>
+<style>
+
+.keyboardButton{
+  height: 70px;
+  width: 70px;
+}
+
+#press{
+  font-size:75px;
+  height:80px;
+  position:absolute;
+  right:13px;
+  top:35px;
+  width:300px;
+}
+
+
+.keypadbutton {
+  width: 55px;
+  height: 65px;
+}
+
+#keypad span {
+  position: absolute;
+}
+
+.keypad{
+  padding-left:17px;
+}
+
+#keypad{ -moz-user-select: none; }
+
+#keypad{
+ -moz-user-select:none;
+ background-color: white;
+ position:absolute;
+ top:10px;
+ width:600px;
+ right:500px;
+ height:280px;
+ display:none;
+ border-bottom-color-value:lightblue;
+ border-top-color-value:lightblue;
+ border-right-color-value:lightblue;
+ border-left-color-value:lightblue;
+ border-style:solid;
+ top:130px;
+ right:8px;
+ border-width: 1px;
+}
+
+.patient_link{
+  height:50px;
+  width:150px;
+}
+
+#keypad a {
+  -moz-user-select: none;
+  background-color: LightSlateGrey;
+  border-bottom: 1px outset black;
+  border-style: outset;
+  border-top: 1px outset black;
+  color: white;
+  display: block;
+  padding: 10px 16px 10px 10px;
+  text-align: center;
+  text-decoration: none;
+  height: 30px;
+  width: 30px;
+
+  background-position: lef top;
+  background-repeat: no-repeat;
+}
+
+#keypad table {
+  width: 570px;
+  margin-left: -16px;
+}
+
+#backspace {
+}
+</style>
+</html>

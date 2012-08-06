@@ -1,0 +1,317 @@
+<style type="text/css">
+  .summary {
+    margin:20px;
+    font-size:1.6em;
+  }
+  .title, .recommendation {
+    margin-right:10px;
+    font-weight:bold;
+  }
+  .recommendation {
+    font-style:italic;
+  }
+  .warning {
+    color:red;
+  }
+
+  .pills_remaing{
+    left:25px;
+    position:inherit;
+  }
+
+  #char { display:none; }
+
+  #notes{background-color:red;}
+
+  .tt_controls_clinical_notes_optional #space { display:inline; }
+</style>
+
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+	
+  function getNumberOfSymptoms(){
+    var options = $('symptoms').options
+    var symptoms = 0;
+
+    <% @side_effects = concept_set('MALAWI ART DRUG INDUCED SYMPTOM SET') %>
+    var myArray = "<%= @side_effects.to_a %>";
+
+    for (var i=0; i < options.length; i++) {
+      if (options[i].selected && options[i].value != "") {
+       if (myArray.indexOf(options[i].value) != -1) {
+        symptoms =  symptoms + 1;
+       }
+      }
+    }
+
+	options = $('additional_symptoms').options;
+
+    for (var i=0; i < options.length; i++) {
+      if (options[i].selected && options[i].value != "") {
+       if (myArray.indexOf(options[i].value) != -1) {
+        symptoms =  symptoms + 1;
+       }
+      }
+    }
+
+    return symptoms;
+  }
+
+  function getSelectedSymptoms() {
+    var options = $('symptoms').options;
+    var symptoms = new Array();
+
+    <% @side_effects = concept_set('MALAWI ART DRUG INDUCED SYMPTOM SET') %>
+    var myArray = "<%= @side_effects.to_a %>";
+	
+	var x = -1;
+	var css = "even";
+    for (var i=0; i < options.length; i++) {
+		if (options[i].selected && options[i].value != "") {
+			if (myArray.indexOf(options[i].value) != -1) {
+				x = x + 1;
+        		symptoms +=  '<li id="' + x + '" class="' + css + '" onclick="null; updateTouchscreenInputForSelect(__$(\'optionValue\' + this.id));" onmousedown="" tag="odd" tstvalue="' + options[i].value + '" style="">'
+				+ "<div style='display: table; border-spacing: 0px;' <div style='display: table-row'><div style='display: table-cell;'><img id='img" + x + "' alt='[ ]' src='/touchscreentoolkit/lib/images/unticked.jpg'></div><div id='optionValue" + x + "' style='display: table-cell; vertical-align: middle; text-align: left; padding-left: 15px;'>" 
+				+ options[i].value 
+				+ "</div></div>"				
+				 + "</li>";
+			if(css == "odd") {
+				css = "even";
+			} else {
+				css = "odd";
+			}
+
+        	$("drug_induced_effects").innerHTML += "<option>" + options[i].value + "</option>";
+       }
+      }
+    }
+
+    options = $('additional_symptoms').options;
+
+    for (var i=0; i < options.length; i++) {
+		if (options[i].selected && options[i].value != "") {
+			if (myArray.indexOf(options[i].value) != -1) {
+				x = x + 1;
+        		symptoms +=  '<li id="' + x + '" class="' + css + '" onclick="null; updateTouchscreenInputForSelect(__$(\'optionValue\' + this.id));" onmousedown="" tag="odd" tstvalue="' + options[i].value + '" style="">'
+				+ "<div style='display: table; border-spacing: 0px;' <div style='display: table-row'><div style='display: table-cell;'><img id='img" + x + "' alt='[ ]' src='/touchscreentoolkit/lib/images/unticked.jpg'></div><div id='optionValue" + x + "' style='display: table-cell; vertical-align: middle; text-align: left; padding-left: 15px;'>" 
+				+ options[i].value 
+				+ "</div></div>"				
+				 + "</li>";
+			if(css == "odd") {
+				css = "even";
+			} else {
+				css = "odd";
+			}
+
+        	$("drug_induced_effects").innerHTML += "<option>" + options[i].value + "</option>";
+       }
+      }
+    }
+
+    $("tt_currentUnorderedListOptions").innerHTML = symptoms;
+  }
+
+  function checkPregnancyAndAge() {
+    var patientAge = "<%= @patient_bean.age.to_i %>";
+    var pregnancyStatus = $('pregnant').value;
+
+    if ((patientAge >= 55) && pregnancyStatus == "YES") {
+       return 'true';
+    } else {
+      return 'false';
+    }
+  }
+
+  function checkBreastfeedingAndAge() {
+    var patientAge = "<%= @patient_bean.age.to_i %>";
+    var breastfeedingStatus = $('breast_feeding').value;
+
+    if ((patientAge >= 55) && breastfeedingStatus == "YES") {
+       return 'true';
+    } else {
+      return 'false';
+    }
+  }
+  
+</script>
+
+<form action="/encounters/create" method='post'>
+  <%= hidden_field_tag "encounter[encounter_type_name]", "HIV CLINIC CONSULTATION" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
+
+  <% if @patient_is_child_bearing_female %>
+  
+        <% if @is_patient_pregnant_value.nil?%>
+
+            <%= touch_yes_no_unknown_tag "IS PATIENT PREGNANT?", @patient, nil,
+            {:id => "pregnant",
+             :validationCode => "checkPregnancyAndAge() == 'false'",
+             :validationMessage => "Patient (#{@patient_bean.name}) is #{@patient_bean.age} years old. Is she pregnant?",
+             :helpText => "Is patient pregnant?" } %>
+
+        <%else%>
+            <%= touch_hidden_tag "IS PATIENT PREGNANT?" , @patient, @is_patient_pregnant_value.strip , :id => "pregnant" %>
+        <%end%>
+
+        <% if @is_patient_breast_feeding_value.nil?%>
+
+            <%= touch_yes_no_unknown_tag "IS PATIENT BREAST FEEDING?", @patient, nil,
+            {:id => "breast_feeding",
+             :validationCode => "checkBreastfeedingAndAge() == 'false'",
+             :validationMessage => "Patient (#{@patient_bean.name}) is #{@patient_bean.age} years old. Is she breastfeeding?",
+             :helpText => "Is patient breast feeding?" } %>
+
+        <%else%>
+            <%= touch_hidden_tag "IS PATIENT BREAST FEEDING?" , @patient, @is_patient_breast_feeding_value , :id => "breast_feeding" %>
+        <%end%>
+
+  <% end %>    
+  
+  <% if ask_standard_art_side_effects %>
+    <%= touch_select_tag "MALAWI ART SIDE EFFECTS", @patient, concept_set_options('MALAWI ART SIDE EFFECTS'),
+      {:id => 'side_effects',
+       :optional => true,
+       :multiple => true,
+       :conditions => @art_first_visit == false,
+       :helpText => "Side effects (select all that apply)" } %>
+  <% else %>
+    <%= touch_select_tag "SYMPTOM PRESENT", @patient, concept_set_options('COMMON MALAWI ART SYMPTOM SET'),
+      {:id => 'symptoms',
+       :optional => true,
+       :multiple => true,
+       :helpText => "Symptoms (select all that apply)" } %>
+
+    <%= touch_select_tag "SYMPTOM PRESENT", @patient, concept_set_options('ADDITIONAL MALAWI ART SYMPTOM SET'),
+      {:id => 'additional_symptoms',
+       :optional => true,
+       :multiple => true,
+       :helpText => "More symptoms (select all that apply)" } %>
+
+    <% if @art_first_visit == false %>
+      <%= touch_select_tag "DRUG INDUCED", @patient, options_for_select([['', '']]),
+        {:id => 'drug_induced_effects',
+         :optional => true,
+         :multiple => true,
+         :condition => 'getNumberOfSymptoms() > 0',
+         :helpText => "Select which of these symptoms are likely drug induced<br />(select all that apply)",
+         :tt_onLoad => "getSelectedSymptoms()" } %>
+      <% end %>
+  <% end %>
+
+	<%= touch_select_tag "Routine Tuberculosis Screening", @patient, concept_set_options('Routine Tuberculosis Screening'),
+		{	:id => 'routine_tb_screening',
+			:optional => true,
+			:multiple => true,
+			:helpText => "TB associated symptoms" } %>
+
+
+  <%  if @tb_programs_state.nil? %>
+  
+    <%= touch_select_tag "TB STATUS", @patient, concept_set_options('TB STATUS'),
+      {:id => 'tb_status',
+        :multiple => false,
+       :helpText => "TB Status" } %>
+    <% else %>
+        <%= touch_hidden_tag "TB STATUS" , @patient, ConceptName.find_by_name("#{@patient_tb_status}").name, {:id => "tb_status"} %>
+    <% end %>
+
+  <% if @patient_is_child_bearing_female %>
+ 
+    <% if @currently_using_family_planning_methods.nil? %>
+        <%= touch_yes_no_unknown_tag "CURRENTLY USING FAMILY PLANNING METHOD", @patient, nil,
+          {:id => "on_fpm",
+            :condition => "$('pregnant').value != 'Yes'",
+            :helpText => "Currently using family planning method" } %>
+
+        <%= touch_select_tag "FAMILY PLANNING METHOD", @patient, options_for_select(@select_options['family_planning_methods']),
+        {:id => "fpm_used",
+         :condition => '$("on_fpm").value == "YES"',
+         :multiple => true,
+         :tt_pageStyleClass => "NoKeyboard",
+         :helpText => "What method?" } %>
+
+    <%else%>
+        
+        <%= touch_hidden_tag "CURRENTLY USING FAMILY PLANNING METHOD" , @patient, @currently_using_family_planning_methods.to_s , {:id => "on_fpm"} %>
+
+        <% id = 0 
+            if @family_planning_methods.length != 0 
+                @family_planning_methods.each do | planning_method | %>
+                    <%= touch_hidden_tag "FAMILY PLANNING METHOD" , @patient, planning_method.to_s , {:id => "fpm_used_#{id}"} %>
+                    <% id = id + 1 
+                 end 
+            end %>
+    <% end %>
+
+<%end%>
+
+<%date = session[:datetime].to_date rescue Date.today
+  start_date = date.strftime("%Y-%m-%d 00:00:00")                       
+  end_date = date.strftime("%Y-%m-%d 23:59:59")                       
+  reception = Encounter.find(:first,:order => "encounter_datetime DESC,date_created DESC",
+  :conditions =>["patient_id = ? AND DATE(encounter_datetime) = ? AND encounter_type = ?
+  AND encounter_datetime >= ? AND encounter_datetime <=?",@patient.id,date,
+  EncounterType.find_by_name('HIV RECEPTION').id,start_date,end_date])
+
+  reception = reception.observations.collect{|r|r.to_s.squish}.join(',') rescue ''
+  patient_present = reception.match(/PATIENT PRESENT FOR CONSULTATION: YES/i) 
+%>
+
+
+  <%
+  art_adherence_to_be_done = false
+  (PatientService.drug_given_before(@patient,date) || []).uniq.each do |order|  
+      next unless MedicationService.arv(order.drug_order.drug)
+      art_adherence_to_be_done = true
+      break
+  end
+  
+  if art_adherence_to_be_done
+    e = EncounterType.find_by_name("ART ADHERENCE")
+    art_adherence_to_be_done = Encounter.find(:first,
+    :conditions =>["patient_id=? AND encounter_type=?
+    AND encounter_datetime >= ? AND encounter_datetime <=?",@patient.id,e.id,
+    start_date,end_date]).blank?
+  end
+  
+  
+  %>
+
+  <% if current_user_roles.include?('Nurse') and patient_present %>
+    <%= touch_yes_no_tag "REFER TO ART CLINICIAN", @patient, nil,
+      {:id => "refer_to_clinician",
+      :helpText => "Refer patient to clinician?" } %>
+  <%else%>
+    <%= touch_hidden_tag "REFER TO ART CLINICIAN", @patient, "NO", :id => "refer_to_clinician" %>
+  <%end unless art_adherence_to_be_done %>
+
+
+  <%if @obs_ans.match(/Prescribe drugs: Yes/i) %>
+    <%= touch_hidden_tag "Prescribe drugs", @patient, "YES", :id => "prescribe_drugs" %>
+  <%else%>
+    <%= touch_yes_no_unknown_tag "Prescribe drugs", @patient, nil,
+      {:id => "prescribe_drugs",
+       :condition => "$('refer_to_clinician').value == 'NO'" ,
+       :helpText => "Prescribe drugs during this visit" } %>
+  <%end unless art_adherence_to_be_done %>
+
+  <%if @allergic_to_sulphur.match(/Allergic to sulphur:/i).blank? %>
+    <%= touch_yes_no_unknown_tag "Allergic to sulphur", @patient, nil,
+		  {	:id => "allergic_to_sulphur",
+			  :condition => "$('refer_to_clinician').value == 'NO'" ,
+			  :helpText => "Is patient allergic to sulphur" } %>
+  <%end unless art_adherence_to_be_done %>
+  
+  <% session_date = session[:datetime].to_date rescue nil                       
+    if session_date %>
+
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+<%= text_field "filter" , 'provider', :helpText => 'Staff who provided the information (Provider)', 
+  :ajaxURL => '/user/username?username=' %></p>
+    <% else %>
+      <%= hidden_field_tag "filter[provider]", nil %>
+    <%end%>
+  <%= submit_tag "Finish" %>    
+</form>
