@@ -60,7 +60,7 @@
 								session_datetime = ''
 								if session[:datetime]
 		             	if session[:datetime].to_date != Date.today.to_date
-		             		session_datetime = session[:datetime]
+		             		session_datetime = session[:datetime].to_date
 		             	end 
                	end
 							%>

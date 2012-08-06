@@ -67,12 +67,12 @@
 						<td class='data'><%=@patient_bean.sex%></td>
 					</tr>
 					<tr>
-						<td class='title'><a href="/patients/mastercard_modify?field=city_village&id=<%=@patient.patient_id%>"> Current Location/Village</a></td>
-						<td class='data'> <%=@patient_bean.current_residence%></td>
+						<td class='title'><a href="/patients/mastercard_modify?field=state_province&id=<%=@patient.patient_id%>">Current District</a></td>
+						<td class='data'><%= @patient_bean.address %></td>
 					</tr>
 					<tr>
-						<td class='title'><a href="/patients/mastercard_modify?field=state_province&id=<%=@patient.patient_id%>">Current T/A or Ward</a></td>
-						<td class='data'><%= @patient_bean.address %></td>
+						<td class='title'><a href="/patients/mastercard_modify?field=city_village&id=<%=@patient.patient_id%>"> Current Location/Village</a></td>
+						<td class='data'> <%=@patient_bean.current_residence%></td>
 					</tr>
 					<tr> 
 						<td class='title'><a href="/patients/mastercard_modify?field=home_district&id=<%=@patient.patient_id%>"> Home District</a> </td> 

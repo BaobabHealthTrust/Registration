@@ -5,12 +5,13 @@ class EncountersController < GenericEncountersController
 		@patient_bean = PatientService.get_patient(@patient.person)
 		session_date = session[:datetime].to_date rescue Date.today
 		
+		@retrospective = 'false'
 		if session[:datetime]
-			@retrospective = true 
-		else
-			@retrospective = false
+			if session[:datetime].to_date != Date.today.to_date
+      	@retrospective = 'true'
+      end  
 		end
-		
+
 		@programs = @patient.patient_programs.all
 		#@referral_sections = patient_referral_sections(@patient_bean.age)
 

@@ -66,9 +66,18 @@
                   
                 </select>
                 <select id="navigation_links">
-                    <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
-                          "/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
-                     <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+ 						<%
+								session_datetime = ''
+								if session[:datetime]
+		             	if session[:datetime].to_date != Date.today.to_date
+		             		session_datetime = session[:datetime].to_date
+		             	end 
+               	end
+							%>
+
+              <option value='<%= ((session_datetime.to_date rescue '') != '' ?
+                          "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="150px">
+                <%= ((session_datetime.to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
                 </select>
              <% end %>
             <tr>

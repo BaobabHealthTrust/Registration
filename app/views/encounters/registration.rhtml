@@ -44,7 +44,7 @@
         <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
         <%= hidden_field_tag("observations[][obs_datetime]", DateTime.now()) %>
     
-    <% if @retrospective %>
+    <% if @retrospective == 'true' %>
       <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
         <%= text_field "filter", 'provider',
             :helpText => 'Staff who provided the information (Provider)',

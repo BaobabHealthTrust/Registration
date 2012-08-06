@@ -464,10 +464,13 @@ class GenericPatientsController < ApplicationController
   end
 
   def mastercard_modify
+  	#raise params[:id].to_yaml
+  	@patient_id = Patient.find_by_patient_id(params[:id])
     @occupations = PatientService.occupations
+    @patient_bean = PatientService.get_patient(@patient.person)
     @districts = all_districts
     @traditional_authorities = all_traditional_authorities
-    #@state_provincies = all_state_provincies
+    @state_provincies = all_state_provincies
     #raise all_state_provincies.to_yaml
     if request.method == :get
       @patient_id = params[:id]
@@ -546,17 +549,27 @@ class GenericPatientsController < ApplicationController
     return traditional_authorities
   end
   
+  def village
+    #raise params.to_yaml
+    traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").id
+    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "#{params[:filter_value]}%", traditional_authority_id]
+
+    villages = Village.find(:all,:conditions => village_conditions, :order => 'name')
+    villages = villages.map do |v|
+      "<li value='#{v.name}'>#{v.name}</li>"
+    end
+    #raise villages.to_yaml
+    render :text => villages.join('') + "<li value='Other'>Other</li>" and return
+  end
+  
   def all_state_provincies
     patient_bean = PatientService.get_patient(@patient.person)
 
     traditional_authorities = []
-		#raise Village.find_by_name("#{patient_bean.current_residence}").traditional_authority_id.to_yaml
+		district_id = District.find_by_name("#{patient_bean.address}").id
+    traditional_authority_conditions = ["district_id = ?}%", district_id]
 
-    traditional_authority_id = Village.find_by_name("#{patient_bean.current_residence}").traditional_authority_id
-  
-    district_id = TraditionalAuthority .find_by_traditional_authority_id(traditional_authority_id).district_id
-
-    all_traditional_authorities = TraditionalAuthority.find(:all, :conditions => ["district_id = ?", district_id], :order => 'name')
+    all_traditional_authorities = TraditionalAuthority.find(:all, :conditions => ["district_id = ?", "#{district_id}"], :order => 'name')
    
     all_traditional_authorities.map do |ta|
       traditional_authorities << ta.name
@@ -683,6 +696,7 @@ class GenericPatientsController < ApplicationController
     @patient_bean = PatientService.get_patient(@patient.person)
     @cell_phone_number = PatientService.get_attribute(@patient.person, "Cell Phone Number")
     @home_phone_number = PatientService.get_attribute(@patient.person, "Home Phone Number")
+    #raise @patient_bean.to_yaml
     render :template => 'patients/patient_demographics', :layout => 'menu'
   end
 
@@ -2185,7 +2199,7 @@ class GenericPatientsController < ApplicationController
       patient.person.addresses.first.update_attributes(city_village) if city_village
     when "state_province"
       state_province = params[:person][:addresses]
-      patient.person.addresses.first.update_attributes(city_village) if state_province
+      patient.person.addresses.first.update_attributes(state_province) if state_province
     when "ta"
       county_district = params[:person][:addresses]
       patient.person.addresses.first.update_attributes(county_district) if county_district
