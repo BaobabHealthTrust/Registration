@@ -5,13 +5,13 @@ class PatientProgram < ActiveRecord::Base
   belongs_to :patient, :conditions => {:voided => 0}
   belongs_to :program, :conditions => {:retired => 0}
   belongs_to :location, :conditions => {:retired => 0}
-  has_many :patient_states, :class_name => 'PatientState', :conditions => {:voided => 0}, :dependent => :destroy
+  has_many :patient_states, :class_name => 'PatientState', :conditions => {:voided => 0}, :order => 'start_date, date_created', :dependent => :destroy
 
   named_scope :current, :conditions => ['date_enrolled < NOW() AND (date_completed IS NULL OR date_completed > NOW())']
   named_scope :local, lambda{|| {:conditions => ['location_id IN (?)',  Location.current_health_center.children.map{|l|l.id} + [Location.current_health_center.id] ]}}
 
   named_scope :in_programs, lambda{|names| names.blank? ? {} : {:include => :program, :conditions => ['program.name IN (?)', Array(names)]}}
-  named_scope :not_completed, lambda{|tags| tags.blank? ? {} : {:conditions => ['date_completed IS NULL']}}
+  named_scope :not_completed, lambda{||  {:conditions => ['date_completed IS NULL']}}
 
   named_scope :in_uncompleted_programs, lambda{|names| names.blank? ? {} : {:include => :program, :conditions => ['program.name IN (?) AND date_completed IS NULL', Array(names)]}}
 
@@ -39,10 +39,15 @@ class PatientProgram < ActiveRecord::Base
   end
 
   def to_s
-    "#{self.program.concept.concept_names.typed("SHORT").first.name rescue program.concept.concept_names.first.name} (at #{location.name rescue nil})"
+	if !self.program.concept.shortname.blank?
+    	"#{self.program.concept.shortname} (at #{location.name rescue nil})"
+	else
+    	"#{self.program.concept.fullname} (at #{location.name rescue nil})"
+	end
   end
   
   def transition(params)
+	#raise params.to_yaml
     ActiveRecord::Base.transaction do
       # Find the state by name
       # Used upcase below as we were having problems matching the concept fullname with the state
@@ -64,11 +69,18 @@ class PatientProgram < ActiveRecord::Base
           :end_date => params[:end_date]
         })
         state.save!
+
+		if selected_state.terminal == 1
+			complete(params[:start_date])
+		else
+			complete(nil)
+		end
+
       end  
     end
   end
   
-  def complete(end_date)
+  def complete(end_date = nil)
     self.date_completed = end_date
     self.save!
   end
@@ -79,7 +91,7 @@ class PatientProgram < ActiveRecord::Base
   # obs must be the current health center, not the station!
   def current_regimen
     location_id = Location.current_health_center.location_id
-    obs = patient.person.observations.recent(1).all(:conditions => ['value_coded IN (?) AND location_id = ?', regimens, location_id])
+		obs = patient.person.observations.recent(1).all(:joins => :encounter, :conditions => ['value_coded IN (?) AND encounter.location_id = ?', regimens, location_id])
     obs.first.value_coded rescue nil
   end
 

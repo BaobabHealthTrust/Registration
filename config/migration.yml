@@ -1,4 +1,5 @@
 config:
-  import_path: /tmp/migrator
-  import_years: "2007"
-  file_map_location: /tmp/migrator
+  import_path: /home/precious/src/migrator_test
+  import_years: "2001"
+  file_map_location: /home/precious/src/migrator_test
+  import_type: "encounter"

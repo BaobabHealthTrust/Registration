@@ -50,7 +50,7 @@
 </table-->
 <table class = 'userdata'>
   <%row_class = 'blue'
-    @holidays.map do | date | 
+    (@holidays || []).map do | date | 
       if row_class == 'blue'
         row_class = 'white'
       else

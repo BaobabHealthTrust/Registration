@@ -1,17 +1,15 @@
-set :staging, CLI.ui.ask("Do you want to stage this deployment? (y/n): ") == 'y'
-set :repository, "git://github.com/jeffrafter/mateme.git"  
-set :domain, "mateme.socialrange.org"
-#set :repository, "git@neverlet.be:mateme.git"
-#set :domain, "neno:8999"
-set :application, staging ? "staging" : "mateme"
+set :domain, CLI.ui.ask("Domain you are deploying to (IP Address or Hostname): ")
+set :local, "#{`ifconfig | grep "192"`.match(/192\.168\.\d+\.\d+/)}"
+
+set :application, "bart2"
 set :keep_releases, 3
 set :scm, :git
 set :deploy_via, :remote_cache
 set :deploy_to, "/var/www/#{application}"
-set :branch, "master"
+set :branch, "bart2"
 set :user, "deploy"
 set :runner, "deploy"
-set :use_sudo, :false
+set :use_sudo, :true
 
 role :app, "#{domain}"
 role :web, "#{domain}"
@@ -91,6 +89,18 @@ end
 
 # == DEPLOY ======================================================================
 namespace :deploy do
+  if Capistrano::CLI.ui.ask("Pull from current machine (#{local})? (y/n): ") == 'y'
+    set :distribution, local
+    set :repository, "git://#{distribution}/var/www/#{application}"
+  elsif Capistrano::CLI.ui.ask("Pull from github.com (public)? (y/n): ") == 'y'
+    set :repository, "git://github.com/Baobab/bart.git"
+  elsif Capistrano::CLI.ui.ask("Connect to distributed git repository? (y/n): ") == 'y'
+    set :distribution, Capistrano::CLI.ui.ask("Repository address: ")
+    set :repository, "git://#{distribution}/var/www/#{application}"
+	else 	
+  	set :repository, "git://null"
+	end	
+	
   desc "Start application"
   task :start do
     run "touch #{current_path}/tmp/restart.txt"
@@ -106,4 +116,4 @@ end
 before "deploy:migrate", "db:backup"
 after "deploy:setup", "init:config:database"
 after "deploy:symlink", "init:config:localize"
-after "deploy:symlink", "init:config:workplans"
+#after "deploy:symlink", "init:config:workplans"

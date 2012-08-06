@@ -1,22 +1,29 @@
 <%= stylesheet_link_tag 'extra_buttons' %>
 <style type="text/css">
-  #stats {
-    width:95%;
-    margin:10px;
-    background:white;
+  body {
+    -moz-user-select:none;
+	font-family: Arial,sans-serif;
   }
 
-  #stats a {
-    background-color: grey;
-    border-bottom: 1px outset black;
-    border-style: outset;
-    border-top: 1px outset black;
-    color: white;
-    display: block;
-    padding: 10px 16px 10px 10px;
-    text-align: center;
-    text-decoration: none;
+  #stats {
+    width:98%;
+    margin:10px;
+    background:white;
+    -moz-user-select:none;
   }
+
+	#stats a {
+		border-radius: 7px; 
+		background-color: #669999;
+		border-bottom: 1px outset black;
+		border-style: outset;
+		border-top: 1px outset black;
+		color: white;
+		display: block;
+		padding: 10px 16px 10px 10px;
+		text-align: center;
+		text-decoration: none;
+	}
 
   #stats td {
     width: 310px;
@@ -39,7 +46,7 @@
 </script>
 
 <base target="_parent">
-<h2 style="margin: 0px;">Select task</h2>
+<h2 style="margin: 0px;-moz-user-select:none;">Select task</h2>
 <div id="table_div">
 
   <table id="stats">
