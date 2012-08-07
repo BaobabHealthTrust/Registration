@@ -5,13 +5,13 @@
 @reports << ['Preffered keyboard',"/user/properties/#{current_user.id}"]
 
 if not Location.current_location.name.match(/Outpatient/i)
-  @reports << ['Activities',"/user/activities/#{current_user.id}"]
+  #@reports << ['Activities',"/user/activities/#{current_user.id}"]
 end
 if current_user.admin?
   @reports << ['Create user',"/user/new"]
   @reports << ['Edit user',"/user/select_user"]
-	@reports << ['Set user roles',"/user/users"]
-	@reports << ['Set related roles',"/user/set_role_role/#{current_user.id}"]
+	#@reports << ['Set user roles',"/user/users"]
+	#@reports << ['Set related roles',"/user/set_role_role/#{current_user.id}"]
 end
 %>
 
