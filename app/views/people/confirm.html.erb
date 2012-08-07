@@ -95,13 +95,12 @@
 			<span id='patient_residence'><%= @patient_bean.current_residence rescue "" %></span>
 			
 			<span id='patient_gender'><%= @patient_bean.sex rescue "" %></span>
-			<span id='patient_guardian'><%= @patient_bean.address rescue "" %></span>
 
 			<div id="patient_card">
 				<%# if Location.current_location.name.match(/HIV|ART/i) %>
 
-					<%if(@patient_bean.address != nil) %>
-						<span value="<%= @patient_bean.address rescue '' %>">Current T/A or Ward</span>
+					<%if(@patient_bean.state_province != nil) %>
+						<span value="<%= @patient_bean.state_province rescue '' %>">Current T/A or Ward</span>
 					<% end %>
 
 					<% if (@patient_bean.home_district rescue nil) != nil  %>

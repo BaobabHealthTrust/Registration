@@ -462,7 +462,7 @@ module PatientService
     label.draw_barcode(50,180,0,1,5,15,120,false,"#{patient_bean.national_id}")
     label.draw_multi_text("#{patient_bean.name.titleize}")
     label.draw_multi_text("#{patient_bean.national_id_with_dashes} #{patient_bean.birth_date}#{sex}")
-    label.draw_multi_text("#{patient_bean.address} , #{patient_bean.current_residence}" )
+    label.draw_multi_text("#{patient_bean.state_province} , #{patient_bean.current_residence}" )
     label.print(1)
   end
 
@@ -809,7 +809,8 @@ EOF
     patient.person_id = person.id
     patient.patient_id = person.patient.id
     patient.arv_number = get_patient_identifier(person.patient, 'ARV Number')
-    patient.address = person.addresses.first.state_province
+    patient.address = person.addresses.first.address1
+    patient.state_province = person.addresses.first.state_province
     patient.national_id = get_patient_identifier(person.patient, 'National id')    
 	  patient.national_id_with_dashes = get_national_id_with_dashes(person.patient)
     patient.name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil

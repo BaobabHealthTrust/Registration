@@ -568,7 +568,7 @@ class GenericPatientsController < ApplicationController
     patient_bean = PatientService.get_patient(@patient.person)
 
     traditional_authorities = []
-		district_id = District.find_by_name("#{patient_bean.address}").id
+		district_id = District.find_by_name("#{patient_bean.state_province}").id
     traditional_authority_conditions = ["district_id = ?}%", district_id]
 
     all_traditional_authorities = TraditionalAuthority.find(:all, :conditions => ["district_id = ?", "#{district_id}"], :order => 'name')
@@ -2192,7 +2192,7 @@ class GenericPatientsController < ApplicationController
       end
     when "address"
       address2 = params[:person][:addresses]
-      patient.person.addresses.first.update_attributes(address2) if address2
+      patient.person.addresses.first.update_attributes(address1) if address1
     when "home_district"
       address2 = params[:person][:addresses]
       patient.person.addresses.first.update_attributes(address2) if address2
