@@ -548,20 +548,22 @@ class GenericPatientsController < ApplicationController
 
     return traditional_authorities
   end
-  
+
   def village
-    #raise params.to_yaml
-    traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").id
+
+    traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").traditional_authority_id
+
     village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "#{params[:filter_value]}%", traditional_authority_id]
 
-    villages = Village.find(:all,:conditions => village_conditions, :order => 'name')
+    villages = Village.find(:all,:conditions => ["traditional_authority_id = ?", "#{traditional_authority_id}"], :order => 'name')
+
     villages = villages.map do |v|
       "<li value='#{v.name}'>#{v.name}</li>"
     end
-    #raise villages.to_yaml
+
     render :text => villages.join('') + "<li value='Other'>Other</li>" and return
   end
-  
+
   def all_state_provincies
     patient_bean = PatientService.get_patient(@patient.person)
 
