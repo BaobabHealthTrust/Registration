@@ -553,7 +553,7 @@ class GenericPatientsController < ApplicationController
 
     traditional_authority_id = TraditionalAuthority.find_by_name("#{params[:filter_value]}").traditional_authority_id
 
-    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "#{params[:filter_value]}%", traditional_authority_id]
+    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "%#{params[:filter_value]}%", traditional_authority_id]
 
     villages = Village.find(:all,:conditions => ["traditional_authority_id = ?", "#{traditional_authority_id}"], :order => 'name')
 
