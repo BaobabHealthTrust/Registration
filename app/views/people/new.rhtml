@@ -190,7 +190,7 @@
 			:condition => '$("region_region_name").value != "Other"',
   	 	:ajaxURL => '',
   	  :field_type => 'alpha',
-  	  :helpText => 'Home District',
+  	  :helpText => 'Home District/Country',
   	  :allowFreeText => true,
 			:tt_onLoad => "seen(tstCurrentPage); set_ajaxURL_for_suggestions('/people/district/District?filter_value=' ,$('region_region_name').value);$('nextButton').style.display = 'none';" } if ask_home_village %>  
 
@@ -201,17 +201,22 @@
   	  :id => 'address2_a',:tt_requireNextClick => true,
   	  :ajaxURL => '/person_addresses/address2?search_string=',
   	  :allowFreeText => true, :field_type => 'alpha',
-  	  :helpText => 'Specify Home District',
+  	  :helpText => 'Specify Home District/Country',
   	  :tt_onLoad => "$('nextButton').style.display = 'block';" } if ask_home_village %>  
 
-  <%= text_field "person[addresses]" , 'county_district', :condition => '$("address2").value != "Other"', :helpText => 'Ancestral Traditional Authority (T/A) or area of residence',:tt_requireNextClick => false, :ajaxURL => '', :tt_pageStyleClass => "azButton", :tt_onLoad => "set_ajaxURL_for_suggestions('/people/traditional_authority/TraditionalAuthority?filter_value=' ,document.getElementById('address2').value);$('nextButton').style.display = 'none';" %></p>
+  <%= text_field "person[addresses]" , 'county_district', :condition => '$("region_region_name").value != "Foreign"', :helpText => 'Ancestral Traditional Authority (T/A) or area of residence',:tt_requireNextClick => false, :ajaxURL => '', :tt_pageStyleClass => "azButton", :tt_onLoad => "set_ajaxURL_for_suggestions('/people/traditional_authority/TraditionalAuthority?filter_value=' ,document.getElementById('address2').value);$('nextButton').style.display = 'none';" %></p>
 
-  <%= text_field "p[addresses]" , 'county_district_a', :tt_onUnLoad => '$("person_addresses_county_district").value = $("p_addresses_county_district_a").value', :condition => '$("address2").value == "Other"', :ajaxURL => '/person_addresses/traditional_authority?search_string=' , :helpText => 'Specify Ancestral Traditional Authority (T/A) or area of residence' , :tt_pageStyleClass => "azButton", :allowFreeText => true, :tt_onLoad => "$('nextButton').style.display = 'block';"  %></p>
+  <%= text_field "p[addresses]" , 'county_district_a', :tt_onUnLoad => '$("person_addresses_county_district").value = $("p_addresses_county_district_a").value', :condition => '$("region_region_name").value == "Other"', :ajaxURL => '/person_addresses/traditional_authority?search_string=' , :helpText => 'Specify Ancestral Traditional Authority (T/A) or area of residence' , :tt_pageStyleClass => "azButton", :allowFreeText => true, :tt_onLoad => "$('nextButton').style.display = 'block';"  %></p>
 
 <p><label for="filter_region">Current Region</label></br>
-<%= text_field "filter" , 'region', :xhelpText => 'Region', :tt_requireNextClick => false, :ajaxURL => '', :tt_onLoad => "set_ajaxURL_for_suggestions('/people/region/Region?filter_value=' ,document.getElementById('person_addresses_county_district').value);$('nextButton').style.display = 'none';" %></p>
+<%#= text_field "filter" , 'region', :xhelpText => 'Region', :tt_requireNextClick => false, :ajaxURL => '', :tt_onLoad => "set_ajaxURL_for_suggestions('/people/region/Region?filter_value=' ,document.getElementById('person_addresses_county_district').value);$('nextButton').style.display = 'none';" %></p>
 
-<%= text_field_tag "person[addresses][state_province]", params[:state_province], {:id => 'filter_district', :field_type => 'alpha', :helpText => 'Current District', :tt_requireNextClick => false, :ajaxURL => '', :allowFreeText => false, :tt_onLoad => "seen(tstCurrentPage); set_ajaxURL_for_suggestions('/people/district/District?filter_value=' ,document.getElementById('filter_region').value);$('nextButton').style.display = 'none';" } if ask_home_village %>  
+<%= select_tag "region_name", options_for_select(["Central Region","Southern Region","Northern Region"]), 
+			{:id => 'region_name',
+			 :tt_requireNextClick => false,
+			 :helpText => 'Current Region'}%>
+
+<%= text_field_tag "person[addresses][state_province]", params[:state_province], {:id => 'filter_district', :field_type => 'alpha', :helpText => 'Current District', :tt_requireNextClick => false, :ajaxURL => '', :allowFreeText => false, :tt_onLoad => "seen(tstCurrentPage); set_ajaxURL_for_suggestions('/people/district/District?filter_value=' ,document.getElementById('region_name').value);$('nextButton').style.display = 'none';" } if ask_home_village %>  
 
 
 <p><label for="filter_t_a">Traditional Authority (T/A) or area of residence</label></br>
