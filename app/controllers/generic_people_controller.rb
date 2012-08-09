@@ -95,7 +95,7 @@ class GenericPeopleController < ApplicationController
 		(@people || []).each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient
-		end
+		end rescue nil
 
 	end
   
