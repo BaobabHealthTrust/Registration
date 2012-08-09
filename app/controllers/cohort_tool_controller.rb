@@ -759,7 +759,7 @@ class CohortToolController < GenericCohortToolController
 		elsif @selSelect.include?('day')
 			@report_type = @day.to_date.strftime("%d-%B-%Y") + " report "
 		else
-			@report_type = @start_date.to_date.strftime("%Y-%B-%d") + " to " + @end_date.to_date.strftime("%Y-%B-%d")
+			@report_type = @start_date.to_date.strftime("%d/%B/%Y") + "  to  " + @end_date.to_date.strftime("%d/%B/%Y")
 		end
     render :layout => 'cohort'
   end
