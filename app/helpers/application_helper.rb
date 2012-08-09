@@ -116,9 +116,8 @@ module ApplicationHelper
   end
 
   def version
-    #"Bart Version: #{BART_VERSION}#{' ' + BART_SETTINGS['installation'] if BART_SETTINGS}, #{File.ctime(File.join(RAILS_ROOT, 'config', 'environment.rb')).strftime('%d-%b-%Y')}"
     style = "style='background-color:red;'" unless session[:datetime].blank?
-    "Bart Version: #{BART_VERSION} - <span #{style}>#{(session[:datetime].to_date rescue Date.today).strftime('%A, %d-%b-%Y')}</span>"
+    "National EMR:Patient Registartion: #{PR_VERSION} - <span #{style}>#{(session[:datetime].to_date rescue Date.today).strftime('%A, %d-%b-%Y')}</span>"
   end
   
   def welcome_message
@@ -173,8 +172,7 @@ module ApplicationHelper
   end
   
   def concept_set_options(concept_name)
-    concept_id = ConceptName.find(:first,:joins =>"INNER JOIN concept USING (concept_id)",
-                                  :conditions =>["voided = 0 AND concept.retired = 0 AND name = ?",concept_name]).concept_id
+    concept_id = concept_id = ConceptName.find_by_name(concept_name).concept_id
     set = ConceptSet.find_all_by_concept_set(concept_id, :order => 'sort_weight')
     options = set.map{|item|next if item.concept.blank? ; [item.concept.fullname, item.concept.fullname] }
     options_for_select(options)
@@ -182,13 +180,13 @@ module ApplicationHelper
 
 
   def selected_concept_set_options(concept_name, exclude_concept_name)
-    concept_id = ConceptName.find(:first,:joins =>"INNER JOIN concept USING (concept_id)",
-                                  :conditions =>["voided = 0 AND concept.retired = 0 AND name = ?",concept_name]).concept_id
+    concept_id = concept_id = ConceptName.find_by_name(concept_name).concept_id
+    
     set = ConceptSet.find_all_by_concept_set(concept_id, :order => 'sort_weight')
     options = set.map{|item|next if item.concept.blank? ; [item.concept.fullname, item.concept.fullname] }
 
-    exclude_concept_id = ConceptName.find(:first,:joins =>"INNER JOIN concept USING (concept_id)",
-                                  :conditions =>["voided = 0 AND concept.retired = 0 AND name = ?", exclude_concept_name]).concept_id
+    exclude_concept_id = ConceptName.find_by_name(exclude_concept_name).concept_id
+    
     exclude_set = ConceptSet.find_all_by_concept_set(exclude_concept_id, :order => 'sort_weight')
     exclude_options = exclude_set.map{|item|next if item.concept.blank? ; [item.concept.fullname, item.concept.fullname] }
 
@@ -196,8 +194,8 @@ module ApplicationHelper
   end
   
   def concept_set(concept_name)
-    concept_id = ConceptName.find(:first,:joins =>"INNER JOIN concept USING (concept_id)",
-                                  :conditions =>["voided = 0 AND concept.retired = 0 AND name = ?",concept_name]).concept_id
+    concept_id = ConceptName.find_by_name(concept_name).concept_id
+    
     set = ConceptSet.find_all_by_concept_set(concept_id, :order => 'sort_weight')
     options = set.map{|item|next if item.concept.blank? ; [item.concept.fullname] }
     return options
@@ -221,8 +219,8 @@ module ApplicationHelper
   end
   
   def concept_sets(concept_name)
-    concept_id = ConceptName.find(:first,:joins =>"INNER JOIN concept USING (concept_id)",
-                                  :conditions =>["retired = 0 AND name = ?",concept_name]).concept_id
+	concept_id = ConceptName.find_by_name(concept_name).concept_id
+
     set = ConceptSet.find_all_by_concept_set(concept_id, :order => 'sort_weight')
     set.map{|item|next if item.concept.blank? ; item.concept.fullname }
   end
@@ -243,4 +241,83 @@ module ApplicationHelper
 			end
 		end
 	end
+
+  def preferred_user_keyboard
+    UserProperty.find(:first,
+      :conditions =>["property = ? AND user_id = ?",'preferred.keyboard', 
+      current_user.id]).property_value rescue 'abc'
+  end
+
+  def create_from_dde_server                                                    
+    CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+  end 
+
+  def current_user_roles                                                        
+    user_roles = UserRole.find(:all,:conditions =>["user_id = ?", current_user.id]).collect{|r|r.role}
+    RoleRole.find(:all,:conditions => ["child_role IN (?)", user_roles]).collect{|r|user_roles << r.parent_role}
+    return user_roles.uniq
+  end
+
+  def suggested_return_date(patient,dispensed_date)
+    session_date = dispensed_date.to_date
+    drugs_given = Hash.new()
+    PatientService.drugs_given_on(patient, session_date).uniq.each do |order|
+      drug = order.drug_order.drug
+      next unless MedicationService.arv(drug)
+      if drugs_given[drug.name].blank? 
+        drugs_given[drug.name] = {:quantity => order.drug_order.quantity ,
+                               :dose => order.drug_order.equivalent_daily_dose,
+                               :auto_expire_date => order.auto_expire_date 
+                              }
+      else
+        drugs_given[drug.name] = {:quantity => order.drug_order.quantity + drugs_given[drug.name][:quantity],
+                               :dose => order.drug_order.equivalent_daily_dose,
+                               :auto_expire_date => order.auto_expire_date 
+                              }
+      end
+    end rescue {}
+
+    return if drugs_given.blank?
+
+    min_pills_given_per_drug = 0
+    auto_expire_date = nil
+    return_date = nil 
+    (drugs_given || {}).each do |name,values|
+      if ((values[:quantity] <= min_pills_given_per_drug) || min_pills_given_per_drug == 0)
+        min_pills_given_per_drug = values[:quantity] 
+        return_date = dispensed_date + (values[:quantity]/values[:dose]).days
+        auto_expire_date = values[:auto_expire_date].to_date rescue dispensed_date
+      end
+    end
+   
+    #here we check if the prescription period is is inline with what was dispensed
+    #if not we go with the date when the actual drugs will run out
+    if auto_expire_date <= return_date
+      return_date = auto_expire_date
+    end unless auto_expire_date.blank?
+
+    #if the suggested_return_date is available we add a two day buffer by subtracting
+    #two days to the suggested_return_date
+    return_date -= 2.day if return_date 
+    return return_date
+  end
+
+	def advanced_prescription_interface
+		get_global_property_value("advanced.prescription.interface")  
+	end
+	
+  def current_program_location                                                  
+    current_user_activities = current_user.activities                      
+    if Location.current_location.name.downcase == 'outpatient'                  
+      return "OPD"                                                              
+    elsif current_user_activities.include?('Manage Lab Orders') or current_user_activities.include?('Manage Lab Results') or
+       current_user_activities.include?('Manage Sputum Submissions') or current_user_activities.include?('Manage TB Clinic Visits') or
+       current_user_activities.include?('Manage TB Reception Visits') or current_user_activities.include?('Manage TB Registration Visits') or
+       current_user_activities.include?('Manage HIV Status Visits')             
+       return 'TB program'                                                      
+    else #if current_user_activities                                            
+       return 'HIV program'                                                     
+    end                                                                         
+  end
+
 end

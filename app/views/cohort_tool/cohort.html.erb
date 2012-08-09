@@ -131,6 +131,16 @@
 			<td style="text-align:left;border-width:1px 1px 1px 1px">Other</td>
 			<td style="border-width:1px 1px 1px 1px"><%= @services['SERVICES']['Other'] -%></td>
 		</tr>
+		<% 
+			@total_services = @services['SERVICES']['Casualty'] + @services['SERVICES']['Dental'] + @services['SERVICES']['Eye'] +
+												@services['SERVICES']['Other'] + @services['SERVICES']['Surgical'] + @services['SERVICES']['STI Clinic'] +  @services['SERVICES']['Skin'] + @services['SERVICES']['Pediatrics'] + @services['SERVICES']['Orthopedics'] + @services['SERVICES']['OB/Gyn'] + @services['SERVICES']['Medical'] + @services['SERVICES']['Family Planing']
+		
+		%>
+		<tr class = 'row_break'>
+			<td style ="border-width:0px"></td>
+			<td style="text-align:left;border-width:1px 1px 1px 1px"><h3><b>Total Number of services</b></h3></td>
+			<td style="border-width:1px 1px 1px 1px"><h3><b><%= @total_services -%></b></h3></td>
+		</tr>
 		</tbody>
 	</table>
 </div>

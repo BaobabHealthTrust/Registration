@@ -26,8 +26,13 @@
             <div id="facility">Kamuzu central hospital<%#= @facility %></div>
             <div id="location"><%= @location %></div>
             <% retrospective = 'false'
-               retrospective = 'true' if session[:datetime]
+               if session[:datetime]
+               	if session[:datetime].to_date != Date.today.to_date
+               		retrospective = 'true'
+               	end 
+               end
             %>
+
             <div id="date" retrospective="<%= retrospective %>"><%= @date %></div>
             <div id="user"><%= @user %></div>
 
@@ -37,7 +42,7 @@
               <%if @location == 'Chronic Cough'%>
                 <option value='/clinic/lab_tab'>Laboratory</option>
               <%end%>
-              <% if User.current_user.admin? %>
+              <% if current_user.admin? %>
                 <option value='/clinic/properties_tab'>Properties</option>
               <%end%>
               <option value='/clinic/administration_tab'>Administration</option>
@@ -51,9 +56,18 @@
                 <option value='/location?from=clinic' ttSize="150px">Swap Desk</option>
               <% end %>
 
-              <option value='<%= ((session[:datetime].to_date rescue '') != '' ?
+							<%
+								session_datetime = ''
+								if session[:datetime]
+		             	if session[:datetime].to_date != Date.today.to_date
+		             		session_datetime = session[:datetime].to_date
+		             	end 
+               	end
+							%>
+
+              <option value='<%= ((session_datetime.to_date rescue '') != '' ?
                           "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="150px">
-                <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+                <%= ((session_datetime.to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
             </select>
             <tr>
               <td align='center'>

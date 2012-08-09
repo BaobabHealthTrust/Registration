@@ -11,7 +11,8 @@ class Observation < ActiveRecord::Base
   has_many :concept_names, :through => :concept
 
   named_scope :recent, lambda {|number| {:order => 'obs_datetime DESC,date_created DESC', :limit => number}}
-  named_scope :old, lambda {|number| {:order => 'obs_datetime ASC,date_created ASC', :limit => number}}
+  named_scope :before, lambda {|date| {:conditions => ["obs_datetime < ? ", date], :order => 'obs_datetime DESC, date_created DESC', :limit => 1}}
+  named_scope :old, lambda {|number| {:order => 'obs_datetime ASC, date_created ASC', :limit => number}}
   named_scope :question, lambda {|concept|
     concept_id = concept.to_i
     concept_id = ConceptName.first(:conditions => {:name => concept}).concept_id rescue 0 if concept_id == 0
@@ -113,7 +114,17 @@ class Observation < ActiveRecord::Base
     #the following code is a hack
     #we need to find a better way because value_coded can also be a location - not only a concept
     return coded_name unless coded_name.blank?
-    Concept.find_by_concept_id(self.value_coded).concept_names.typed("SHORT").first.name || ConceptName.find_by_concept_id(self.value_coded).name rescue ''
+    answer = Concept.find_by_concept_id(self.value_coded).shortname rescue nil
+	
+	if answer.nil?
+		answer = Concept.find_by_concept_id(self.value_coded).fullname rescue nil
+	end
+
+	if answer.nil?
+		answer = Concept.find_with_voided(self.value_coded).fullname + ' - retired'
+	end
+	
+	return answer
   end
 
   def self.new_accession_number

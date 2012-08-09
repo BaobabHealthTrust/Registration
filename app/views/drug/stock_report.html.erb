@@ -1,0 +1,186 @@
+<%= javascript_include_tag "prototype" %>
+
+<style>
+</style>
+
+<%= stylesheet_link_tag "stock_report" %>
+<%#= stylesheet_link_tag "data_table" %>
+<%#= stylesheet_link_tag "data_table_jui" %>
+<%#= stylesheet_link_tag "data_table_page" %>
+
+<%=javascript_include_tag "jquery_data_table" %>
+<%=javascript_include_tag "jquery.dataTables.min" %>
+
+<script>
+  var tt_cancel_destination = '/clinic'; // /management';
+  function dataT(){
+    $('#data_table').dataTable();
+  }
+  dataT();
+</script>
+
+<div id="general_dashboard">
+  <h2>Drug stock report</h2><h3>From: <%= @start_date.strftime("%A, %Y %b %d")%> 
+    <br/>To: <%=@end_date.strftime("%A, %Y %b %d")%></br></h3>
+<%#= render :partial => "header" %>
+  </br>
+  <table class="main-table">
+  <tr class="header">
+    <td>
+      <table>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="width:200px;">Item</td>
+          <td style="text-align:right;padding-right:5px;">Units</td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td colspan="2" style="text-align:center;">Opening stock</td>
+        </tr>
+        <tr>
+          <td>Date</td>
+          <td style="text-align:right;">Verified</td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td colspan="2" style="text-align:center;">Total adjustments in interval</td>
+        </tr>
+        <tr>
+          <td style="vertical-align: bottom;">Recieved</td>
+          <td style="text-align:right;">Relocated <br />out/disposed</td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="text-align:center;">Dispensed</td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td colspan="3" style="text-align:center;">Closing stoke</td>
+        </tr>
+        <tr>
+          <td style="width:65px;">Date</td>
+          <td>Expected</td>
+          <td style="text-align:right;">Verified</td>
+        </tr>
+      </table>
+    </td>
+    <td>
+      <table>
+        <tr>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="text-align:center;">Difference</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <%color = "blue"
+    count = 1
+    original_form_count = 0
+    @stock.each{|name,values|
+      if color == "blue"
+        color = "white"
+      else
+        color = "blue"
+      end
+      
+      %>
+  <tr>
+    <td class="color_<%=color%>">
+      <table class="inner-data">
+        <tr>
+          <td style="width:90px;"><%=name%></td>
+          <td style="text-align:right;width:40px;vertical-align: top;">tins (60 tabs)</td>
+        </tr>
+      </table>
+    </td>
+    <td class="color_<%=color%> caldata" id="current_stock_<%=count%>">
+      <table class="inner-data">
+        <tr>
+          <td style="width:60px;text-align:left;"><%=values['start_date']%></td>
+          <td style="width:60px;"><%=(values['confirmed_opening'] / 60).round %></td>
+        </tr>
+      </table>
+    </td>
+    <td class="color_<%=color%> caldata" id="current_stock_<%=count%>">
+      <table class="inner-data">
+        <tr>
+          <td style="width:30px;text-align:left;color:green;">+<%= (values['receipts'] / 60).round %></td>
+          <% relocated = (values['relocated'] / 60).round 
+            if relocated < 0
+          %>
+            <td style="width:100px;color:red;"><%=relocated%></td>
+          <%else%>
+            <td style="width:100px;color:green;">+<%=relocated %></td>
+          <%end%>
+        </tr>
+      </table>
+    </td>
+    <td class="color_<%=color%> caldata" id="dispensed_<%=count%>">
+      <table class="inner-data">
+        <tr>
+        <% dispensed = (values['dispensed'] / 60).round
+           if dispensed < 0
+        %>
+          <td style="text-align:center;color:red;"><%=dispensed %></td>
+        <%else%>
+          <td style="text-align:center;color:green;">+<%=dispensed %></td>
+        <%end%>
+        </tr>
+      </table>
+    </td>
+    <td class="color_<%=color%> caldata" id="dispensed_<%=count%>">
+      <table class="inner-data">
+        <tr>
+          <td style="text-align:left;width:40px;"><%=values['end_date'] %></td>
+          <td style="text-align:left;width:75px;padding-left:12px;"><%=(values['expected'] / 60).round %></td>
+          <td style="text-align:right;width:75px;"><%=(values['confirmed_closing'] / 60).round %></td>
+        </tr>
+      </table>
+    </td>
+    <td class="color_<%=color%> caldata" id="dispensed_<%=count%>">
+      <%
+        expected = ( (values['confirmed_closing'] / 60) - (values['expected'] / 60) ).round
+      %>
+      <table class="inner-data">
+        <tr>
+          <%if expected < 0 %>
+            <td style="text-align:center;color:red;"><%= expected %></td>
+          <%else%>
+            <td style="text-align:center;color:green;">+<%= expected %></td>
+          <%end%>
+        </tr>
+      </table>
+    </td>
+
+
+
+   </tr>
+   <% count+=1
+      original_form_count+=1
+    }%>
+</table>
+</div>
+
+<script>
+  dataT();
+</script>
+

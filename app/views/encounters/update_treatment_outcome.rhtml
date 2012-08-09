@@ -33,7 +33,7 @@ function changeNextButton(text){
 	<%= hidden_field_tag "encounter[encounter_type_name]", "UPDATE OUTCOME" %>
 	<%= hidden_field_tag "encounter[patient_id]", @patient.id %>
 	<%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
 
   <%@tb_treatment_outcomes = ["", "On TB Treatments", "Cure (Smear negative)","TX Complete (No Smear)","Died", "TX Failure", "Default","Transfer Out"]%>
 

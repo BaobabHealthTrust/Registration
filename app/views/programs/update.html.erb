@@ -106,7 +106,7 @@
        :condition => "current_state_input_box.value.toUpperCase() == 'PATIENT TRANSFERRED OUT'",
        :allowFreeText => true } %>
 
-  <%= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
+  <%#= touch_yes_no_unknown_tag "TRANSFER WITHIN RESPONSIBILITY", @patient, nil,
       {:id => "transfer_within_responsibility",
        :optional => false,
        :condition => "current_state_input_box.value.toUpperCase() == 'PATIENT TRANSFERRED OUT'",
@@ -116,6 +116,6 @@
   <%= hidden_field_tag "encounter[encounter_type_name]", "TRANSFER OUT" %>
   <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
   <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
-  <%= hidden_field_tag "encounter[provider_id]", session[:user_id] %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
 </form>
 

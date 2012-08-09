@@ -23,7 +23,7 @@
     background-color: white;
     border: solid 1px #eee;
     border-width: 1px;
-    overflow: hidden;
+    
   }
 
 </style>
@@ -70,7 +70,7 @@
         <% end %>
       	<% if !@family_planing.blank? %>
       		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Family_planing</td>
+		        <td style="text-align:left;">Family planing</td>
 		        <td><%= @family_planing.length.to_i %></td>
 		        <td><%= @family_planing.length.to_i %></td>
         	</tr>
@@ -126,15 +126,13 @@
         <% end %>
         <% if !@other.blank? %>
       		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Skin</td>
+		        <td style="text-align:left;">Other</td>
 		        <td><%= @other.length.to_i %></td>
 		        <td><%= @other.length.to_i %></td>
         	</tr>
         <% else %>
         <% end %>
-        
-      	<%#= raise service.to_yaml %>
-      	<%# end %>
+ 
     </table>
   </div>
 </div>

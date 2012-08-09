@@ -85,7 +85,7 @@ INSERT INTO openmrs_b2.patient_identifier (patient_id, identifier_type, preferre
 SELECT patient_id, 17 AS identifier_type, preferred, location_id, identifier, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_bart1.patient_identifier WHERE identifier_type = 10;
 
 INSERT INTO openmrs_b2.patient_identifier (patient_id, identifier_type, preferred, location_id, identifier, creator, voided, voided_by, void_reason, date_voided, date_created, uuid)
-SELECT patient_id, 4 AS identifier_type, preferred, location_id, identifier, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_bart1.patient_identifier WHERE identifier_type = 18;
+SELECT patient_id, 4 AS identifier_type, preferred, location_id, CONCAT_WS('-ARV-', SUBSTRING(identifier, 1, 3), RTRIM(LTRIM(RIGHT(identifier, LENGTH(identifier) - 3)))) AS identifier, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_bart1.patient_identifier WHERE identifier_type = 18;
 
 INSERT INTO openmrs_b2.patient_identifier (patient_id, identifier_type, preferred, location_id, identifier, creator, voided, voided_by, void_reason, date_voided, date_created, uuid)
 SELECT patient_id, 18 AS identifier_type, preferred, location_id, identifier, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_bart1.patient_identifier WHERE identifier_type = 19;
@@ -118,8 +118,8 @@ INSERT INTO openmrs_b2.person_name (person_id, middle_name, given_name, family_n
 SELECT person_id, username, username, username,  1, NULL, creator, retired, retired_by, retire_reason, date_retired, date_created, (SELECT UUID()) AS uuid FROM openmrs_b2.users;
 
 /* Update patient programs */
-INSERT INTO openmrs_b2.patient_program (patient_program_id, patient_id, program_id, date_enrolled, date_completed, creator, voided, voided_by, void_reason, date_voided, date_created, uuid)
-SELECT patient_program_id, patient_id, program_id, date_enrolled, date_completed, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_bart1.patient_program WHERE patient_id IN (SELECT patient_id FROM openmrs_bart1.patient);
+INSERT INTO openmrs_b2.patient_program (patient_program_id, patient_id, program_id, date_enrolled, date_completed, creator, voided, voided_by, void_reason, date_voided, date_created, uuid, location_id)
+SELECT patient_program_id, patient_id, program_id, date_enrolled, date_completed, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid, (SELECT property_value FROM openmrs_bart1.global_property WHERE property = "current_health_center_id") AS location_id FROM openmrs_bart1.patient_program WHERE patient_id IN (SELECT patient_id FROM openmrs_bart1.patient);
 
 UPDATE openmrs_b2.patient_program program SET program.date_enrolled = IFNULL((SELECT dates.start_date FROM openmrs_bart1.patient_start_dates dates WHERE program.patient_id = dates.patient_id), program.date_created);
 
@@ -127,7 +127,7 @@ INSERT INTO openmrs_b2.patient_state (patient_program_id, state, start_date, cre
 SELECT patient_program_id, 1, date_enrolled, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_b2.patient_program WHERE program_id = 1;
 
 INSERT INTO openmrs_b2.patient_state (patient_program_id, state, start_date, creator, voided, voided_by, void_reason, date_voided, date_created, uuid)
-SELECT patient_program_id, 18, date_enrolled, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_b2.patient_program WHERE program_id = 2;
+SELECT patient_program_id, 118, date_enrolled, creator, voided, voided_by, void_reason, date_voided, date_created, (SELECT UUID()) AS uuid FROM openmrs_b2.patient_program WHERE program_id = 2;
 
 
 INSERT INTO openmrs_b2.relationship (person_a, relationship, person_b, creator, date_created, voided, voided_by, date_voided, void_reason, uuid)

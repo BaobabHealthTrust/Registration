@@ -1,16 +1,17 @@
-production:
+development:
    adapter: mysql
-   database: openmrs17
+   database: bart2_development
    username: root
-   password: yammyuk
+   password: root
    host: localhost
 
-development:
-  adapter: mysql
-  database: bart2_development
+production:
+  adapter:  mysql
+  database: openmrs_healthdata
   username: root
   password: root
   host: localhost
+  pool: 500
 
 test: &TEST
   adapter: mysql

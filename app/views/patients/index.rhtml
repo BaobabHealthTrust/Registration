@@ -40,7 +40,6 @@
               <% end %>
 
               <%
-                 session_date = session[:datetime].to_date rescue Date.today
                  task = @task
                  task_name = (task.encounter_type || 'NONE').upcase rescue 'NONE'
               %>
@@ -67,9 +66,18 @@
                   
                 </select>
                 <select id="navigation_links">
-                    <option link='<%= ((session[:datetime].to_date rescue '') != '' ?
-                          "/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
-                     <%= ((session[:datetime].to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+ 						<%
+								session_datetime = ''
+								if session[:datetime]
+		             	if session[:datetime].to_date != Date.today.to_date
+		             		session_datetime = session[:datetime].to_date
+		             	end 
+               	end
+							%>
+
+              <option link='<%= ((session_datetime.to_date rescue '') != '' ?
+                            "/people/reset_datetime/#{@patient.id}" : "/people/set_datetime/#{@patient.id}") %>'  ttSize="160px">
+                  <%= ((session_datetime.to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
                 </select>
              <% end %>
             <tr>

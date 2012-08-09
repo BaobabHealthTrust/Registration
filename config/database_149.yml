@@ -1,0 +1,30 @@
+#production:
+#   adapter: mysql
+#   database: bart2_test
+#   username: bart2
+#   password: bart2
+#   host: 192.168.11.143
+
+production:
+  adapter: mysql
+  username: bart2
+  database: bart2
+  password: bart2
+  host: 192.168.11.149
+
+development:
+  adapter: mysql
+  username: bart2
+  database: bart2
+  password: bart2
+  host: 192.168.11.149
+
+test: &TEST
+  adapter: mysql
+  database: openmrs15
+  username: yamiko
+  password: bart
+  host: localhost
+
+cucumber:
+  <<: *TEST

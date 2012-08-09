@@ -1,38 +1,130 @@
 module PatientService
 	include CoreService
 	require 'bean'
+	require 'json'
+	require 'rest_client'                                                           
+
+  def self.create_patient_from_dde(params)
+	  address_params = params["person"]["addresses"]
+		names_params = params["person"]["names"]
+		patient_params = params["person"]["patient"]
+    birthday_params = params["person"]
+		params_to_process = params.reject{|key,value| 
+      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) 
+    }
+		birthday_params = params_to_process["person"].reject{|key,value| key.match(/gender/) }
+		person_params = params_to_process["person"].reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
+
+
+		if person_params["gender"].to_s == "Female"
+      person_params["gender"] = 'F'
+		elsif person_params["gender"].to_s == "Male"
+      person_params["gender"] = 'M'
+		end
+    
+		unless birthday_params.empty?
+		  if birthday_params["birth_year"] == "Unknown"
+			  birthdate = Date.new(Date.today.year - birthday_params["age_estimate"].to_i, 7, 1) 
+        birthdate_estimated = 1
+		  else
+			  year = birthday_params["birth_year"]
+        month = birthday_params["birth_month"]
+        day = birthday_params["birth_day"]
+
+        month_i = (month || 0).to_i                                                 
+        month_i = Date::MONTHNAMES.index(month) if month_i == 0 || month_i.blank?   
+        month_i = Date::ABBR_MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+                                                                                    
+        if month_i == 0 || month == "Unknown"                                       
+          birthdate = Date.new(year.to_i,7,1)                                
+          birthdate_estimated = 1
+        elsif day.blank? || day == "Unknown" || day == 0                            
+          birthdate = Date.new(year.to_i,month_i,15)                         
+          birthdate_estimated = 1
+        else                                                                        
+          birthdate = Date.new(year.to_i,month_i,day.to_i)                   
+          birthdate_estimated = 0
+        end
+		  end
+    else
+      birthdate_estimated = 0
+		end
+
+    passed_params = {"person"=> 
+        {"data" => 
+          {"addresses"=> 
+            {"state_province"=> address_params["address2"], 
+            "address2"=> address_params["address1"], 
+            "city_village"=> address_params["city_village"],
+            "county_district"=> address_params["county_district"]
+          }, 
+          "attributes"=> 
+            {"occupation"=> params["person"]["occupation"], 
+            "cell_phone_number" => params["person"]["cell_phone_number"] },
+          "patient"=> 
+            {"identifiers"=> 
+              {"diabetes_number"=>""}}, 
+          "gender"=> person_params["gender"], 
+          "birthdate"=> birthdate, 
+          "birthdate_estimated"=> birthdate_estimated , 
+          "names"=>{"family_name"=> names_params["family_name"], 
+            "given_name"=> names_params["given_name"]
+          }}}}
+
+    if !params["remote"]
+      
+      @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+    
+      @dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+    
+      @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+    
+      uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"                          
+      recieved_params = RestClient.post(uri,passed_params)      
+                                          
+      national_id = JSON.parse(recieved_params)["npid"]["value"]
+    else
+      national_id = params["person"]["patient"]["identifiers"]["National_id"]
+    end
+      
+	  person = self.create_from_form(params[:person])
+    identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
+    person.patient.patient_identifiers.create("identifier" => national_id, 
+      "identifier_type" => identifier_type.patient_identifier_type_id) unless national_id.blank?
+    return person
+  end
 
   def self.remote_demographics(person_obj)
     demo = demographics(person_obj)
 
     demographics = {
-                   "person" =>
-                   {"attributes" => {
-                      "occupation" => demo['person']['occupation'],
-                      "cell_phone_number" => demo['person']['cell_phone_number']
-                    } ,
-                    "addresses" => 
-                     { "address2"=> demo['person']['addresses']['location'],
-                       "city_village" => demo['person']['addresses']['city_village'],
-                       "address1"  => demo['person']['addresses']['address1'],
-                       "county_district" => ""
-                     },
-                    "age_estimate" => person_obj.birthdate_estimated ,
-                    "birth_month"=> person_obj.birthdate.month ,
-                    "patient" =>{"identifiers"=>
-                                {"National id"=> demo['person']['patient']['identifiers']['National id'] }
-                               },
-                    "gender" => person_obj.gender.first ,
-                    "birth_day" => person_obj.birthdate.day ,
-                    "date_changed" => demo['person']['date_changed'] ,
-                    "names"=>
-                      {
-                        "family_name2" => demo['person']['names']['family_name2'],
-                        "family_name" => demo['person']['names']['family_name'] ,
-                        "given_name" => demo['person']['names']['given_name']
-                      },
-                    "birth_year" => person_obj.birthdate.year }
-                    }
+      "person" =>
+        {"attributes" => {
+          "occupation" => demo['person']['occupation'],
+          "cell_phone_number" => demo['person']['cell_phone_number']
+        } ,
+        "addresses" => 
+          { "address2"=> demo['person']['addresses']['location'],
+          "city_village" => demo['person']['addresses']['city_village'],
+          "address1"  => demo['person']['addresses']['address1'],
+          "county_district" => ""
+        },
+        "age_estimate" => person_obj.birthdate_estimated ,
+        "birth_month"=> person_obj.birthdate.month ,
+        "patient" =>{"identifiers"=>
+            {"National id"=> demo['person']['patient']['identifiers']['National id'] }
+        },
+        "gender" => person_obj.gender.first ,
+        "birth_day" => person_obj.birthdate.day ,
+        "date_changed" => demo['person']['date_changed'] ,
+        "names"=>
+          {
+          "family_name2" => demo['person']['names']['family_name2'],
+          "family_name" => demo['person']['names']['family_name'] ,
+          "given_name" => demo['person']['names']['given_name']
+        },
+        "birth_year" => person_obj.birthdate.year }
+    }
   end
 
   def self.demographics(person_obj)
@@ -50,24 +142,24 @@ module PatientService
     end
 
     demographics = {"person" => {
-      "date_changed" => person_obj.date_changed.to_s,
-      "gender" => person_obj.gender,
-      "birth_year" => person_obj.birthdate.year,
-      "birth_month" => birth_month,
-      "birth_day" => birth_day,
-      "names" => {
-        "given_name" => person_obj.names[0].given_name,
-        "family_name" => person_obj.names[0].family_name,
-        "family_name2" => person_obj.names[0].family_name2
-      },
-      "addresses" => {
-        "county_district" => person_obj.addresses[0].county_district,
-        "city_village" => person_obj.addresses[0].city_village,
-        "address1" => person_obj.addresses[0].address1,
-        "address2" => person_obj.addresses[0].address2
-      },
-    "attributes" => {"occupation" => self.get_attribute(person_obj, 'Occupation'),
-                     "cell_phone_number" => self.get_attribute(person_obj, 'Cell Phone Number')}}}
+        "date_changed" => person_obj.date_changed.to_s,
+        "gender" => person_obj.gender,
+        "birth_year" => person_obj.birthdate.year,
+        "birth_month" => birth_month,
+        "birth_day" => birth_day,
+        "names" => {
+          "given_name" => person_obj.names[0].given_name,
+          "family_name" => person_obj.names[0].family_name,
+          "family_name2" => person_obj.names[0].family_name2
+        },
+        "addresses" => {
+          "county_district" => person_obj.addresses[0].county_district,
+          "city_village" => person_obj.addresses[0].city_village,
+          "address1" => person_obj.addresses[0].address1,
+          "address2" => person_obj.addresses[0].address2
+        },
+        "attributes" => {"occupation" => self.get_attribute(person_obj, 'Occupation'),
+          "cell_phone_number" => self.get_attribute(person_obj, 'Cell Phone Number')}}}
  
     if not person_obj.patient.patient_identifiers.blank? 
       demographics["person"]["patient"] = {"identifiers" => {}}
@@ -81,16 +173,21 @@ module PatientService
   
   def self.current_treatment_encounter(patient, date = Time.now(), provider = user_person_id)
     type = EncounterType.find_by_name("TREATMENT")
-    encounter = patient.encounters.find(:first,:conditions =>["DATE(encounter_datetime) = ? AND encounter_type = ?",date.to_date,type.id])
+    encounter = patient.encounters.find(:first,:conditions =>["encounter_datetime BETWEEN ? AND ? AND encounter_type = ?",
+    									date.to_date.strftime('%Y-%m-%d 00:00:00'),
+    									date.to_date.strftime('%Y-%m-%d 23:59:59'),
+    									type.id])
     encounter ||= patient.encounters.create(:encounter_type => type.id,:encounter_datetime => date, :provider_id => provider)
-
   end
 
   def self.count_by_type_for_date(date)
     # This query can be very time consuming, because of this we will not consider
     # that some of the encounters on the specific date may have been voided
     ActiveRecord::Base.connection.select_all("SELECT count(*) as number, encounter_type FROM encounter GROUP BY encounter_type")
-    todays_encounters = Encounter.find(:all, :include => "type", :conditions => ["DATE(encounter_datetime) = ?",date])
+    todays_encounters = Encounter.find(:all, :include => "type", :conditions => ["encounter_datetime BETWEEN TIMESTAMP (?) AND TIMESTAMP (?)",
+		date.to_date.strftime('%Y-%m-%d 00:00:00'),
+		date.to_date.strftime('%Y-%m-%d 23:59:59')
+    ])
     encounters_by_type = Hash.new(0)
     todays_encounters.each{|encounter|
       next if encounter.type.nil?
@@ -113,91 +210,48 @@ module PatientService
     Encounter.find_by_sql("SELECT * FROM encounter ORDER BY encounter_datetime LIMIT 1").first
   end
   
-  def self.services
-  	services_concept_id = ConceptName.find_by_name('SERVICES').concept_id
-    
-    @start_date = Date.today.to_date
-    @end_date = Date.today.to_date
-		
-    registration_services_hash = {} ; services = []
-    registration_services_hash['SERVICES'] = {'Casualty' => 0,'Dental' => 0,'Eye' => 0,'Family Planing' => 0,'Medical' => 0,'OB/Gyn' => 0,'Orthopedics' => 0,'Other' => 0,'Pediatrics' => 0,'Skin' => 0,'STI Clinic' => 0,'Surgical' => 0} 
-
-    
-    services = Observation.find(:all, :conditions => ["DATE(obs_datetime) = ? AND concept_id = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc")#.uniq.reverse.first(5) rescue []
-    
-    ( services || [] ).each do | service |
-				  if service.value_text.capitalize == 'Casualty'
-				    registration_services_hash['SERVICES']['Casualty'] += 1
-				  elsif service.value_text.capitalize == 'Eye'
-				    registration_services_hash['SERVICES']['Eye'] += 1
-				  elsif service.value_text.capitalize == 'Family Planing'
-				    registration_services_hash['SERVICES']['Family Planing'] += 1
-				  elsif service.value_text.capitalize == 'Dental'
-				    registration_services_hash['SERVICES']['Dental'] += 1
-				  elsif service.value_text.capitalize == 'Medical'
-				    registration_services_hash['SERVICES']['Medical'] += 1
-				  elsif service.value_text.capitalize == 'OB/Gyn'
-				    registration_services_hash['SERVICES']['OB/Gyn'] += 1
-				  elsif service.value_text.capitalize == 'Orthopedics'
-				    registration_services_hash['SERVICES']['Orthopedics'] += 1
-				  elsif service.value_text.capitalize == 'Pediatrics'
-				    registration_services_hash['SERVICES']['Pediatrics'] += 1
-				  elsif service.value_text.capitalize == ' Skin '
-				    registration_services_hash['SERVICES']['Skin'] += 1
-				  elsif service.value_text.capitalize == 'STI Clinic'
-				    registration_services_hash['SERVICES']['STI Clinic'] += 1
-				  elsif service.value_text.capitalize == 'Surgical'
-				    registration_services_hash['SERVICES']['Surgical'] += 1
-				  else
-						registration_services_hash['SERVICES']['Other'] += 1
-				  end
-				end
-
-  	return services
-  end
-  
   def self.create_remote_person(received_params)
     #raise known_demographics.to_yaml
 
     #Format params for BART
-     new_params = received_params[:person]
-     known_demographics = Hash.new()
-     new_params['gender'] == 'F' ? new_params['gender'] = "Female" : new_params['gender'] = "Male"
+    new_params = received_params[:person]
+    known_demographics = Hash.new()
+    new_params['gender'] == 'F' ? new_params['gender'] = "Female" : new_params['gender'] = "Male"
 
-       known_demographics = {
-                  "occupation"=>"#{new_params[:occupation]}",
-                   "patient_year"=>"#{new_params[:birth_year]}",
-                   "patient"=>{
-                    "gender"=>"#{new_params[:gender]}",
-                    "birthplace"=>"#{new_params[:addresses][:address2]}",
-                    "creator" => 1,
-                    "changed_by" => 1
-                    },
-                   "p_address"=>{
-                    "identifier"=>"#{new_params[:addresses][:state_province]}"},
-                   "home_phone"=>{
-                    "identifier"=>"#{new_params[:home_phone_number]}"},
-                   "cell_phone"=>{
-                    "identifier"=>"#{new_params[:cell_phone_number]}"},
-                   "office_phone"=>{
-                    "identifier"=>"#{new_params[:office_phone_number]}"},
-                   "patient_id"=>"",
-                   "patient_day"=>"#{new_params[:birth_day]}",
-                   "patientaddress"=>{"city_village"=>"#{new_params[:addresses][:city_village]}"},
-                   "patient_name"=>{
-                    "family_name"=>"#{new_params[:names][:family_name]}",
-                    "given_name"=>"#{new_params[:names][:given_name]}", "creator" => 1
-                    },
-                   "patient_month"=>"#{new_params[:birth_month]}",
-                   "patient_age"=>{
-                    "age_estimate"=>"#{new_params[:age_estimate]}"
-                    },
-                   "age"=>{
-                    "identifier"=>""
-                    },
-                   "current_ta"=>{
-                    "identifier"=>"#{new_params[:addresses][:county_district]}"}
-                  }
+    known_demographics = {
+      "occupation"=>"#{new_params[:occupation]}",
+      "patient_year"=>"#{new_params[:birth_year]}",
+      "patient"=>{
+        "gender"=>"#{new_params[:gender]}",
+        "birthplace"=>"#{new_params[:addresses][:address2]}",
+        "creator" => 1,
+        "changed_by" => 1
+      },
+      "p_address"=>{
+        "identifier"=>"#{new_params[:addresses][:state_province]}"},
+      "home_phone"=>{
+        "identifier"=>"#{new_params[:home_phone_number]}"},
+      "cell_phone"=>{
+        "identifier"=>"#{new_params[:cell_phone_number]}"},
+      "office_phone"=>{
+        "identifier"=>"#{new_params[:office_phone_number]}"},
+      "patient_id"=>"",
+      "patient_day"=>"#{new_params[:birth_day]}",
+      "patientaddress"=>{"city_village"=>"#{new_params[:addresses][:city_village]}"},
+      "patient_name"=>{
+        "family_name"=>"#{new_params[:names][:family_name]}",
+        "given_name"=>"#{new_params[:names][:given_name]}", "creator" => 1
+      },
+      "patient_month"=>"#{new_params[:birth_month]}",
+      "patient_age"=>{
+        "age_estimate"=>"#{new_params[:age_estimate]}"
+      },
+      "age"=>{
+        "identifier"=>""
+      },
+      "current_ta"=>{
+        "identifier"=>"#{new_params[:addresses][:county_district]}"}
+    }
 
 
     servers = GlobalProperty.find(:first, :conditions => {:property => "remote_servers.parent"}).property_value.split(/,/) rescue nil
@@ -234,16 +288,16 @@ module PatientService
 
     result ? person = JSON.parse(result) : nil
     begin
-        person["person"]["addresses"]["address1"] = "#{new_params[:addresses][:address1]}"
-        person["person"]["names"]["middle_name"] = "#{new_params[:names][:middle_name]}"
-        person["person"]["occupation"] = known_demographics["occupation"]
-        person["person"]["cell_phone_number"] = known_demographics["cell_phone"]["identifier"]
-        person["person"]["home_phone_number"] = known_demographics["home_phone"]["identifier"]
-        person["person"]["office_phone_number"] = known_demographics["office_phone"]["identifier"]
-        person["person"]["attributes"].delete("occupation")
-        person["person"]["attributes"].delete("cell_phone_number")
-        person["person"]["attributes"].delete("home_phone_number")
-        person["person"]["attributes"].delete("office_phone_number")
+      person["person"]["addresses"]["address1"] = "#{new_params[:addresses][:address1]}"
+      person["person"]["names"]["middle_name"] = "#{new_params[:names][:middle_name]}"
+      person["person"]["occupation"] = known_demographics["occupation"]
+      person["person"]["cell_phone_number"] = known_demographics["cell_phone"]["identifier"]
+      person["person"]["home_phone_number"] = known_demographics["home_phone"]["identifier"]
+      person["person"]["office_phone_number"] = known_demographics["office_phone"]["identifier"]
+      person["person"]["attributes"].delete("occupation")
+      person["person"]["attributes"].delete("cell_phone_number")
+      person["person"]["attributes"].delete("home_phone_number")
+      person["person"]["attributes"].delete("office_phone_number")
     rescue
     end   
     person
@@ -325,17 +379,17 @@ module PatientService
   
   def self.checks_if_labs_results_are_avalable_to_be_shown(patient , session_date , task)
     lab_result = Encounter.find(:first,:order => "encounter_datetime DESC",
-                                :conditions =>["DATE(encounter_datetime) <= ? 
-                                AND patient_id = ? AND encounter_type = ?",
-                                session_date.to_date ,patient.id,
-                                EncounterType.find_by_name('LAB RESULTS').id])
-
+      :conditions =>[" encounter_datetime <= TIMESTAMP(?) AND patient_id = ? AND encounter_type = ?",
+        session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+        patient.id,
+        EncounterType.find_by_name('LAB RESULTS').id])
+	
     give_lab_results = Encounter.find(:first,:order => "encounter_datetime DESC",
-                                :conditions =>["DATE(encounter_datetime) >= ? 
+      :conditions =>["encounter_datetime >= TIMESTAMP(?)
                                 AND patient_id = ? AND encounter_type = ?",
-                                lab_result.encounter_datetime.to_date , patient.id,
-                                EncounterType.find_by_name('GIVE LAB RESULTS').id]) rescue nil
-
+        lab_result.encounter_datetime.to_date.strftime('%Y-%m-%d 00:00:00') , patient.id,
+        EncounterType.find_by_name('GIVE LAB RESULTS').id]) rescue nil
+	
     if not lab_result.blank? and give_lab_results.blank?
       task.encounter_type = 'GIVE LAB RESULTS'
       task.url = "/encounters/new/give_lab_results?patient_id=#{patient.id}"
@@ -352,7 +406,49 @@ module PatientService
 
   end
   
+  def self.services
+  	services_concept_id = ConceptName.find_by_name('SERVICES').concept_id
+    
+    @start_date = Date.today.to_date
+    @end_date = Date.today.to_date
+		
+    registration_services_hash = {} ; services = []
+    registration_services_hash['SERVICES'] = {'Casualty' => 0,'Dental' => 0,'Eye' => 0,'Family Planing' => 0,'Medical' => 0,'OB/Gyn' => 0,'Orthopedics' => 0,'Other' => 0,'Pediatrics' => 0,'Skin' => 0,'STI Clinic' => 0,'Surgical' => 0} 
 
+    
+    services = Observation.find(:all, :conditions => ["DATE(obs_datetime) = ? AND concept_id = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc")#.uniq.reverse.first(5) rescue []
+    
+    ( services || [] ).each do | service |
+				  if service.value_text.capitalize == 'Casualty'
+				    registration_services_hash['SERVICES']['Casualty'] += 1
+				  elsif service.value_text.capitalize == 'Eye'
+				    registration_services_hash['SERVICES']['Eye'] += 1
+				  elsif service.value_text.capitalize == 'Family Planing'
+				    registration_services_hash['SERVICES']['Family Planing'] += 1
+				  elsif service.value_text.capitalize == 'Dental'
+				    registration_services_hash['SERVICES']['Dental'] += 1
+				  elsif service.value_text.capitalize == 'Medical'
+				    registration_services_hash['SERVICES']['Medical'] += 1
+				  elsif service.value_text.capitalize == 'OB/Gyn'
+				    registration_services_hash['SERVICES']['OB/Gyn'] += 1
+				  elsif service.value_text.capitalize == 'Orthopedics'
+				    registration_services_hash['SERVICES']['Orthopedics'] += 1
+				  elsif service.value_text.capitalize == 'Pediatrics'
+				    registration_services_hash['SERVICES']['Pediatrics'] += 1
+				  elsif service.value_text.capitalize == ' Skin '
+				    registration_services_hash['SERVICES']['Skin'] += 1
+				  elsif service.value_text.capitalize == 'STI Clinic'
+				    registration_services_hash['SERVICES']['STI Clinic'] += 1
+				  elsif service.value_text.capitalize == 'Surgical'
+				    registration_services_hash['SERVICES']['Surgical'] += 1
+				  else
+						registration_services_hash['SERVICES']['Other'] += 1
+				  end
+				end
+
+  	return services
+  end
+  
   def self.patient_national_id_label(patient)
 	  patient_bean = get_patient(patient.person)
     return unless patient_bean.national_id
@@ -366,7 +462,7 @@ module PatientService
     label.draw_barcode(50,180,0,1,5,15,120,false,"#{patient_bean.national_id}")
     label.draw_multi_text("#{patient_bean.name.titleize}")
     label.draw_multi_text("#{patient_bean.national_id_with_dashes} #{patient_bean.birth_date}#{sex}")
-    label.draw_multi_text("#{patient_bean.address} , #{patient_bean.current_residence}" )
+    label.draw_multi_text("#{patient_bean.state_province} , #{patient_bean.current_residence}" )
     label.print(1)
   end
 
@@ -380,12 +476,6 @@ module PatientService
     sputum_concept_names = ["AAFB(1st) results", "AAFB(2nd) results", "AAFB(3rd) results", "Culture(1st) Results", "Culture-2 Results"]
     sputum_concept_ids = ConceptName.find(:all, :conditions => ["name IN (?)", sputum_concept_names]).map(&:concept_id)
     obs = Observation.find(:all, :conditions => ["person_id = ? AND concept_id IN (?)", patient_id, sputum_concept_ids], :order => "obs_datetime desc", :limit => 3)
-  end
-
-  def self.occupations
-    ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
-     'Student','Security guard','Domestic worker', 'Police','Office worker',
-     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
   end
 
   def self.sputum_orders_without_submission(patient_id)
@@ -403,12 +493,6 @@ module PatientService
     return test_date
   end
 
-  def self.occupations
-    ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
-     'Student','Security guard','Domestic worker', 'Police','Office worker',
-     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
-  end
-
   def self.months_since_last_hiv_test(patient_id)
     #this can be done better
     session_date = Observation.find(:last, :conditions => ["person_id = ? AND concept_id = ?", patient_id, ConceptName.find_by_name("HIV test date").concept_id]).obs_datetime rescue Date.today
@@ -419,107 +503,119 @@ module PatientService
     return months
   end
 
+  def self.occupations
+    ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
+     'Student','Security guard','Domestic worker', 'Police','Office worker',
+     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
+  end
+
   def self.patient_hiv_status(patient)
     status = Concept.find(Observation.find(:first,
-    :order => "obs_datetime DESC,date_created DESC",
-    :conditions => ["value_coded IS NOT NULL AND person_id = ? AND concept_id = ?", patient.id,
-    ConceptName.find_by_name("HIV STATUS").concept_id]).value_coded).fullname rescue "UNKNOWN"
+        :order => "obs_datetime DESC,date_created DESC",
+        :conditions => ["value_coded IS NOT NULL AND person_id = ? AND concept_id = ?", patient.id,
+          ConceptName.find_by_name("HIV STATUS").concept_id]).value_coded).fullname rescue "UNKNOWN"
     if status.upcase == 'UNKNOWN'
       return patient.patient_programs.collect{|p|p.program.name}.include?('HIV PROGRAM') ? 'Positive' : status
     end
     return status
   end
 
- def self.patient_is_child?(patient)
-   return self.get_patient_attribute_value(patient, "age") <= 14 unless self.get_patient_attribute_value(patient, "age").nil?
-   return false
- end
+  def self.patient_is_child?(patient)
+    return self.get_patient_attribute_value(patient, "age") <= 14 unless self.get_patient_attribute_value(patient, "age").nil?
+    return false
+  end
 
- def self.get_patient_attribute_value(patient, attribute_name)
+  def self.get_patient_attribute_value(patient, attribute_name, session_date = Date.today)
 
-   patient_bean = get_patient(patient.person)
-   if patient_bean.sex.upcase == 'MALE'
+    patient_bean = get_patient(patient.person)
+    if patient_bean.sex.upcase == 'MALE'
    		sex = 'M'
-   elsif patient_bean.sex.upcase == 'FEMALE'
+    elsif patient_bean.sex.upcase == 'FEMALE'
    		sex = 'F'
-   end
+    end
    
-   case attribute_name.upcase
-     when "AGE"
-       return patient_bean.age
-     when "RESIDENCE"
-       return patient_bean.address
-     when "CURRENT_HEIGHT"
-      obs = patient.person.observations.recent(1).question("HEIGHT (CM)").all
-      return obs.first.value_numeric rescue 0
-     when "CURRENT_WEIGHT"
-      obs = patient.person.observations.recent(1).question("WEIGHT (KG)").all
-      return obs.first.value_numeric rescue 0
-     when "INITIAL_WEIGHT"
+    case attribute_name.upcase
+    when "AGE"
+      return patient_bean.age
+    when "RESIDENCE"
+      return patient_bean.address
+    when "CURRENT_HEIGHT"
+      obs = patient.person.observations.before((session_date + 1.days).to_date).question("HEIGHT (CM)").all
+      return obs.first.answer_string.to_f rescue 0
+    when "CURRENT_WEIGHT"
+      obs = patient.person.observations.before((session_date + 1.days).to_date).question("WEIGHT (KG)").all
+      return obs.first.answer_string.to_f rescue 0
+    when "INITIAL_WEIGHT"
       obs = patient.person.observations.old(1).question("WEIGHT (KG)").all
-      return obs.last.value_numeric rescue 0
-     when "INITIAL_HEIGHT"
+      return obs.last.answer_string.to_f rescue 0
+    when "INITIAL_HEIGHT"
       obs = patient.person.observations.old(1).question("HEIGHT (CM)").all
-      return obs.last.value_numeric rescue 0
-     when "INITIAL_BMI"
+      return obs.last.answer_string.to_f rescue 0
+    when "INITIAL_BMI"
       obs = patient.person.observations.old(1).question("BMI").all
-      return obs.last.value_numeric rescue nil
-     when "MIN_WEIGHT"
+      return obs.last.answer_string.to_f rescue nil
+    when "MIN_WEIGHT"
       return WeightHeight.min_weight(sex, patient_bean.age_in_months).to_f
-     when "MAX_WEIGHT"
+    when "MAX_WEIGHT"
       return WeightHeight.max_weight(sex, patient_bean.age_in_months).to_f
-     when "MIN_HEIGHT"
+    when "MIN_HEIGHT"
       return WeightHeight.min_height(sex, patient_bean.age_in_months).to_f
-     when "MAX_HEIGHT"
+    when "MAX_HEIGHT"
       return WeightHeight.max_height(sex, patient_bean.age_in_months).to_f
-   end
+    end
 
- end
+  end
 
- def self.patient_tb_status(patient)
-   Concept.find(Observation.find(:first,
-    :order => "obs_datetime DESC,date_created DESC",
-    :conditions => ["person_id = ? AND concept_id = ? AND value_coded IS NOT NULL",
-                    patient.id,
-    ConceptName.find_by_name("TB STATUS").concept_id]).value_coded).fullname rescue "UNKNOWN"
- end
+  def self.patient_tb_status(patient)
+    Concept.find(Observation.find(:first,
+        :order => "obs_datetime DESC,date_created DESC",
+        :conditions => ["person_id = ? AND concept_id = ? AND value_coded IS NOT NULL",
+          patient.id,
+          ConceptName.find_by_name("TB STATUS").concept_id]).value_coded).fullname rescue "UNKNOWN"
+  end
  
- def self.reason_for_art_eligibility(patient)
+  def self.reason_for_art_eligibility(patient)
     reasons = patient.person.observations.recent(1).question("REASON FOR ART ELIGIBILITY").all rescue nil
     reasons.map{|c|ConceptName.find(c.value_coded_name_id).name}.join(',') rescue nil
- end
+  end
 
- def self.patient_appointment_dates(patient, start_date, end_date = nil)
+  def self.patient_appointment_dates(patient, start_date, end_date = nil)
 
     end_date = start_date if end_date.nil?
 
     appointment_date_concept_id = Concept.find_by_name("APPOINTMENT DATE").concept_id rescue nil
 
-    appointments = Observation.find(:all,
-      :conditions => ["DATE(obs.value_datetime) >= ? AND DATE(obs.value_datetime) <= ? AND " +
-          "obs.concept_id = ? AND obs.voided = 0 AND obs.person_id = ?", start_date.to_date,
-        end_date.to_date, appointment_date_concept_id, patient.id])
+     appointments = Observation.find(:all,
+      :conditions => ["obs.value_datetime BETWEEN TIMESTAMP(?) AND TIMESTAMP(?) AND " +
+          "obs.concept_id = ? AND obs.voided = 0 AND obs.person_id = ?", 
+			start_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+			end_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+			appointment_date_concept_id, patient.id])
 
     appointments
   end
-
+  
   def self.get_patient_identifier(patient, identifier_type)
-    patient_identifier_type_id = PatientIdentifierType.find_by_name(identifier_type).patient_identifier_type_id rescue nil
+    patient_identifier_type_id = PatientIdentifierType.find_by_name(identifier_type).patient_identifier_type_id rescue nil   
     patient_identifier = PatientIdentifier.find(:first, :select => "identifier",
-                                                :conditions  =>["patient_id = ? and identifier_type = ?", patient.id, patient_identifier_type_id],
-                                                :order => "date_created DESC" ).identifier rescue nil
-    return patient_identifier
+      :conditions  =>["patient_id = ? and identifier_type = ?", patient.id, patient_identifier_type_id],
+      :order => "date_created DESC" ).identifier rescue nil
+      return patient_identifier      
   end
 
   def self.patient_printing_message(new_patient , archived_patient , creating_new_filing_number_for_patient = false)
     arv_code = Location.current_arv_code
-    
     new_patient_bean = get_patient(new_patient.person)
     archived_patient_bean = get_patient(archived_patient.person) rescue nil
     
     new_patient_name = new_patient_bean.name
     new_filing_number = patient_printing_filing_number_label(new_patient_bean.filing_number)
-    old_archive_filing_number = patient_printing_filing_number_label(new_patient_bean.archived_filing_number)
+    inactive_identifier = PatientIdentifier.inactive(:first,:order => 'date_created DESC',
+                           :conditions => ['identifier_type = ? AND patient_id = ?',PatientIdentifierType.
+                           find_by_name("Archived filing number").patient_identifier_type_id,
+                            archived_patient.person.id]).identifier rescue nil
+    old_archive_filing_number = patient_printing_filing_number_label(inactive_identifier)
+    
     unless archived_patient.blank?
       old_active_filing_number = patient_printing_filing_number_label(old_filing_number(archived_patient))
       new_archive_filing_number = patient_printing_filing_number_label(archived_patient_bean.archived_filing_number)
@@ -582,14 +678,6 @@ EOF
   <th style="text-align:left;">Old label</th>
   <th style="text-align:left;">New label</th>
 </tr>
-
-<tr>
-  <td style='text-align:left;'>Active → Dormant</td>
-  <td class = 'filing_instraction'>#{archived_patient_bean.name}</td>
-  <td class = 'old_label'>#{old_active_filing_number}</td>
-  <td class='new_label'>#{new_archive_filing_number}</td>
-</tr>
-
 <tr>
   <td style='text-align:left;'>Add → Active</td>
   <td class = 'filing_instraction'>#{new_patient_name}</td>
@@ -649,10 +737,7 @@ EOF
   end
 
   def self.patient_art_start_date(patient_id)
-    date = ActiveRecord::Base.connection.select_value <<EOF
-SELECT patient_start_date(#{patient_id})
-EOF
-    return date.to_date rescue nil
+    self.date_antiretrovirals_started(Patient.find(patient_id))
   end
 
   def self.prescribe_arv_this_visit(patient, date = Date.today)
@@ -661,30 +746,71 @@ EOF
     refer_concept = ConceptName.find_by_name('PRESCRIBE ARVS THIS VISIT').concept_id
     refer_patient = Encounter.find(:first,
       :joins => 'INNER JOIN obs USING (encounter_id)',
-      :conditions => ["encounter_type = ? AND concept_id = ? AND person_id = ? AND value_coded = ? AND DATE(obs_datetime) = ?",
-        encounter_type.id,refer_concept,patient.id,yes_concept,date.to_date],
+      :conditions => ["encounter_type = ? AND concept_id = ? AND person_id = ? AND value_coded = ? AND obs_datetime BETWEEN ? AND ?",
+        encounter_type.id,refer_concept,patient.id,yes_concept,
+		date.to_date.strftime('%Y-%m-%d 00:00:00'),
+		date.to_date.strftime('%Y-%m-%d 23:59:59')
+        ],
       :order => 'encounter_datetime DESC,date_created DESC')
     return false if refer_patient.blank?
     return true
   end
 
   def self.drug_given_before(patient, date = Date.today)
-    encounter_type = EncounterType.find_by_name('TREATMENT')
-    Encounter.find(:first,
-      :joins => 'INNER JOIN orders ON orders.encounter_id = encounter.encounter_id
-               INNER JOIN drug_order ON orders.order_id = orders.order_id',
-      :conditions => ["quantity IS NOT NULL AND encounter_type = ? AND
-               encounter.patient_id = ? AND DATE(encounter_datetime) < ?",
-        encounter_type.id,patient.id,date.to_date],
-        :order => 'encounter_datetime DESC,date_created DESC').orders rescue []
+    clinic_encounters = ["APPOINTMENT", "VITALS","HIV CLINIC CONSULTATION","HIV RECEPTION",
+      "HIV CLINIC REGISTRATION","TREATMENT","DISPENSING",'ART ADHERENCE','HIV STAGING']
+    encounter_type_ids = EncounterType.find_all_by_name(clinic_encounters).collect{|e|e.id}
+
+    latest_encounter_date = Encounter.find(:first,:conditions =>["patient_id=? AND encounter_datetime < ? AND 
+        encounter_type IN(?)",patient.id,date.strftime('%Y-%m-%d 00:00:00'),
+        encounter_type_ids],:order =>"encounter_datetime DESC").encounter_datetime rescue nil
+                        
+    return [] if latest_encounter_date.blank?
+
+    start_date = latest_encounter_date.strftime('%Y-%m-%d 00:00:00')
+    end_date = latest_encounter_date.strftime('%Y-%m-%d 23:59:59')
+                                       
+    concept_id = Concept.find_by_name('AMOUNT DISPENSED').id
+    Order.find(:all,:joins =>"INNER JOIN obs ON obs.order_id = orders.order_id",
+        :conditions =>["obs.person_id = ? AND obs.concept_id = ?                    
+        AND obs_datetime >=? AND obs_datetime <=?",
+        patient.id,concept_id,start_date,end_date],
+        :order =>"obs_datetime")
   end
 
+  def self.drugs_given_on(patient, date = Date.today)
+    clinic_encounters = ["APPOINTMENT", "VITALS","ART_INITIAL","HIV RECEPTION",
+      "ART VISIT","TREATMENT","DISPENSING",'ART ADHERENCE','HIV STAGING']
+    encounter_type_ids = EncounterType.find_all_by_name(clinic_encounters).collect{|e|e.id}
+
+    latest_encounter_date = Encounter.find(:first,
+        :conditions =>["patient_id = ? AND encounter_datetime >= ? 
+        AND encounter_datetime <=? AND encounter_type IN(?)",
+        patient.id,date.strftime('%Y-%m-%d 00:00:00'),
+        date.strftime('%Y-%m-%d 23:59:59'),encounter_type_ids],
+        :order =>"encounter_datetime DESC").encounter_datetime rescue nil
+                        
+    return [] if latest_encounter_date.blank?
+
+    start_date = latest_encounter_date.strftime('%Y-%m-%d 00:00:00')
+    end_date = latest_encounter_date.strftime('%Y-%m-%d 23:59:59')
+                                       
+    concept_id = Concept.find_by_name('AMOUNT DISPENSED').id
+    Order.find(:all,:joins =>"INNER JOIN obs ON obs.order_id = orders.order_id",
+        :conditions =>["obs.person_id = ? AND obs.concept_id = ?                    
+        AND obs_datetime >=? AND obs_datetime <=?",
+        patient.id,concept_id,start_date,end_date],
+        :order =>"obs_datetime")
+  end
+
+  
   def self.get_patient(person)
     patient = PatientBean.new('')
     patient.person_id = person.id
     patient.patient_id = person.patient.id
     patient.arv_number = get_patient_identifier(person.patient, 'ARV Number')
-    patient.address = person.addresses.first.state_province
+    patient.address = person.addresses.first.address1
+    patient.state_province = person.addresses.first.state_province
     patient.national_id = get_patient_identifier(person.patient, 'National id')    
 	  patient.national_id_with_dashes = get_national_id_with_dashes(person.patient)
     patient.name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
@@ -735,7 +861,7 @@ EOF
     birth_date=person.birthdate
     estimate=person.birthdate_estimated==1
     patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  && 
-      today.month < birth_date.month && person.date_created.year == today.year) ? 1 : 0
+        today.month < birth_date.month && person.date_created.year == today.year) ? 1 : 0
   end
 
   def self.old_filing_number(patient, type = 'Filing Number')
@@ -751,10 +877,14 @@ EOF
 
   def self.patient_to_be_archived(patient)
     active_identifier_type = PatientIdentifierType.find_by_name("Filing Number")
-    PatientIdentifier.find_by_sql(["
+=begin    PatientIdentifier.find_by_sql(["
       SELECT * FROM patient_identifier
       WHERE voided = 1 AND identifier_type = ? AND void_reason = ? ORDER BY date_created DESC",
         active_identifier_type.id,"Archived - filing number given to:#{patient.id}"]).first.patient rescue nil
+=end
+   
+
+   PatientIdentifier.find_by_sql(["SELECT * FROM patient_identifier WHERE voided = 1 AND identifier_type = ? AND void_reason = 'Archived'  AND patient_id = ? ORDER BY date_created DESC",active_identifier_type.id,patient.id]).first.patient rescue nil
   end
 
   def self.set_patient_filing_number(patient) #changed from set_filing_number after being moved from patient model
@@ -764,70 +894,75 @@ EOF
     self.next_filing_number_to_be_archived(patient, next_filing_number)
   end
 
-  def self.next_filing_number_to_be_archived(current_patient , next_filing_number)
-    ActiveRecord::Base.transaction do
-      global_property_value = CoreService.get_global_property_value("filing.number.limit").to_s rescue '10000'
-      active_filing_number_identifier_type = PatientIdentifierType.find_by_name("Filing Number")
-      dormant_filing_number_identifier_type = PatientIdentifierType.find_by_name('Archived filing number')
+	def self.next_filing_number_to_be_archived(current_patient , next_filing_number)
+		ActiveRecord::Base.transaction do
+			global_property_value = CoreService.get_global_property_value("filing.number.limit")
 
-      if (next_filing_number[5..-1].to_i >= global_property_value.to_i)
-        encounter_type_name = ['REGISTRATION','VITALS','ART_INITIAL','ART VISIT',
-          'TREATMENT','HIV RECEPTION','HIV STAGING','DISPENSING','APPOINTMENT']
-        encounter_type_ids = EncounterType.find(:all,:conditions => ["name IN (?)",encounter_type_name]).map{|n|n.id}
+			if global_property_value.blank?
+				global_property_value = '10000'
+			end
 
-        all_filing_numbers = PatientIdentifier.find(:all, :conditions =>["identifier_type = ?",
+			active_filing_number_identifier_type = PatientIdentifierType.find_by_name("Filing Number")
+			dormant_filing_number_identifier_type = PatientIdentifierType.find_by_name('Archived filing number')
+
+			if (next_filing_number[5..-1].to_i >= global_property_value.to_i)
+				encounter_type_name = ['REGISTRATION','VITALS','ART_INITIAL','ART VISIT',
+				  'TREATMENT','HIV RECEPTION','HIV STAGING','DISPENSING','APPOINTMENT']
+				encounter_type_ids = EncounterType.find(:all,:conditions => ["name IN (?)",encounter_type_name]).map{|n|n.id}
+
+				all_filing_numbers = PatientIdentifier.find(:all, :conditions =>["identifier_type = ?",
             PatientIdentifierType.find_by_name("Filing Number").id],:group=>"patient_id")
-        patient_ids = all_filing_numbers.collect{|i|i.patient_id}
-        patient_to_be_archived = Encounter.find_by_sql(["
-          SELECT patient_id, MAX(encounter_datetime) AS last_encounter_id
-          FROM encounter
-          WHERE patient_id IN (?)
-          AND encounter_type IN (?)
-          GROUP BY patient_id
-          ORDER BY last_encounter_id
-          LIMIT 1",patient_ids,encounter_type_ids]).first.patient rescue nil
-        if patient_to_be_archived.blank?
-          patient_to_be_archived = PatientIdentifier.find(:last,:conditions =>["identifier_type = ?",
+				patient_ids = all_filing_numbers.collect{|i|i.patient_id}
+				patient_to_be_archived = Encounter.find_by_sql(["
+					SELECT patient_id, MAX(encounter_datetime) AS last_encounter_id
+					FROM encounter
+					WHERE patient_id IN (?)
+					AND encounter_type IN (?)
+					GROUP BY patient_id
+					ORDER BY last_encounter_id
+					LIMIT 1",patient_ids,encounter_type_ids]).first.patient rescue nil
+				if patient_to_be_archived.blank?
+					patient_to_be_archived = PatientIdentifier.find(:last,:conditions =>["identifier_type = ?",
               PatientIdentifierType.find_by_name("Filing Number").id],
             :group=>"patient_id",:order => "identifier DESC").patient rescue nil
-        end
-      end
+				end
+			end
 
-      if patient_to_be_archived
-        filing_number = PatientIdentifier.new()
-        filing_number.patient_id = patient_to_be_archived.id
-        filing_number.identifier_type = dormant_filing_number_identifier_type.id
-        filing_number.identifier = PatientIdentifier.next_filing_number("Archived filing number")
-        filing_number.save
+			if patient_to_be_archived
+				filing_number = PatientIdentifier.new()
+				filing_number.patient_id = patient_to_be_archived.id
+				filing_number.identifier_type = dormant_filing_number_identifier_type.id
+				filing_number.identifier = PatientIdentifier.next_filing_number("Archived filing number")
+				filing_number.save
 
-        #assigning "patient_to_be_archived" filing number to the new patient
-        filing_number= PatientIdentifier.new()
-        filing_number.patient_id = current_patient.id
-        filing_number.identifier_type = active_filing_number_identifier_type.id
-        filing_number.identifier = self.get_patient_identifier(patient_to_be_archived, 'Filing Number')
-        filing_number.save
+				#assigning "patient_to_be_archived" filing number to the new patient
+				filing_number= PatientIdentifier.new()
+				filing_number.patient_id = current_patient.id
+				filing_number.identifier_type = active_filing_number_identifier_type.id
+				filing_number.identifier = self.get_patient_identifier(patient_to_be_archived, 'Filing Number')
+				filing_number.save
 
-        #void current filing number
-        current_filing_numbers =  PatientIdentifier.find(:all,:conditions=>["patient_id=? AND identifier_type = ?",
+				#void current filing number
+				current_filing_numbers =  PatientIdentifier.find(:all,:conditions=>["patient_id=? AND identifier_type = ?",
             patient_to_be_archived.id,PatientIdentifierType.find_by_name("Filing Number").id])
-        current_filing_numbers.each do | filing_number |
-          filing_number.voided = 1
-          filing_number.voided_by = User.current_user.id
-          filing_number.void_reason = "Archived - filing number given to:#{current_patient.id}"
-          filing_number.date_voided = Time.now()
-          filing_number.save
-        end
-      else
-        filing_number = PatientIdentifier.new()
-        filing_number.patient_id = current_patient.id
-        filing_number.identifier_type = active_filing_number_identifier_type.id
-        filing_number.identifier = next_filing_number
-        filing_number.save
-      end
-    end
+				current_filing_numbers.each do | filing_number |
+					filing_number.voided = 1
+					filing_number.voided_by = current_user.id
+					filing_number.void_reason = "Archived - filing number given to:#{current_patient.id}"
+					filing_number.date_voided = Time.now()
+					filing_number.save
+				end
+			else
+				filing_number = PatientIdentifier.new()
+				filing_number.patient_id = current_patient.id
+				filing_number.identifier_type = active_filing_number_identifier_type.id
+				filing_number.identifier = next_filing_number
+				filing_number.save
+			end
+		end
 
-    true
-  end
+		return true
+	end
 
 	def self.patient_printing_filing_number_label(number=nil)
 		return number[5..5] + " " + number[6..7] + " " + number[8..-1] unless number.nil?
@@ -839,22 +974,21 @@ EOF
 		patient_params = params["patient"]
 		params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) }
 		birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
-		person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
-
+		person_params = params_to_process.reject{|key,value| key.match(/birth_|age_estimate|occupation|identifiers/) }
 
 		if person_params["gender"].to_s == "Female"
-		   person_params["gender"] = 'F'
+      person_params["gender"] = 'F'
 		elsif person_params["gender"].to_s == "Male"
-		   person_params["gender"] = 'M'
+      person_params["gender"] = 'M'
 		end
-
+   
 		person = Person.create(person_params)
 
 		unless birthday_params.empty?
 		  if birthday_params["birth_year"] == "Unknown"
-			self.set_birthdate_by_age(person, birthday_params["age_estimate"], person.session_datetime || Date.today)
+        self.set_birthdate_by_age(person, birthday_params["age_estimate"], person.session_datetime || Date.today)
 		  else
-			self.set_birthdate(person, birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"])
+        self.set_birthdate(person, birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"])
 		  end
 		end
 		person.save
@@ -878,15 +1012,15 @@ EOF
 		  :person_attribute_type_id => PersonAttributeType.find_by_name("Home Phone Number").person_attribute_type_id,
 		  :value => params["home_phone_number"]) unless params["home_phone_number"].blank? rescue nil
 
-	# TODO handle the birthplace attribute
+    # TODO handle the birthplace attribute
 
 		if (!patient_params.nil?)
 		  patient = person.create_patient
-
+      
 		  patient_params["identifiers"].each{|identifier_type_name, identifier|
-			next if identifier.blank?
-			identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
-			patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
+        next if identifier.blank?
+        identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
+        patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
 		  } if patient_params["identifiers"]
 
 		  # This might actually be a national id, but currently we wouldn't know
@@ -896,7 +1030,7 @@ EOF
 		return person
 	end
 
-   # Get the any BMI-related alert for this patient
+  # Get the any BMI-related alert for this patient
   def self.current_bmi_alert(patient_weight, patient_height)
     weight = patient_weight
     height = patient_height
@@ -928,21 +1062,75 @@ EOF
 
     return people.first.id unless people.blank? || people.size > 1
     people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patient], :conditions => [
-    "gender = ? AND \
+        "gender = ? AND \
      (person_name.given_name LIKE ? OR person_name_code.given_name_code LIKE ?) AND \
      (person_name.family_name LIKE ? OR person_name_code.family_name_code LIKE ?)",
-    params[:gender],
-    params[:given_name],
-    (params[:given_name] || '').soundex,
-    params[:family_name],
-    (params[:family_name] || '').soundex
-    ]) if people.blank?
+        params[:gender],
+        params[:given_name],
+        (params[:given_name] || '').soundex,
+        params[:family_name],
+        (params[:family_name] || '').soundex
+      ]) if people.blank?
 
     return people
   end
+
+  def self.person_search_from_dde(params)
+    search_string = "given_name=#{params[:given_name]}"
+    search_string += "&family_name=#{params[:family_name]}"
+    search_string += "&gender=#{params[:gender]}"
+    uri = "http://admin:admin@http://192.168.6.183:3001/people/find.json?#{search_string}"                          
+    JSON.parse(RestClient.get(uri)) rescue []
+  end
   
   def self.search_by_identifier(identifier)
-    PatientIdentifier.find_all_by_identifier(identifier).map{|id| id.patient.person} unless identifier.blank? rescue nil
+    people = PatientIdentifier.find_all_by_identifier(identifier).map{|id| 
+      id.patient.person
+    } unless identifier.blank? rescue nil
+    return people unless people.blank?
+    create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    if create_from_dde_server 
+      dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
+      dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
+      dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
+      uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
+      uri += "?value=#{identifier}"                          
+      p = JSON.parse(RestClient.get(uri)).first rescue nil
+   
+      return [] if p.blank?
+ 
+      birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
+      birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
+      birthdate_day = p["person"]["birthdate"].to_date.day rescue nil
+      birthdate_estimated = p["person"]["birthdate_estimated"] 
+      gender = p["person"]["gender"] == "F" ? "Female" : "Male"
+
+      passed = {
+       "person"=>{"occupation"=>p["person"]["data"]["attributes"]["occupation"],
+       "age_estimate"=>"",
+       "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
+       "birth_month"=> birthdate_month ,
+       "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
+       "address2"=>p["person"]["data"]["addresses"]["address2"],
+       "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+       "county_district"=>""},
+       "gender"=> gender ,
+       "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
+       "birth_day"=>birthdate_day,
+       "home_phone_number"=>p["person"]["data"]["attributes"]["home_phone_number"],
+       "names"=>{"family_name"=>"Mwale",
+       "given_name"=>p["person"]["given_name"],
+       "middle_name"=>""},
+       "birth_year"=>birthdate_year},
+       "filter_district"=>"Chitipa",
+       "filter"=>{"region"=>"Northern Region",
+       "t_a"=>""},
+       "relation"=>""
+      }
+
+      return [self.create_from_form(passed["person"])]
+    end
+    return people
   end
   
   def self.set_birthdate_by_age(person, age, today = Date.today)
@@ -1005,62 +1193,65 @@ EOF
     if encounter.blank?
       type = EncounterType.find_by_name('LAB ORDERS').id
       lab_order = Encounter.find(:first,
-             :order => "encounter_datetime DESC,date_created DESC",
-             :conditions =>["patient_id = ? AND encounter_type = ?",patient.id,type])
+        :order => "encounter_datetime DESC,date_created DESC",
+        :conditions =>["patient_id = ? AND encounter_type = ?",patient.id,type])
       return 'NO LAB ORDERS' if lab_order.blank?
       return
     end
 
     case encounter.name.upcase
-      when 'LAB ORDERS' 
-        type = EncounterType.find_by_name('SPUTUM SUBMISSION').id
-        sputum_sub = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
-               :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
-               encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
+    when 'LAB ORDERS' 
+      type = EncounterType.find_by_name('SPUTUM SUBMISSION').id
+      sputum_sub = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
+        :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
+          encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
 
-        return type if sputum_sub.blank?
-        return sputum_sub 
-      when 'SPUTUM SUBMISSION'
-        type = EncounterType.find_by_name('LAB RESULTS').id
-        lab_results = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
-               :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
-               encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
+      return type if sputum_sub.blank?
+      return sputum_sub 
+    when 'SPUTUM SUBMISSION'
+      type = EncounterType.find_by_name('LAB RESULTS').id
+      lab_results = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
+        :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
+          encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
 
-        type = EncounterType.find_by_name('LAB ORDERS').id
-        lab_order = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
-               :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
-               encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
+      type = EncounterType.find_by_name('LAB ORDERS').id
+      lab_order = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
+        :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
+          encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
 
-        return lab_order if lab_results.blank? and not lab_order.blank?
-        return if lab_results.blank?
-        return lab_results 
-      when 'LAB RESULTS'
-        type = EncounterType.find_by_name('SPUTUM SUBMISSION').id
-        sputum_sub = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
-               :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
-               encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
+      return lab_order if lab_results.blank? and not lab_order.blank?
+      return if lab_results.blank?
+      return lab_results 
+    when 'LAB RESULTS'
+      type = EncounterType.find_by_name('SPUTUM SUBMISSION').id
+      sputum_sub = Encounter.find(:first,:joins => "INNER JOIN obs USING(encounter_id)",
+        :conditions =>["obs.accession_number IN (?) AND patient_id = ? AND encounter_type = ?",
+          encounter.observations.map{|r|r.accession_number}.compact,encounter.patient_id,type])
 
-        return if sputum_sub.blank?
-        return sputum_sub 
+      return if sputum_sub.blank?
+      return sputum_sub 
     end
   end
   
   def self.checks_if_vitals_are_need(patient , session_date, task , user_selected_activities)
     first_vitals = Encounter.find(:first,:order => "encounter_datetime DESC",
-                            :conditions =>["patient_id = ? AND encounter_type = ?",
-                            patient.id,EncounterType.find_by_name('VITALS').id])
+      :conditions =>["patient_id = ? AND encounter_type = ?",
+        patient.id,EncounterType.find_by_name('VITALS').id])
 
 
     if first_vitals.blank?
       encounter = Encounter.find(:first,:order => "encounter_datetime DESC",
-                  :conditions =>["patient_id = ? AND encounter_type = ?",
-                  patient.id,EncounterType.find_by_name('LAB ORDERS').id])
+        :conditions =>["patient_id = ? AND encounter_type = ?",patient.id,
+        EncounterType.find_by_name('LAB ORDERS').id])
       
       sup_result = self.next_lab_encounter(patient , encounter, session_date)
 
       reception = Encounter.find(:first,:order => "encounter_datetime DESC",
-                                 :conditions =>["DATE(encounter_datetime) = ? AND patient_id = ? AND encounter_type = ?",
-                                 session_date.to_date,patient.id,EncounterType.find_by_name('TB RECEPTION').id])
+        :conditions =>["encounter_datetime BETWEEN ? AND ? AND patient_id = ? AND encounter_type = ?",
+          session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+          session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+          patient.id,
+          EncounterType.find_by_name('TB RECEPTION').id])
 
       if reception.blank? and not sup_result.blank?
         if user_selected_activities.match(/Manage TB Reception Visits/i)
@@ -1088,8 +1279,11 @@ EOF
     return if self.patient_tb_status(patient).match(/treatment/i) and not self.patient_hiv_status(patient).match(/Positive/i)
 
     vitals = Encounter.find(:first,:order => "encounter_datetime DESC",
-                            :conditions =>["DATE(encounter_datetime) = ? AND patient_id = ? AND encounter_type = ?",
-                            session_date.to_date,patient.id,EncounterType.find_by_name('VITALS').id])
+      :conditions =>["encounter_datetime BETWEEN ? AND ? AND patient_id = ? AND encounter_type = ?",
+		session_date.to_date.strftime('%Y-%m-%d 00:00:00'),
+		session_date.to_date.strftime('%Y-%m-%d 23:59:59'),
+        patient.id,
+        EncounterType.find_by_name('VITALS').id])
 
     if vitals.blank? and user_selected_activities.match(/Manage Vitals/i) 
       task.encounter_type = 'VITALS'
@@ -1106,17 +1300,17 @@ EOF
     return unless self.patient_hiv_status(patient).match(/Positive/i)
 
     enrolled_in_hiv_program = Concept.find(Observation.find(:first,
-      :order => "obs_datetime DESC,date_created DESC", 
-      :conditions => ["person_id = ? AND concept_id = ?",patient.id,
-      ConceptName.find_by_name("Patient enrolled in IMB HIV program").concept_id]).value_coded).concept_names.map{|c|c.name}[0].upcase rescue nil
+        :order => "obs_datetime DESC,date_created DESC", 
+        :conditions => ["person_id = ? AND concept_id = ?",patient.id,
+          ConceptName.find_by_name("Patient enrolled in IMB HIV program").concept_id]).value_coded).concept_names.map{|c|c.name}[0].upcase rescue nil
 
     return unless enrolled_in_hiv_program == 'YES'
 
     #return if not reason_for_art.upcase == 'UNKNOWN' and not reason_for_art.blank?
 
     art_initial = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ?",
-                             patient.id,EncounterType.find_by_name('ART_INITIAL').id],
-                             :order =>'encounter_datetime DESC,date_created DESC',:limit => 1)
+        patient.id,EncounterType.find_by_name('ART_INITIAL').id],
+      :order =>'encounter_datetime DESC,date_created DESC',:limit => 1)
 
     if art_initial.blank? and user_selected_activities.match(/Manage HIV first visits/i)
       task.encounter_type = 'ART_INITIAL'
@@ -1129,8 +1323,8 @@ EOF
     end
 
     hiv_staging = Encounter.find(:first,:order => "encounter_datetime DESC",
-                                 :conditions =>["patient_id = ? AND encounter_type = ?",
-                                 patient.id,EncounterType.find_by_name('HIV STAGING').id])
+      :conditions =>["patient_id = ? AND encounter_type = ?",
+        patient.id,EncounterType.find_by_name('HIV STAGING').id])
 
     if hiv_staging.blank? and user_selected_activities.match(/Manage HIV staging visits/i)
       extended_staging_questions = CoreService.get_global_property_value('use.extended.staging.questions')
@@ -1146,8 +1340,8 @@ EOF
     end
 
     pre_art_visit = Encounter.find(:first,:order => "encounter_datetime DESC",
-                                    :conditions =>["patient_id = ? AND encounter_type = ?",
-                                    patient.id,EncounterType.find_by_name('PART_FOLLOWUP').id])
+      :conditions =>["patient_id = ? AND encounter_type = ?",
+        patient.id,EncounterType.find_by_name('PART_FOLLOWUP').id])
 
     if pre_art_visit.blank? and user_selected_activities.match(/Manage pre ART visits/i)
       task.encounter_type = 'Pre ART visit'
@@ -1161,8 +1355,8 @@ EOF
 
 
     art_visit = Encounter.find(:first,:order => "encounter_datetime DESC",
-                               :conditions =>["patient_id = ? AND encounter_type = ?",
-                               patient.id,EncounterType.find_by_name('ART VISIT').id])
+      :conditions =>["patient_id = ? AND encounter_type = ?",
+        patient.id,EncounterType.find_by_name('ART VISIT').id])
 
     if art_visit.blank? and user_selected_activities.match(/Manage ART visits/i)
       task.encounter_type = 'ART VISIT'
@@ -1175,9 +1369,9 @@ EOF
     end
 
     treatment_encounter = Encounter.find(:first,:order => "encounter_datetime DESC",
-                              :joins =>"INNER JOIN obs USING(encounter_id)",
-                              :conditions =>["patient_id = ? AND encounter_type = ? AND concept_id = ?",
-                              patient.id,EncounterType.find_by_name('TREATMENT').id,ConceptName.find_by_name('ARV regimen type').concept_id])
+      :joins =>"INNER JOIN obs USING(encounter_id)",
+      :conditions =>["patient_id = ? AND encounter_type = ? AND concept_id = ?",
+        patient.id,EncounterType.find_by_name('TREATMENT').id,ConceptName.find_by_name('ARV regimen type').concept_id])
 
     prescribe_drugs = art_visit.observations.map{|obs| obs.to_s.squish.strip.upcase }.include? 'Prescribe arvs this visit: Yes'.upcase rescue false
 
@@ -1194,13 +1388,6 @@ EOF
       task.url = "/patients/show/#{patient.id}"
       return task
     end if prescribe_drugs
-  end
-
-	def self.months_since_last_update_area_of_residence(person_id)
-    area_of_residence_date = PersonAddress.find(:last, :conditions => ["person_id = ?", person_id]).date_created rescue Date.today
-
-    months = (Date.today.year * 12 + Date.today.month) - (area_of_residence_date.year * 12 + area_of_residence_date.month) rescue nil
-    return months
   end
 
   def self.get_national_id(patient, force = true)
@@ -1221,7 +1408,49 @@ EOF
     id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
   end
   
-  def self.previous_referral_section(person_obj)
+  # Move orders, observations and encounters to new patient and 
+  # void names, addresses, attributes and identifiers of the old patient
+  def self.merge_patients(old_patient, new_patient)
+    old_patient.orders.each do |o|
+      o.patient = new_patient
+      o.save
+    end
+    
+    old_patient.person.observations.each do |obs|
+      obs.person_id = new_patient.person.person_id
+      obs.save
+    end
+    
+    old_patient.encounters.each do |o|
+      o.patient = new_patient
+      o.save
+    end
+    
+    void_reason = "Patient merged with #{new_patient.patient_id}"
+    old_patient.person.addresses.each { |pa|           pa.void(void_reason) }
+    old_patient.person.names.each { |pn|               pn.void(void_reason) }
+    old_patient.person.person_attributes.each { |pa|   pa.void(void_reason) }
+    old_patient.patient_identifiers.each { |pi|        pi.void(void_reason) }
+    old_patient.patient_programs.each { |pp|           pp.void(void_reason) }
+  end
+
+  def self.date_antiretrovirals_started(patient)
+    start_date = ActiveRecord::Base.connection.select_value <<EOF                   
+SELECT earliest_start_date FROM earliest_start_date 
+WHERE patient_id = #{patient.id} LIMIT 1
+EOF
+     return start_date.to_date unless start_date.blank?
+     concept_id = ConceptName.find_by_name('Date antiretrovirals started').concept_id    
+ 
+    start_date = ActiveRecord::Base.connection.select_value <<EOF                   
+SELECT value_text FROM start_date_observation 
+WHERE person_id = #{patient.id} AND concept_id = #{concept_id} LIMIT 1
+EOF
+
+     return start_date.to_date rescue nil
+  end
+  
+   def self.previous_referral_section(person_obj)
     
     services = Observation.find(:all, :conditions => ["person_id = ? AND concept_id = ?", person_obj.id, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc").uniq.reverse.first(5) rescue []
 

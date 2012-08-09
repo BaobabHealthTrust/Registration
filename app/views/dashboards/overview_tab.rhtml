@@ -1,118 +1,92 @@
-<%= stylesheet_link_tag "dashboard" %>
-<script src="/javascripts/jquery-1.3.2.min.js" type="text/javascript"></script>
-<script language="javascript" type="text/javascript" src="/javascripts/jquery.flot.js"></script>
-<script src="/javascripts/touchscreenYesNo.js" type="text/javascript"></script>
-<script type="text/javascript">
-  function select(node) {
-    $('#observations').empty().load('/encounters/observations/' + node.attr('encounter'))
-    $('#encounters li.data').removeClass("active");
-    node.addClass("active");
-  }
+<script>
 
-  function voiding(node) {
-    confirmYesNo("Void this item?", function() {
-      hideConfirmation();
-      $.post('/encounters/void/' + node.parent().attr('encounter'), {}, function(data, status) {
-        if (status == 'success') {
-          document.getElementById('observations').innerHTML = '';
-          node.parent().remove();
-        }
-      })
-    }, function() { hideConfirmation(); });
-  }
-
-  jQuery(document).ready(function($) {
-    $('#encounters li.data').click(function() { select($(this)); });
-    $('#encounters li.data div.void').click(function() { voiding($(this)); return false; });
-    $('#charts').empty().load('/patients/graph/<%= @patient.id -%>?data=weight_tab');
-    recent = $('#encounters li.data:first');
-    if (recent) select(recent);
-  })
+  var tt_cancel_destination = "/encounters/new/registration?patient_id=<%=@patient.patient_id%>"
 </script>
+
 <style>
-  .even {
-     -moz-border-radius: 15px;
+  body {
+    -moz-user-select:none;
   }
-  .noneWarnings {color:black;background:orange;}
+
+  .charts {
+    padding-left:20px;
+    -moz-user-select:none;
+  }
+
+  #header {
+    padding-left:10px;
+    -moz-user-select:none;
+  }
+  
+  th {
+    text-align:left;
+    -moz-user-select:none;
+  }
+
+  #cancelhButton {
+    float:left;
+    -moz-user-select:none;
+  }
+
+  .messageBar {
+    background-color: tomato;
+    font-size: 2em;
+    left: 270px;
+    position: absolute;
+    text-align: center;
+    top: 10px;
+    width: 450px;
+    z-index: 999;
+    display:none;
+    height:210px;
+    -moz-user-select:none;
+  }
+
+  a {
+    background-color: grey;
+    border-bottom: 1px outset black;
+    border-style: outset;
+    border-top: 1px outset black;
+    color: white;
+    display: block;
+    padding: 0px 0px 0px 0px;
+    text-align: center;
+    text-decoration: none;
+    width: 300px;
+    -moz-user-select:none;
+  }
+  
+  .visit-summary{
+    text-align: right;
+    font-size:  1.5em;
+    padding-left:20px;
 </style>
-<div  style="display: table; width: 99%;">
-  <div  style="display: table-row;">
-    <div style="display: table-cell; width: 50%; padding: 10px; vertical-align: top;
-         border: 1px solid #eee; -moz-border-radius: 15px;">
 
-      <div id="programs">
-        <!-- h2>Programs</h2 -->
-        <ul class="list small" style="height:140px; -moz-border-radius: 15px;">
-          <% for prog in @programs do %>
-              <li class="data <%= cycle('even', 'odd') %>" program="<%= prog.id %>">
-                <div class="program">
-                  <%=(h prog.program.name.humanize).gsub('Hiv','HIV').gsub('Tb','TB') %> started <%=h prog.date_enrolled.strftime("%b-%Y") rescue 'Unknown' %>
-                  <br /><font class='patient_state'>Current state: <%=h prog.patient_states.last.to_s.humanize.gsub('-art','-ART').gsub('arvs','ARVs') %></font>
-                </div>
-              </li>
-            <%
-             end %>
-            <% if @programs.empty? %>
-              <li class="data even">
-                <div class="program">There are no current programs for this patient</div>
-              </li>
-            <% end %>
-            </ul>
-          </div>
+<body onload = "setTimeout('changeAttributes()',500);">
+	<%
+  	@services = []
+  	@services = PatientService.previous_referral_section(@patient.person)
+  %>
 
-        </div>
-
-
-        <div style="display: table-cell; width: 50%; padding: 10px; border: 1px solid #eee; -moz-border-radius: 15px;">
-
-          <div id="charts" >
-          </div>
-
-        </div>
-      </div>
-      <div  style="display: table-row;">
-
-        <div style="display: table-cell; width: 50%; padding: 5px; border: 1px solid #eee; -moz-border-radius: 15px;">
-
-          <div id="treatment">
-            <ul class="list small" style="height:140px; -moz-border-radius: 15px;">
-              <% for presc in @prescriptions do %>
-                  <li class="data <%= cycle('even', 'odd') %>" prescription="<%= presc.id %>">
-                    <div class="prescription"><%=h presc.to_s %></div>
-                  </li>
-                <% end %>
-                <% if @prescriptions.empty? %>
-                  <li class="data even">
-                    <div class="prescription">There are no current prescriptions for this patient</div>
-                  </li>
-                <% end %>
-              </ul>
-            </div>
-          </div>
-<div style="display: table-cell; width: 50%; padding: 5px; border: 1px solid #eee; -moz-border-radius: 15px;">
-
-            <div id="alerts">
-              <ul class="list" style="height:140px; -moz-border-radius: 15px;">
-                <% for alert in @alerts do %>
-                    <% if alert.include?("Missed") %>
-                      <li class="data <%= cycle('even', 'odd') %>"
-                          <%= (alert.include?("Missed") ? "style='background-color: #f33; -moz-border-radius: 15px;'" : "") %> >
-                        <div class="patientState"><%=h alert %></div>
-                      </li>
-                     <% else %>
-                        <li class="data <%= cycle('even', 'odd') %>" >
-
-                         <div class="noneWarnings"><%=h alert %></div>
-                      </li>
-                     <% end %>
-                  <% end %>
-                  <% if @alerts.blank? %>
-                    <li class="data even">
-                      <div class="alert">There are no alerts for this patient</div>
-                    </li>
-                  <% end %>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+<% if !@services.blank? %>	
+	<div class="visit-summary">
+  
+		<table cellpadding ="5" cellspacing="5" align="center">
+			<tr style = "font-size:20px;">
+				<th>Previous Service</th>
+				<th>Previous Service Date</th>
+			</tr>
+			<% @services.each do |service| %>
+				<tr>
+					<td style="float:left;">
+						<%= service.value_text %>
+					</td>
+					<td align="center">
+						<%= service.obs_datetime.to_date %>
+					</td>
+				</tr>
+			<% end %>
+		</table>
+	</div>
+<% end %>
+</body>
