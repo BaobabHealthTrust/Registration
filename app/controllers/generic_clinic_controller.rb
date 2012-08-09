@@ -7,7 +7,9 @@ class GenericClinicController < ApplicationController
 
     @date = session[:datetime].to_date rescue Date.today.to_date
 
-    @user = current_user.name rescue ""
+		@person = Person.find_by_person_id(current_user.person_id)
+
+    @user = PatientService.name(@person)
 
     @roles = current_user.user_roles.collect{|r| r.role} rescue []
 
@@ -77,7 +79,7 @@ class GenericClinicController < ApplicationController
     render :template => 'clinic/administration', :layout => 'clinic' 
   end
 
-def overview_tab
+	def overview_tab
     simple_overview_property = CoreService.get_global_property_value("simple_application_dashboard") rescue nil
 
     simple_overview = false
@@ -86,14 +88,36 @@ def overview_tab
         simple_overview = true
       end
     end
-			
-				
-		@services = PatientService.services
+
+    @types = EncounterType.all.map{|encounter_type| encounter_type.name if encounter_type.name == "REGISTRATION"}.to_s
+
+    @current_user_id = current_user.user_id
+
+    @me = Encounter.patient_registration(@types, @current_user_id, :conditions => ['DATE(patient.date_created) = DATE(NOW()) AND patient.creator = ?', current_user.user_id])
+
+    @today = Encounter.patient_registration_total(@types, :conditions => ['DATE(date_created) = DATE(NOW())'])
+    if !simple_overview
+    	@types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
+    	@types = @types.split(/,/)
+
+    	@me = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW()) AND encounter.creator = ?', User.current_user.user_id])
+   	 @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW())'])
+
+    	
+      @year = Encounter.statistics(@types, :conditions => ['YEAR(encounter_datetime) = YEAR(NOW())'])
+      @ever = Encounter.statistics(@types)
+    end
+
+    @person = Person.find_by_person_id(current_user.person_id)
+
+    @user = PatientService.name(@person)
+
+		@services = PatientService.services(@current_user_id)
 
 		@casualty = []; @dental = []; @eye = []; @family_planing = []; @medical = []; @ob_gyn = [];
 		@orthopedics = []; @other = []; @pediatrics = []; @skin = []; @sti_clinic = []; @surgical = []
- 		#raise @services.map{|p| p.value_text}.to_yaml
- 		PatientService.services.each do |service|
+
+ 		@services.each do |service|
  			if service.value_text.capitalize.include?("Casualty")
  				@casualty << service
  			elsif service.value_text.capitalize.include?("Dental")
@@ -121,29 +145,38 @@ def overview_tab
  			end
  		end
 
+		@all_services = PatientService.all_services#(@current_user_id)
 
-		
-    @types = EncounterType.all.map{|encounter_type| encounter_type.name if encounter_type.name == "REGISTRATION"}.to_s
+		@all_casualty = []; @all_dental = []; @all_eye = []; @all_family_planing = []; @all_medical = []; @all_ob_gyn = [];
+		@all_orthopedics = []; @all_other = []; @all_pediatrics = []; @all_skin = []; @all_sti_clinic = []; @all_surgical = []
 
-    @current_user_id = current_user.user_id
-
-    @me = Encounter.patient_registration(@types, @current_user_id, :conditions => ['DATE(patient.date_created) = DATE(NOW()) AND patient.creator = ?', current_user.user_id])
-
-    @today = Encounter.patient_registration_total(@types, :conditions => ['DATE(date_created) = DATE(NOW())'])
-    if !simple_overview
-    	@types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
-    	@types = @types.split(/,/)
-
-    	@me = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW()) AND encounter.creator = ?', User.current_user.user_id])
-   	 @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW())'])
-
-    	
-      @year = Encounter.statistics(@types, :conditions => ['YEAR(encounter_datetime) = YEAR(NOW())'])
-      @ever = Encounter.statistics(@types)
-    end
-
-    @user = User.find(session[:user_id]).person.name rescue ""
-
+ 		@all_services.each do |service|
+ 			if service.value_text.capitalize.include?("Casualty")
+ 				@all_casualty << service
+ 			elsif service.value_text.capitalize.include?("Dental")
+ 				@all_dental << service
+ 			elsif service.value_text.capitalize.include?("Eye")
+ 				@all_eye << service
+ 			elsif service.value_text.include?("Family Planing")
+ 				@all_family_planing << service
+ 			elsif service.value_text.capitalize.include?("Medical")
+ 				@all_medical << service
+ 			elsif service.value_text.include?("OB/Gyn")
+ 				@all_ob_gyn << service
+ 			elsif service.value_text.capitalize.include?("Orthopedics")
+ 				@all_orthopedics << service
+ 			elsif service.value_text.capitalize.include?("Pediatrics")
+ 				@all_pediatrics << service
+ 			elsif service.value_text.include?(" Skin ")
+ 				@all_skin << service
+ 			elsif service.value_text.include?("STI Clinic")
+ 				@all_sti_clinic << service
+ 			elsif service.value_text.capitalize.include?("Surgical")
+ 				@all_surgical << service
+ 			else service.value_text.capitalize.include?(" Other ")
+ 				@all_other << service
+ 			end
+ 		end
     if simple_overview
         render :template => 'clinic/overview_simple.rhtml' , :layout => false
         return
