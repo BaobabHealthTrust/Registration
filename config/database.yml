@@ -1,24 +1,32 @@
-production:
-   adapter: mysql
-   database: bart2_development
-   username: root
-   password: root
-   host: localhost
+# production:
+#   adapter: mysql
+#   database: openmrs
+#   username: root
+#   password:
+#   host: localhost
 
 development:
-  adapter:  mysql
-  database: bart2_development
-  username: root
+  adapter: mysql
+  database: openmrs_dmht
+  username: meduser #root
+  pool: 30
   password: root
-  host: localhost
-  pool: 500
+  host: 192.168.11.26
 
 test: &TEST
   adapter: mysql
   database: bart2_test
   username: root
-  password: root
+  password: password
   host: localhost
 
 cucumber:
   <<: *TEST
+
+migration:
+  adapter: mysql
+  database: test
+  username: root
+  password: password
+  host: localhost
+
