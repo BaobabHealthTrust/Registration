@@ -13,14 +13,13 @@
       //-->
     </script>
     <style>
-    	.tt_controls_Select_Month .keyboard{display:none;}
-	    	#tt_page_select_month .options{height:500px;}
+    	.tt_controls_select_month .keyboard{display:none;}
+	    	#tt_page_select_month .options{height:550px;}
 		    #tt_page_select_month .options li{font-size:30px;}
 		    #space {display:inline;}
 		    
       #Unknown {display: none;}
       #num {display: none;}
-
     </style>
   </head>
   <body>
@@ -90,7 +89,7 @@
        
       </select>
 
-      <select id="selMonth" name="selMonth" helpText="Select Month:" condition="$('selSelect').value == 'month';">
+      <select id="selMonth" name="selMonth" helpText="Select Month" condition="$('selSelect').value == 'month';">
         <option></option>
         <option value="1">January</option>
         <option value="2">February</option>
