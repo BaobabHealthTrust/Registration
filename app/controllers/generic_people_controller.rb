@@ -339,7 +339,9 @@ class GenericPeopleController < ApplicationController
 
     regions = Region.find(:all,:conditions => region_conditions, :order => 'region_id')
     regions = regions.map do |r|
-      "<li value='#{r.name}'>#{r.name}</li>"
+      if r.name != "Foreign"
+        "<li value='#{r.name}'>#{r.name}</li>"
+      end
     end
     render :text => regions.join('')  and return
   end
