@@ -87,10 +87,12 @@ class GenericPeopleController < ApplicationController
 				end
 			end
 		end
+
 		@relation = params[:relation]
 		@people = PatientService.person_search(params)
 		@patients = []
-		@people.each do | person |
+
+		(@people || []).each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient
 		end
