@@ -1,13 +1,13 @@
-production:
+development:
    adapter: mysql
    database: bart2_development
    username: root
    password: root
    host: localhost
 
-development:
+production:
   adapter:  mysql
-  database: bart2_development
+  database: openmrs_healthdata
   username: root
   password: root
   host: localhost
