@@ -1128,9 +1128,17 @@ EOF
   end
   
   def self.search_by_identifier(identifier)
+    identifier_with_dashes = identifier
+    identifier_without_dashes = identifier.gsub('-','')
+    people = PatientIdentifier.find(:all,:conditions =>["voided = 0 AND (identifier = (?) OR 
+    identifier = (?))",identifier_without_dashes,identifier_with_dashes]).map{|id| 
+      id.patient.person
+    } unless identifier.blank? rescue nil
+=begin    
     people = PatientIdentifier.find_all_by_identifier(identifier).map{|id| 
       id.patient.person
     } unless identifier.blank? rescue nil
+=end
     return people unless people.blank?
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
     if create_from_dde_server 
