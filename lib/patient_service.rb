@@ -1463,6 +1463,8 @@ EOF
         id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
       when 9
         id[0..2] + "-" + id[3..6] + "-" + id[7..-1] rescue id
+      when 6
+        id[0..2] + "-" + id[3..-1] rescue id
       else
         id
     end
