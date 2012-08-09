@@ -8,10 +8,15 @@ class GenericPatientsController < ApplicationController
     		return
 		end
 		session[:mastercard_ids] = []
-		session_date = session[:datetime].to_date rescue Date.today
+		
+		session_date = Date.today.to_date
+		if session[:datetime]
+			session_date = session[:datetime].to_date
+		end
+		
 		@patient_bean = PatientService.get_patient(@patient.person)
 		@encounters = @patient.encounters.find_by_date(session_date)
-		@referral_section = get_referral_section(@patient.person, Date.today).map{|service| service.value_text}.join(', ')  rescue 'None'
+		@referral_section = get_referral_section(@patient.person, session_date).map{|service| service.value_text}.join(', ')  rescue 'None'
 		@diabetes_number = DiabetesService.diabetes_number(@patient)
 		@prescriptions = @patient.orders.unfinished.prescriptions.all
 		@programs = @patient.patient_programs.all
@@ -504,20 +509,14 @@ class GenericPatientsController < ApplicationController
 
     #@past_encounter_dates = @encounter_dates
     @person = Patient.find_by_patient_id(params[:patient_id]).person
+    session_datetime = Date.today.to_date
     
-    if !session[:datetime]
-    	session[:datetime] = Date.today 
-    else
-    	session[:datetime] = session[:datetime]
+    if session[:datetime]
+    	session_datetime = session[:datetime].to_date
     end
     
 	  @patient_bean = PatientService.get_patient(@person)
-  	@services = []
-  	PatientService.previous_referral_section(@person).map do |service| 
-  		if service.obs_datetime.to_date != session[:datetime].to_date
-  			@services << service
-  		end 
-  	end
+  	@services = PatientService.previous_referral_section(@person, session_datetime)
 
     render :template => 'dashboards/past_visits_summary_tab', :layout => false
   end

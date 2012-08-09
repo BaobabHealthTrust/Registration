@@ -65,7 +65,14 @@
 <body onload = "setTimeout('changeAttributes()',500);">
 	<%
   	@services = []
-  	@services = PatientService.previous_referral_section(@patient.person)
+  	session_date = Date.today.to_date
+  	
+  	if session[:datetime]
+  		session_date = session[:datetime].to_date
+  	end
+  	
+  	@services = PatientService.previous_referral_section(@patient.person,session_date)
+
   %>
 
 <% if !@services.blank? %>	
@@ -74,7 +81,7 @@
 		<table cellpadding ="5" cellspacing="5" align="center">
 			<tr style = "font-size:20px;">
 				<th>Previous Service</th>
-				<th>Previous Service Date</th>
+				<th>Date</th>
 			</tr>
 			<% @services.each do |service| %>
 				<tr>
@@ -88,5 +95,11 @@
 			<% end %>
 		</table>
 	</div>
+<% else %>
+	<table cellpadding ="5" cellspacing="5" align="center">
+			<tr style = "font-size:20px;">
+				<th><h4>No previous service for this patient</h4></th>
+			</tr>
+	</table>
 <% end %>
 </body>
