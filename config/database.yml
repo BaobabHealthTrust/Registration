@@ -1,8 +1,8 @@
 development:
    adapter: mysql
-   database: bart2_development
+   database: bart2 #_development
    username: root
-   password: root
+   password: letusout
    host: localhost
 
 production:

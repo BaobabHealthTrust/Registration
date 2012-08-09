@@ -108,7 +108,7 @@
 					<% end %>
 
 					<% if (@patient_bean.traditional_authority rescue nil) != nil %>
-						<span value="<%= @patient_bean.taditional_authority rescue 'Other' %>">Ancestral T/A</span>
+						<span value="<%= @patient_bean.traditional_authority %>">Ancestral T/A</span>
 					<% end %>
 
 					<% if (@patient_bean.filing_number rescue nil) != nil && (@patient_bean.filing_number) != " " %>
