@@ -1085,7 +1085,7 @@ EOF
   
   def self.search_by_identifier(identifier)
     identifier_with_dashes = identifier
-    identifier_without_dashes = identifier.gsub('-','')
+    identifier_without_dashes = identifier.gsub('-','') unless identifier.blank?
     people = PatientIdentifier.find(:all,:conditions =>["voided = 0 AND (identifier = (?) OR 
     identifier = (?))",identifier_without_dashes,identifier_with_dashes]).map{|id| 
       id.patient.person
