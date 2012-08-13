@@ -88,6 +88,12 @@ class GenericClinicController < ApplicationController
         simple_overview = true
       end
     end
+		
+		@session_date = Date.today.to_date
+		
+		if session[:datetime]
+			@session_date = session[:datetime].to_date
+		end
 
     @types = EncounterType.all.map{|encounter_type| encounter_type.name if encounter_type.name == "REGISTRATION"}.to_s
 
@@ -96,6 +102,7 @@ class GenericClinicController < ApplicationController
     @me = Encounter.patient_registration(@types, @current_user_id, :conditions => ['DATE(patient.date_created) = DATE(NOW()) AND patient.creator = ?', current_user.user_id])
 
     @today = Encounter.patient_registration_total(@types, :conditions => ['DATE(date_created) = DATE(NOW())'])
+    
     if !simple_overview
     	@types = CoreService.get_global_property_value("statistics.show_encounter_types") rescue EncounterType.all.map(&:name).join(",")
     	@types = @types.split(/,/)
@@ -111,9 +118,16 @@ class GenericClinicController < ApplicationController
     @person = Person.find_by_person_id(current_user.person_id)
 
     @user = PatientService.name(@person)
+		
+		@services = PatientService.services(@current_user_id, @session_date)
 
-		@services = PatientService.services(@current_user_id)
-
+		@existing_patients_by_current_user = 0
+		@existing_patients_by_current_user = @services.length - @me['REGISTRATION'].to_i
+		
+		if @existing_patients_by_current_user < 0
+			@existing_patients_by_current_user = 0
+		end
+		
 		@casualty = []; @dental = []; @eye = []; @family_planing = []; @medical = []; @ob_gyn = [];
 		@orthopedics = []; @other = []; @pediatrics = []; @skin = []; @sti_clinic = []; @surgical = []
 
@@ -134,7 +148,7 @@ class GenericClinicController < ApplicationController
  				@orthopedics << service
  			elsif service.value_text.capitalize.include?("Pediatrics")
  				@pediatrics << service
- 			elsif service.value_text.include?(" Skin ")
+ 			elsif service.value_text.strip.include?("Skin")
  				@skin << service
  			elsif service.value_text.include?("STI Clinic")
  				@sti_clinic << service
@@ -145,8 +159,14 @@ class GenericClinicController < ApplicationController
  			end
  		end
 
-		@all_services = PatientService.all_services#(@current_user_id)
-
+		@all_services = PatientService.all_services(@session_date)
+		
+		@existing_patients_by_all_users = 0
+		@existing_patients_by_all_users = PatientService.all_patient_services.length - @today['REGISTRATION'].to_i
+		if @existing_patients_by_all_users < 0
+			@existing_patients_by_all_users = 0
+		end
+		
 		@all_casualty = []; @all_dental = []; @all_eye = []; @all_family_planing = []; @all_medical = []; @all_ob_gyn = [];
 		@all_orthopedics = []; @all_other = []; @all_pediatrics = []; @all_skin = []; @all_sti_clinic = []; @all_surgical = []
 
@@ -167,7 +187,7 @@ class GenericClinicController < ApplicationController
  				@all_orthopedics << service
  			elsif service.value_text.capitalize.include?("Pediatrics")
  				@all_pediatrics << service
- 			elsif service.value_text.include?(" Skin ")
+ 			elsif service.value_text.strip.include?("Skin")
  				@all_skin << service
  			elsif service.value_text.include?("STI Clinic")
  				@all_sti_clinic << service
@@ -177,6 +197,7 @@ class GenericClinicController < ApplicationController
  				@all_other << service
  			end
  		end
+
     if simple_overview
         render :template => 'clinic/overview_simple.rhtml' , :layout => false
         return

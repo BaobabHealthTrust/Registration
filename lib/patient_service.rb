@@ -406,11 +406,11 @@ module PatientService
 
   end
   
-  def self.services(current_user_id)
+  def self.services(current_user_id, session_date)
   	services_concept_id = ConceptName.find_by_name('SERVICES').concept_id
 
-    @start_date = Date.today.to_date
-    @end_date = Date.today.to_date
+    @start_date = session_date.to_date
+    @end_date = session_date.to_date
 		
     registration_services_hash = {} ; services = []
     registration_services_hash['SERVICES'] = {'Casualty' => 0,'Dental' => 0,'Eye' => 0,'Family Planing' => 0,'Medical' => 0,'OB/Gyn' => 0,'Orthopedics' => 0,'Other' => 0,'Pediatrics' => 0,'Skin' => 0,'STI Clinic' => 0,'Surgical' => 0} 
@@ -418,7 +418,7 @@ module PatientService
     
     #services = Observation.find(:all, :conditions => ["DATE(obs_datetime) = ? AND concept_id = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc")
     
-    services = Observation.find(:all, :conditions => ["DATE(obs_datetime) = ? AND concept_id = ? AND creator = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id, current_user_id], :order => "obs_datetime desc")#.uniq.reverse.first(5) rescue []
+    services = Observation.find(:all, :conditions => ["DATE(obs_datetime) = ? AND concept_id = ? AND creator = ?", session_date.to_date, ConceptName.find_by_name("SERVICES").concept_id, current_user_id], :order => "obs_datetime desc")#.uniq.reverse.first(5) rescue []
     
     ( services || [] ).each do | service |
 				  if service.value_text.capitalize == 'Casualty'
@@ -451,16 +451,16 @@ module PatientService
   	return services
   end
   
-    def self.all_services
+    def self.all_services(session_date)
   	services_concept_id = ConceptName.find_by_name('SERVICES').concept_id
 
-    @start_date = Date.today.to_date
-    @end_date = Date.today.to_date
+    @start_date = session_date.to_date
+    @end_date = session_date.to_date
 		
     registration_services_hash = {} ; services = []
     registration_services_hash['SERVICES'] = {'Casualty' => 0,'Dental' => 0,'Eye' => 0,'Family Planing' => 0,'Medical' => 0,'OB/Gyn' => 0,'Orthopedics' => 0,'Other' => 0,'Pediatrics' => 0,'Skin' => 0,'STI Clinic' => 0,'Surgical' => 0} 
     
-    services = Observation.find(:all, :conditions => ["DATE(obs_datetime) = ? AND concept_id = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc")
+    services = Observation.find(:all, :conditions => ["DATE(date_created) = ? AND concept_id = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc")
     
     ( services || [] ).each do | service |
 				  if service.value_text.capitalize == 'Casualty'
@@ -491,6 +491,10 @@ module PatientService
 				end
 
   	return services
+  end
+  
+  def self.all_patient_services
+  	services = Observation.find(:all, :conditions => ["DATE(date_created) = ? AND concept_id = ?", Date.today.to_date, ConceptName.find_by_name("SERVICES").concept_id], :order => "obs_datetime desc") 
   end
   
   def self.patient_national_id_label(patient)

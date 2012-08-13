@@ -39,12 +39,18 @@
       </tr>
       <% @types.each do |type| %>
         <tr class="<%= cycle('even', 'odd') %>">
-          <td style="text-align:left;"><%= type.capitalize %></td>
+          <td style="text-align:left;">Newly registered patients<%#= type.capitalize %></td>
           <td><%= @me[type].to_i %></td>
           <td><%= @today[type].to_i %></td>
-          
         </tr>
       <% end %>
+
+      <tr class="<%= cycle('even', 'odd') %>">
+        <td style="text-align:left;">Returning patients</td>
+        <td><%= @existing_patients_by_current_user %></td>
+        <td><%= @existing_patients_by_all_users %></td>
+      </tr>
+
 
       <%# if !@casualty.blank? %>
       		<tr class="<%= cycle('even', 'odd') %>">
