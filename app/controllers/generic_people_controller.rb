@@ -205,7 +205,7 @@ class GenericPeopleController < ApplicationController
 	end
  
   def create
-   raise params.to_yaml
+   #raise params.to_yaml
     hiv_session = false
     if current_program_location == "HIV program"
       hiv_session = true
@@ -345,7 +345,7 @@ class GenericPeopleController < ApplicationController
     regions = Region.find(:all,:conditions => region_conditions, :order => 'region_id')
     regions = regions.map do |r|
       if r.name != "Foreign"
-        "<li value='#{r.name}'>#{r																						.name}</li>"
+        "<li value='#{r.name}'>#{r.name}</li>"
       end
     end
     render :text => regions.join('')  and return
