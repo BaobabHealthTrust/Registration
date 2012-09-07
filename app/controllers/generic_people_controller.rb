@@ -90,6 +90,9 @@ class GenericPeopleController < ApplicationController
 		@relation = params[:relation]
 		@people = PatientService.person_search(params)
 		@patients = []
+
+    @people = [Person.find(@people)] if @people.is_a? Fixnum
+
 		@people.each do | person |
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient

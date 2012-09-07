@@ -7,11 +7,11 @@
 
 development:
   adapter: mysql
-  database: openmrs_dmht
-  username: meduser #root
+  database: test
+  username: root #root
   pool: 30
-  password: root
-  host: 192.168.11.26
+  password: letusout
+  host: localhost
 
 test: &TEST
   adapter: mysql
