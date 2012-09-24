@@ -10,10 +10,8 @@ class GenericPeopleController < ApplicationController
 
 	def identifiers
 	end
-
+  
 	def create_remote
-
-		#raise person_params.to_yaml
 		if current_user.blank?
 		  user = User.authenticate('admin', 'test')
 		  sign_in(:user, user) if !user.blank?
@@ -101,7 +99,6 @@ class GenericPeopleController < ApplicationController
 		found_person = nil
 		if params[:identifier]
 			local_results = PatientService.search_by_identifier(params[:identifier])
-
 			if local_results.length > 1
 				@people = PatientService.person_search(params)
 			elsif local_results.length == 1
@@ -109,7 +106,7 @@ class GenericPeopleController < ApplicationController
 			else
 				# TODO - figure out how to write a test for this
 				# This is sloppy - creating something as the result of a GET
-				if create_from_remote        
+				if create_from_remote
 					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
 					found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.nil?
 				end
@@ -611,6 +608,14 @@ class GenericPeopleController < ApplicationController
     @person = Person.find(params[:id])
 		@patient_bean = PatientService.get_patient(@person)
 		render :layout => 'menu'
+  end
+  
+  def demographics_remote
+    identifier = params[:person][:patient][:identifiers]["national_id"]
+    people = PatientService.search_by_identifier(identifier)
+    render :text => "" and return  if people.blank?
+    render :text => PatientService.remote_demographics(people.first).to_json rescue ""
+    return
   end
   
 private
