@@ -1569,5 +1569,11 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
 		end
 		return previous_services
   end
-    
+  
+  def self.occupations
+    ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
+     'Student','Security guard','Domestic worker', 'Police','Office worker',
+     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
+  end
+
 end
