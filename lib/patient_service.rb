@@ -1474,7 +1474,17 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
 
   def self.get_national_id_with_dashes(patient, force = true)
     id = self.get_national_id(patient, force)
-    id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
+    length = id.length
+    case length
+      when 13
+        id[0..4] + "-" + id[5..8] + "-" + id[9..-1] rescue id
+      when 9
+        id[0..2] + "-" + id[3..6] + "-" + id[7..-1] rescue id
+      when 6
+        id[0..2] + "-" + id[3..-1] rescue id
+      else
+        id
+    end
   end
   
   # Move orders, observations and encounters to new patient and 
