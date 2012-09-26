@@ -525,6 +525,7 @@ module DDEService
     end
 
     if (dont_recreate_local == false)
+      raise ">>>>>>>>>>>>> #{dont_recreate_local}"
       person = self.create_from_form(params["person"])
 
       identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
