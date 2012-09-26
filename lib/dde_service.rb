@@ -103,16 +103,21 @@ module DDEService
       create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
       if create_from_dde_server
 
-        if identifier.to_s.strip.length != 6 and identifier == self.national_id
+        if identifier.to_s.strip.length != 6 #and identifier == self.national_id
 
           dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
           dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
           dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
           uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
           uri += "?value=#{identifier}"
-          p = JSON.parse(RestClient.get(uri)).first rescue nil
+          output = RestClient.get(uri)
+          
+          results = []                                                                
+          results.push output if output and output.match(/person/)                    
+          result = results.sort{|a,b|b.length <=> a.length}.first                     
+          result ? p = JSON.parse(result) : nil
 
-          return true if !p.blank?
+          return true unless p.blank?
 
           # birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"]
           person = {"person" => {
