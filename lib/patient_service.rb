@@ -1087,13 +1087,18 @@ EOF
     people = []
     people = search_by_identifier(params[:identifier]) if params[:identifier]
     return people.first.id unless people.blank? || people.size > 1
+
+    gender = params[:gender]
+    given_name = params[:given_name].squish unless params[:given_name].blank?
+    family_name = params[:family_name].squish unless params[:family_name].blank?
+    
     people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patient], :conditions => [
         "gender = ? AND \
      person_name.given_name = ? AND \
      person_name.family_name = ?",
-        params[:gender],
-        params[:given_name],
-        params[:family_name]
+        gender,
+        given_name,
+        family_name
       ]) if people.blank?
 
     if people.length < 15
@@ -1105,9 +1110,9 @@ EOF
         "gender = ? AND \
      person_name_code.given_name_code LIKE ? AND \
      person_name_code.family_name_code LIKE ? AND person.person_id NOT IN (?)",
-        params[:gender],
-        (params[:given_name] || '').soundex,
-        (params[:family_name] || '').soundex,
+        gender,
+        (given_name || '').soundex,
+        (family_name || '').soundex,
         matching_people
       ], :order => "person_name.given_name ASC, person_name_code.family_name_code ASC")
       people = people + people_like
