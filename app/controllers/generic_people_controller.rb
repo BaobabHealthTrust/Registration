@@ -125,7 +125,6 @@ class GenericPeopleController < ApplicationController
 			end
 		end
 		@relation = params[:relation]
-    #raise 'i got hit'
 		@people = PatientService.person_search(params)
 		@patients = []
 		@people.each do | person |
