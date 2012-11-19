@@ -49,7 +49,8 @@ class GenericPeopleController < ApplicationController
      "p"=>{"'address2_a'"=>"",
      "addresses"=>{"county_district_a"=>"",
      "city_village_a"=>""}},
-     "identifier"=>""}
+     "identifier"=> params["old_national_id"]
+     }
 
       person = PatientService.create_patient_from_dde(passed_params)
     else
@@ -631,6 +632,13 @@ private
 			#
 			#url_for(:controller => :encounters, :action => :new, :patient_id => found_person_id)
 			patient = Person.find(found_person_id).patient
+      if create_from_dde_server
+        p = DDEService::Patient.new(patient)
+        identifier_type = PatientIdentifierType.find_by_name("National id")
+        patient_national_id = patient.patient_identifiers.find_by_identifier_type(identifier_type.id).identifier rescue nil
+        national_id_replaced = p.check_old_national_id(patient_national_id) unless patient_national_id.blank?
+      end
+
 			show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
 			if show_confirmation
 				url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
