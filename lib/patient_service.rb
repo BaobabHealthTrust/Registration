@@ -5,6 +5,7 @@ module PatientService
 	require 'rest_client'                                                           
 
   def self.create_patient_from_dde(params)
+    old_identifier = params["identifier"] rescue nil
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
 		patient_params = params["person"]["patient"]
@@ -50,6 +51,7 @@ module PatientService
       birthdate_estimated = 0
 		end
 
+
     passed_params = {"person"=> 
         {"data" => 
           {"addresses"=> 
@@ -71,6 +73,31 @@ module PatientService
             "given_name"=> names_params["given_name"]
           }}}}
 
+    unless old_identifier.blank?
+      passed_params = {"person"=>
+        {"data" =>
+          {"addresses"=>
+            {"state_province"=> address_params["address2"],
+            "address2"=> address_params["address1"],
+            "city_village"=> address_params["city_village"],
+            "county_district"=> address_params["county_district"]
+          },
+          "attributes"=>
+            {"occupation"=> params["person"]["occupation"],
+            "cell_phone_number" => params["person"]["cell_phone_number"] },
+          "patient"=>
+            {"identifiers"=>
+              {"old_identification_number"=> old_identifier}},
+          "gender"=> person_params["gender"],
+          "birthdate"=> birthdate,
+          "birthdate_estimated"=> birthdate_estimated ,
+          "names"=>{"family_name"=> names_params["family_name"],
+            "given_name"=> names_params["given_name"]
+          }}}}
+    end
+
+    #raise passed_params.to_yaml
+    
     if !params["remote"]
       
       @dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
@@ -91,6 +118,13 @@ module PatientService
     identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
     person.patient.patient_identifiers.create("identifier" => national_id, 
       "identifier_type" => identifier_type.patient_identifier_type_id) unless national_id.blank?
+
+    unless old_identifier.blank?
+      identifier_type = PatientIdentifierType.find_by_name("Old Identification Number")
+      person.patient.patient_identifiers.create("identifier" => old_identifier,
+      "identifier_type" => identifier_type.patient_identifier_type_id)
+    end
+
     return person
   end
 
@@ -212,7 +246,7 @@ module PatientService
   
   def self.create_remote_person(received_params)
     #raise known_demographics.to_yaml
-
+    #raise received_params.to_yaml
     #Format params for BART
     new_params = received_params[:person]
     known_demographics = Hash.new()
