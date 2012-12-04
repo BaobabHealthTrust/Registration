@@ -614,6 +614,8 @@ class GenericPeopleController < ApplicationController
     identifier = params[:person][:patient][:identifiers]["national_id"]
     people = PatientService.search_by_identifier(identifier)
     render :text => "" and return  if people.blank?
+    patient = DDEService::Patient.new(people.first.patient)
+    patient.check_old_national_id(identifier)
     render :text => PatientService.remote_demographics(people.first).to_json rescue ""
     return
   end
