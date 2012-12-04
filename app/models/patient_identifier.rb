@@ -111,4 +111,9 @@ EOF
     end
   end
 
+  def before_save
+    self.creator = 1 if self.creator.blank?
+    self.date_created = Time.now if self.date_created.blank?
+  end
+
 end
