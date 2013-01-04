@@ -20,6 +20,10 @@ body{
     overflow: hidden;
 }
 
+div {
+    -moz-user-select:none;
+}
+
 form{
     z-index:0;
 }

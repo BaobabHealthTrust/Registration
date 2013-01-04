@@ -25,6 +25,9 @@ body{
     background-color:#000000;
 }
 
+div {
+    -moz-user-select:none;
+}
 
 #content {
     background:#FFFFFF;
