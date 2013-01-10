@@ -1,13 +1,8 @@
-# To change this template, choose Tools | Templates
-# and open the template in the editor.
 require 'rubygems'
 require 'rest-client'
 require 'json'
 
 class ClientProxySyncService
-  def initialize
-    
-  end
   def self.get_current_ids
     identifier_type = PatientIdentifierType.find_by_name("National id").id
     national_ids = PatientIdentifier.find(:all,:conditions => ["identifier_type = ? and length(identifier) = ?",
@@ -38,6 +33,7 @@ class ClientProxySyncService
       end
     end
   end
+  
   def self.compile_ids(current_ids)
     return {} if current_ids.blank?
     patients_ids_batch = {}
@@ -58,10 +54,7 @@ class ClientProxySyncService
     end
     patients_ids_batch
   end
-  
   #get_current_person_ids
   get_demographics_from_proxy
   #send_current_ids
-
- 
 end
