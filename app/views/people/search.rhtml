@@ -27,7 +27,7 @@ pos = 1
   <% end %>
     
     try {
-      people[<%= pos %>]["Birthdate"] = "<%= person.birth_date rescue "" %>";
+      people[<%= pos %>]["Birthdate"] = "<%= person.birth_date.to_date.strftime('%d/%b/%Y') rescue "" %>";
     }catch(e){
       people[<%= pos %>]["Birthdate"] = null;
     }
@@ -164,15 +164,6 @@ end -%>
       window.location.href = "/people/search";
   }
    
-  function makeRemoteButton(){
-    return
-    <% if create_from_dde_server %>
-    __$("backButton").innerHTML = "<span>Remote Search</span>";
-    __$('backButton').setAttribute("onmousedown","search_remote();");
-    __$('backButton').style.display = "block";
-    <%end%>
-  }
-    
   function createNewSearchButton(){
     $('clearButton').innerHTML = "<span>New Search</span>";
     $('clearButton').setAttribute("onmousedown","newSearch();");            
@@ -232,7 +223,7 @@ end -%>
       
       people[pos]["Gender"] = "<%=data.sex%>"
       
-      people[pos]["Birthdate"] = "<%=data.birth_date%>"
+      people[pos]["Birthdate"] = "<%=data.birth_date.to_date.strftime('%d/%b/%Y')%>"
       
       people[pos]["Age"] = "<%=data.age%>";
       
@@ -244,12 +235,10 @@ end -%>
       
       people[pos]["Patient National ID"] = "<%=data.national_id%>";
       
-      people[pos]["person_id"] = "<%=data.person_id%>";
-      
       var li = document.createElement("li");
       li.id = i + 1;
       li.className = ((i + 1)/2 > 0 ? "odd" : "even");
-      li.setAttribute("tstvalue", i + 1);
+      li.setAttribute("tstvalue", <%=data.person_id%>);
       li.setAttribute("pos", i);
       li.innerHTML = people[pos]["Name"] + " (" + people[pos]["Gender"] + ") " + 
         people[pos]["Birthdate"] + ", " + people[pos]["Home District"];
@@ -269,7 +258,7 @@ end -%>
       
       var selOption = document.createElement("option");
       selOption.innerHTML = li.innerHTML;
-      selOption.setAttribute("value", i + 1);
+      selOption.setAttribute("value", <%=data.person_id%>);
       
       targetElement.appendChild(selOption);
       
@@ -307,7 +296,7 @@ end -%>
           <label for="person">Select the guardian from the following</label>
         <% end %>
       <% end -%>
-      <select name="person[id]" id="person" dualView="true" dualViewOptions="people" tt_onLoad="makeRemoteButton()">
+      <select name="person[id]" id="person" dualView="true" dualViewOptions="people">
         <!--option onmousedown="search_remote()">Search from remote server for person with name <%=h params[:given_name] -%> <%=h params[:family_name] -%></option-->
 
 			<% if @relation.blank? %>
