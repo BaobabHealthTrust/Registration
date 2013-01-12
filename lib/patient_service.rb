@@ -5,6 +5,7 @@ module PatientService
 	require 'rest_client'                                                           
 
   def self.search_from_remote(params)
+    return [] if params[:given_name].blank?
     dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
     dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
     dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
