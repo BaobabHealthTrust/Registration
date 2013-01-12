@@ -39,7 +39,6 @@ class PeopleController < GenericPeopleController
     (PatientService.search_from_remote(params) || []).each do |data|
 			results = PersonSearch.new(data["npid"]["value"])
       results.national_id = data["npid"]["value"]
-      results.birth_date = (data["person"]["data"]["birthdate"]).to_date rescue nil
       results.current_residence =data["person"]["data"]["addresses"]["city_village"]
       results.person_id = 0
       results.home_district = data["person"]["data"]["addresses"]["state_province"]
@@ -48,13 +47,15 @@ class PeopleController < GenericPeopleController
       gender = data["person"]["data"]["gender"]
       results.occupation = data["person"]["data"]["occupation"]
       results.sex = (gender == 'M' ? 'Male' : 'Female') 
-      results.birthdate_estimated = data["person"]["data"]["birthdate_estimated"].to_i
-      results.age = cul_age(results.birth_date.to_date,results.birthdate_estimated)
+      results.birthdate_estimated = (data["person"]["data"]["birthdate_estimated"]).to_i
+      results.birth_date = birthdate_formatted((data["person"]["data"]["birthdate"]).to_date , results.birthdate_estimated)
+      results.birthdate = (data["person"]["data"]["birthdate"]).to_date
+      results.age = cul_age(results.birthdate.to_date , results.birthdate_estimated)
       @search_results[results.national_id] = results
-    end
+    end if create_from_dde_server 
 
 
-		@people.each do | person |
+		(@people || []).each do | person |
 			patient = PatientService.get_patient(person) rescue nil
       next if patient.blank?
 			results = PersonSearch.new(patient.national_id || patient.patient_id)
@@ -97,5 +98,19 @@ class PeopleController < GenericPeopleController
         today.month < birth_date.month && date_created.year == today.year) ? 1 : 0
   end
 
+  def birthdate_formatted(birthdate,birthdate_estimated)                                          
+    if birthdate_estimated == 1                                            
+      if birthdate.day == 1 and birthdate.month == 7              
+        birthdate.strftime("??/???/%Y")                                  
+      elsif birthdate.day == 15                                          
+        birthdate.strftime("??/%b/%Y")                                   
+      elsif birthdate.day == 1 and birthdate.month == 1           
+        birthdate.strftime("??/???/%Y")                                  
+      end                                                                       
+    else                                                                        
+      birthdate.strftime("%d/%b/%Y")                                     
+    end                                                                         
+  end
+ 
 end
  

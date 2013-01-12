@@ -27,7 +27,7 @@ pos = 1
   <% end %>
     
     try {
-      people[<%= pos %>]["Birthdate"] = "<%= person.birth_date.to_date.strftime('%d/%b/%Y') rescue "" %>";
+      people[<%= pos %>]["Birthdate"] = "<%= person.birth_date rescue "" %>";
     }catch(e){
       people[<%= pos %>]["Birthdate"] = null;
     }
@@ -123,10 +123,10 @@ end -%>
           createControlAndAssignValue("given_name", "person[names][given_name]","<%=data.name.split(' ')[0]%>");
           createControlAndAssignValue("family_name", "person[names][family_name]","<%=data.name.split(' ')[1]%>")
           createControlAndAssignValue("address2", "person[addresses][address2]","<%=data.current_residence%>")
-          createControlAndAssignValue("person_birth_year", "person[birth_year]","<%=data.birth_date.year%>")
-          createControlAndAssignValue("person_birth_month", "person[birth_month]","<%=data.birth_date.month%>")
-          createControlAndAssignValue("person_birth_day", "person[birth_day]","<%=data.birth_date.day%>")
-          createControlAndAssignValue("birthdate_estimated", "person[age_estimate]", "<%=data.birthdate_estimated%>");
+          createControlAndAssignValue("person_birth_year", "person[birth_year]","<%=data.birthdate.year%>")
+          createControlAndAssignValue("person_birth_month", "person[birth_month]","<%=data.birthdate.month%>")
+          createControlAndAssignValue("person_birth_day", "person[birth_day]","<%=data.birthdate.day%>")
+          createControlAndAssignValue("birthdate_estimated", "person[birthdate_estimated]", "<%=data.birthdate_estimated%>");
           createControlAndAssignValue("state_province", "person[addresses][state_province]","<%=data.home_district%>")
           createControlAndAssignValue("city_village", "person[addresses][city_village]","<%=data.current_residence%>")
           createControlAndAssignValue("county_district", "person[addresses][county_district]","<%=data.traditional_authority%>")
@@ -223,7 +223,7 @@ end -%>
       
       people[pos]["Gender"] = "<%=data.sex%>"
       
-      people[pos]["Birthdate"] = "<%=data.birth_date.to_date.strftime('%d/%b/%Y')%>"
+      people[pos]["Birthdate"] = "<%=data.birth_date%>"
       
       people[pos]["Age"] = "<%=data.age%>";
       

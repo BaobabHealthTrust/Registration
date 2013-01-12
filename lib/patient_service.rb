@@ -1050,7 +1050,7 @@ EOF
 		elsif person_params["gender"].to_s == "Male"
       person_params["gender"] = 'M'
 		end
-   
+  
 		person = Person.create(person_params)
 
 		unless birthday_params.empty?
@@ -1060,6 +1060,11 @@ EOF
         self.set_birthdate(person, birthday_params["birth_year"], birthday_params["birth_month"], birthday_params["birth_day"])
 		  end
 		end
+
+    unless person_params['birthdate_estimated'].blank?
+      person.birthdate_estimated = person_params['birthdate_estimated'].to_i
+    end
+
 		person.save
 	   
 		person.names.create(names_params)
