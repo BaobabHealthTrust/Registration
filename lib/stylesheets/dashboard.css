@@ -32,11 +32,11 @@ div {
 #content {
     background:#FFFFFF;
     position:absolute;
-    left:50%;
     top:50%;
-    width:1000px;
+    width:99%;
     height:750px;
-    margin-left:-500px;
+    margin-left:0.5%;
+    margin-right:0.5%;
     margin-top:-380px;
     -moz-user-select:none;
 }
@@ -45,7 +45,7 @@ div {
     background-color:rgb(51,51,51);
     color:#CADCEA;
     height:80px;
-    width: 98%;
+    width: 98.7%;
     padding-right: 20px;
     bottom:0px;
     position:absolute;
@@ -318,6 +318,7 @@ div.panel h2 {
     display: table-cell;
     height: 92%;
     background-color: #fff;
+    width: 200px;
 }
 
 #applicationname {
@@ -381,6 +382,8 @@ div.panel h2 {
     width: 26%;
     background-color: #fff;
     z-index: 100;
+    text-align: right;
+    padding-right: 5px;
 }
 
 #patient-dashboard-main {
@@ -528,7 +531,7 @@ div.panel h2 {
 #logininfo{
     position: absolute;
     border: 1px #eee solid;
-    left: 765px;
+    right: 20px;
     top: 140px;
     height: 30px;
     width: 225px;
