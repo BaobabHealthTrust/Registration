@@ -282,7 +282,7 @@ class GenericPeopleController < ApplicationController
     end
 
     if params[:person][:patient] && success
-		  	if !params[:identifier].empty?	
+		  	if !params[:identifier].blank?
 					patient_identifier = PatientIdentifier.new
 					patient_identifier.type = PatientIdentifierType.find_by_name("National id")
 					patient_identifier.identifier = params[:identifier]
