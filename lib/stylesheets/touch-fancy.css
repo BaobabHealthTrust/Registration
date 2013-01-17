@@ -715,9 +715,12 @@ button:hover.dark span {
 .NumbersOnlyWithDecimal,
 .NumbersOnly,
 .DatesOnly { height: 330px !important }
-.NoKeyboard, .NoControls { height: 520px !important } 
-.NoKeyboard .inputFrameClass { height: 440px !important } 
-.NoKeyboard .options { height: 395px !important } 
+
+.NoKeyboard, .NoControls { height: 660px !important }
+
+.NoKeyboard .inputFrameClass { height: 595px !important }
+
+.NoKeyboard .options { height: 552px !important }
 
 #footer button, div.buttonsDiv button {
     margin-top: 10px;
@@ -828,7 +831,7 @@ button {
 }
 
 .NoKeyboard #keyboard {
-    display: none;
+    display: none !important;
 }
 
 button:active.blue span {
