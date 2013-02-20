@@ -1378,7 +1378,9 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       return "found duplicate identifiers" if p.count > 1
       p = p.first
 
-      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
+      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"]) rescue nil
+      passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
+      
       if passed_national_id.blank?
        return [DDEService.get_remote_person(p["person"]["id"])]
       end
