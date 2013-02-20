@@ -1375,6 +1375,12 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       p = JSON.parse(RestClient.get(uri)) rescue nil
       return [] if p.blank?
       return "found duplicate identifiers" if p.count > 1
+      p = p.first
+
+      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
+      if passed_national_id.blank?
+       return [DDEService.get_remote_person(p["person"]["id"])]
+      end
 
       birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
@@ -1405,20 +1411,18 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
        "relation"=>""
       }
 
-
-      passed_national_id = (passed["person"]["patient"]["identifiers"]["National id"])
-
       unless passed_national_id.blank?
         patient = PatientIdentifier.find(:first,
           :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
         return [patient.person] unless patient.blank?
       end
 
+      passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
       return [self.create_from_form(passed["person"])]
     end
     return people
   end
-
+  
   def self.set_birthdate_by_age(person, age, today = Date.today)
     person.birthdate = Date.new(today.year - age.to_i, 7, 1)
     person.birthdate_estimated = 1
