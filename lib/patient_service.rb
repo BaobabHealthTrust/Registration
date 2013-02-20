@@ -3,6 +3,7 @@ module PatientService
 	require 'bean'
 	require 'json'
 	require 'rest_client'
+  require 'dde_service'
 
   def self.search_from_remote(params)
     return [] if params[:given_name].blank?
