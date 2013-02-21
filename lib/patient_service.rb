@@ -277,7 +277,7 @@ module PatientService
 
       national_id = JSON.parse(recieved_params)["npid"]["value"]
     else
-      national_id = params["person"]["patient"]["identifiers"]["National_id"]
+      national_id = params["person"]["patient"]["identifiers"]["National id"]
     end
 
 	  person = person = self.create_from_form(params[:person] || params["person"])
@@ -1302,7 +1302,9 @@ EOF
   def self.person_search(params)
     people = []
     people = search_by_identifier(params[:identifier]) if params[:identifier]
-    return people.first.id unless people.blank? || people.size > 1
+
+    #return people.first.id unless people.blank? || people.size > 1
+    return people unless people.blank? || people.size > 1
 
     gender = params[:gender]
     given_name = params[:given_name].squish unless params[:given_name].blank?
