@@ -8,7 +8,7 @@
 <script type="text/javascript" defer>
   var people = [{}];
   var remote_people;
-  
+
 <%
 pos = 1
 @patients.each do |person|
@@ -87,20 +87,52 @@ end -%>
 
   function changeNextButtonText(text, pos , person_id, selected_person){
     __$('nextButton').innerHTML = "<span>" + text + "</span>";
-    
-    if(pos && (person_id == 0)){
+
+    if (text.match(/New Patient/)){
+      //clearFields
+        var fields = [
+        "identifier",
+        "gender",
+        "given_name",
+        "family_name",
+        "family_name2",
+        "address2",
+        "relation",
+        "birthdate",
+        "birthdate_estimated",
+        "state_province",
+        "city_village",
+        "county_district",
+        "occupation",
+        "cell_phone_number",
+        "national_id"
+      ]
+      for (k = 0; k < fields.length; k ++){
+        try{
+          __$(fields[k]).value = "";
+          __$(fields[k]).removeAttribute("name");
+      }catch(e){
+
+        }
+      }
+       createControlAndAssignValue("given_name", "person[names][given_name]", "<%= params[:given_name] %>");
+       createControlAndAssignValue("family_name", "person[names][family_name]", "<%= params[:family_name] %>");
+       createControlAndAssignValue("gender", "person[gender]", "<%=  params[:gender]%>");
+    }
+
+    if(pos && (person_id == 0) && !text.match(/New Patient/)){
       document.forms[0].action = "select";
       __$('nextButton').onmousedown = function(){
         document.forms[0].submit();
       }
 
       clearFields();
-      
+
       pos = parseInt(pos);
       var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      
+
       createControlAndAssignValue("remote", "remote", "true");
-     
+
       if (selected_person){
         createControlAndAssignValue("gender", "person[gender]",selected_person[pos+1]["Gender"]);
         createControlAndAssignValue("given_name", "person[names][given_name]",selected_person[pos+1]["Name"].split(' ')[0]);
@@ -216,7 +248,7 @@ end -%>
     i = -1;
     <%(@patients).each do |data| %>
       i++
-      
+
       people.push({});
 
       people[pos]["Name"] = "<%=data.name.squish rescue nil%>"

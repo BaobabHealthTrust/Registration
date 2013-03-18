@@ -40,10 +40,12 @@ module PatientService
          "birthdate" => person["person"]["data"]["birthdate"],
          "cell_phone_number"=>person["person"]["data"]["attributes"]["cell_phone_number"],
          "birth_month"=> birthdate_month ,
-         "addresses"=>{"address1"=>person["person"]["data"]["addresses"]["county_district"],
-         "address2"=>person["person"]["data"]["addresses"]["address2"],
-         "city_village"=>person["person"]["data"]["addresses"]["city_village"],
-         "county_district"=>""},
+         "addresses"=>{"address1"=> person["person"]["data"]["addresses"]["county_district"],
+                       "address2"=> person["person"]["data"]["addresses"]["address2"],
+                       "city_village"=> person["person"]["data"]["addresses"]["city_village"],
+                       "county_district"=> person["person"]["data"]["addresses"]["county_district"],
+                       "state_province" => person["person"]["data"]["addresses"]["state_province"],
+                       "neighborhood_cell" => person["person"]["data"]["addresses"]["neighborhood_cell"]},
          "gender"=> gender ,
          "patient"=>{"identifiers"=>{"National id" => national_id ,"Old national id" => old_national_id}},
          "birth_day"=>birthdate_day,
@@ -113,8 +115,10 @@ module PatientService
     passed_params = {"person"=>
         {"data" =>
           {"addresses"=>
-            {"state_province"=> address_params["address2"],
-            "address2"=> address_params["address1"],
+            {"state_province"=> address_params["state_province"],
+            "address2"=> address_params["address2"],
+            "address1"=> address_params["address1"],
+            "neighborhood_cell"=> address_params["neighborhood_cell"],
             "city_village"=> address_params["city_village"],
             "county_district"=> address_params["county_district"]
           },
@@ -156,10 +160,12 @@ module PatientService
     date_created =  person["person"]["date_created"].to_date rescue Date.today
     patient.age = self.cul_age(patient.birthdate , patient.birthdate_estimated , date_created, Date.today)
     patient.birth_date = self.get_birthdate_formatted(patient.birthdate,patient.birthdate_estimated)
-    patient.home_district = person["filter_district"]
-    patient.traditional_authority = person["filter"]["t_a"]
+    patient.home_district = person["person"]["addresses"]["address2"]
+    patient.current_district = person["person"]["addresses"]["state_province"]
+    patient.traditional_authority = person["person"]["addresses"]["county_district"]
     patient.current_residence = person["person"]["addresses"]["city_village"]
-    patient.landmark = person["person"]["addresses"]["address_1"]
+    patient.landmark = person["person"]["addresses"]["address1"]
+    patient.home_village = person["person"]["addresses"]["neighborhood_cell"]
     patient.occupation = person["person"]["occupation"]
     patient.cell_phone_number = person["person"]["cell_phone_number"]
     patient.home_phone_number = person["person"]["home_phone_number"]
@@ -247,8 +253,10 @@ module PatientService
     passed_params = {"person"=>
         {"data" =>
           {"addresses"=>
-            {"state_province"=> address_params["address2"],
-            "address2"=> address_params["address1"],
+            {"state_province"=> address_params["state_province"],
+            "address2"=> address_params["address2"],
+            "address1"=> address_params["address1"],
+            "neighborhood_cell"=> address_params["neighborhood_cell"],
             "city_village"=> address_params["city_village"],
             "county_district"=> address_params["county_district"]
           },
@@ -273,14 +281,14 @@ module PatientService
       @dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
 
       uri = "http://#{@dde_server_username}:#{@dde_server_password}@#{@dde_server}/people.json/"
-      recieved_params = RestClient.post(uri,passed_params)
+      received_params = RestClient.post(uri,passed_params)
 
-      national_id = JSON.parse(recieved_params)["npid"]["value"]
+      national_id = JSON.parse(received_params)["npid"]["value"]
     else
       national_id = params["person"]["patient"]["identifiers"]["National id"]
     end
 
-	  person = person = self.create_from_form(params[:person] || params["person"])
+	  person = self.create_from_form(params[:person] || params["person"])
 
     identifier_type = PatientIdentifierType.find_by_name("National id") || PatientIdentifierType.find_by_name("Unknown id")
     person.patient.patient_identifiers.create("identifier" => national_id,
@@ -677,7 +685,14 @@ module PatientService
 	  patient_bean = get_patient(patient.person)
     return unless patient_bean.national_id
     sex =  patient_bean.sex.match(/F/i) ? "(F)" : "(M)"
-    address = patient.person.address.strip[0..24].humanize rescue ""
+    address = ""
+    if !patient_bean.state_province.blank? and !patient_bean.current_residence.blank?
+      address = patient_bean.state_province + ", " + patient_bean.current_residence
+    elsif !patient_bean.state_province.blank? and patient_bean.current_residence.blank?
+      address = patient_bean.state_province
+    elsif patient_bean.state_province.blank? and !patient_bean.current_residence.blank?
+      address = patient_bean.current_residence
+    end
     label = ZebraPrinter::StandardLabel.new
     label.font_size = 2
     label.font_horizontal_multiplier = 2
@@ -686,8 +701,7 @@ module PatientService
     label.draw_barcode(50,180,0,1,5,15,120,false,"#{patient_bean.national_id}")
     label.draw_multi_text("#{patient_bean.name.titleize}")
     label.draw_multi_text("#{patient_bean.national_id_with_dashes} #{patient_bean.birth_date}#{sex}")
-    label.draw_multi_text("#{patient_bean.state_province}, #{patient_bean.current_residence} " )
-    label.draw_multi_text("#{patient_bean.address}") if patient_bean.current_residence.blank?
+    label.draw_multi_text("#{address}" ) unless address.blank?
     label.print(1)
   end
 
@@ -1056,10 +1070,12 @@ EOF
     patient.dead = person.dead
     patient.birth_date = birthdate_formatted(person)
     patient.birthdate_estimated = person.birthdate_estimated
+    patient.current_district = person.addresses.first.state_province
     patient.home_district = person.addresses.first.address2
     patient.traditional_authority = person.addresses.first.county_district
     patient.current_residence = person.addresses.first.city_village
     patient.landmark = person.addresses.first.address1
+    patient.home_village = person.addresses.first.neighborhood_cell
     patient.mothers_surname = person.names.first.family_name2
     patient.eid_number = get_patient_identifier(person.patient, 'EID Number') rescue nil
     patient.pre_art_number = get_patient_identifier(person.patient, 'Pre ART Number (Old format)') rescue nil
@@ -1380,9 +1396,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       return "found duplicate identifiers" if p.count > 1
       p = p.first
 
-      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"]) rescue nil
-      passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
-      
+      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
       if passed_national_id.blank?
        return [DDEService.get_remote_person(p["person"]["id"])]
       end
@@ -1398,10 +1412,12 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
        "age_estimate"=> birthdate_estimated,
        "cell_phone_number"=>p["person"]["data"]["attributes"]["cell_phone_number"],
        "birth_month"=> birthdate_month ,
-       "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["county_district"],
-       "address2"=>p["person"]["data"]["addresses"]["address2"],
-       "city_village"=>p["person"]["data"]["addresses"]["city_village"],
-       "county_district"=>""},
+       "addresses"=>{"address1"=>p["person"]["data"]["addresses"]["address1"],
+            "address2"=>p["person"]["data"]["addresses"]["address2"],
+            "city_village"=>p["person"]["data"]["addresses"]["city_village"],
+            "state_province"=>p["person"]["data"]["addresses"]["state_province"],
+            "neighborhood_cell"=>p["person"]["data"]["addresses"]["neighborhood_cell"],
+            "county_district"=>p["person"]["data"]["addresses"]["county_district"]},
        "gender"=> gender ,
        "patient"=>{"identifiers"=>{"National id" => p["person"]["value"]}},
        "birth_day"=>birthdate_day,
