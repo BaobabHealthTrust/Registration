@@ -261,6 +261,7 @@ module DDEService
   end
 
   def self.search_by_identifier(identifier)
+    identifier = identifier.gsub("-","").strip
     people = PatientIdentifier.find_all_by_identifier(identifier).map{|id|
       id.patient.person
     } unless identifier.blank? rescue nil
@@ -272,9 +273,16 @@ module DDEService
       dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"
-      p = JSON.parse(RestClient.get(uri)).first rescue nil
-
+      p = JSON.parse(RestClient.get(uri)) rescue nil
       return [] if p.blank?
+      return "found duplicate identifiers" if p.count > 1
+      p = p.first
+
+      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
+      passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
+      if passed_national_id.blank?
+       return [DDEService.get_remote_person(p["person"]["id"])]
+      end
 
       birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
@@ -307,6 +315,13 @@ module DDEService
        "relation"=>""
       }
 
+      unless passed_national_id.blank?
+        patient = PatientIdentifier.find(:first,
+          :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
+        return [patient.person] unless patient.blank?
+      end
+
+      passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
       return [self.create_from_form(passed["person"])]
     end
     return people
@@ -537,7 +552,8 @@ module DDEService
 
     else
       national_id = params["person"]["patient"]["identifiers"]["National id"]
-      # national_id = params["person"]["patient"]["identifiers"]["old_identification_number"]
+      national_id = params["person"]["value"] if national_id.blank? rescue nil
+      return national_id
     end
 
     if (dont_recreate_local == false)

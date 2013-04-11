@@ -151,6 +151,7 @@ module PatientService
     patient.patient_id = 0
     patient.address = person["person"]["addresses"]["city_village"]
     patient.national_id = person["person"]["patient"]["identifiers"]["National id"]
+    patient.national_id = person["person"]["value"] if patient.national_id.blank? rescue nil
     patient.name = person["person"]["names"]["given_name"] + ' ' + person["person"]["names"]["family_name"] rescue nil
     patient.first_name = person["person"]["names"]["given_name"] rescue nil
     patient.last_name = person["person"]["names"]["family_name"] rescue nil
@@ -286,6 +287,8 @@ module PatientService
       national_id = JSON.parse(received_params)["npid"]["value"]
     else
       national_id = params["person"]["patient"]["identifiers"]["National id"]
+      national_id = params["person"]["value"] if national_id.blank? rescue nil
+      return national_id
     end
 
 	  person = self.create_from_form(params[:person] || params["person"])
@@ -549,6 +552,7 @@ module PatientService
 
   def self.find_person_by_demographics(person_demographics)
     national_id = person_demographics["person"]["patient"]["identifiers"]["National id"] rescue nil
+    national_id = person_demographics["person"]["value"] if national_id.blank? rescue nil
     results = search_by_identifier(national_id) unless national_id.nil?
     return results unless results.blank?
 
@@ -1397,6 +1401,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       p = p.first
 
       passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
+      passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
       if passed_national_id.blank?
        return [DDEService.get_remote_person(p["person"]["id"])]
       end
