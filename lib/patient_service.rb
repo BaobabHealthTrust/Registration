@@ -689,8 +689,7 @@ module PatientService
 	  patient_bean = get_patient(patient.person)
     return unless patient_bean.national_id
     sex =  patient_bean.sex.match(/F/i) ? "(F)" : "(M)"
-    address = ""
-   
+    
     address = patient_bean.current_district rescue ""
     if address.blank?
       address = patient_bean.current_residence rescue ""
