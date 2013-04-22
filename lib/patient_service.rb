@@ -689,14 +689,14 @@ module PatientService
 	  patient_bean = get_patient(patient.person)
     return unless patient_bean.national_id
     sex =  patient_bean.sex.match(/F/i) ? "(F)" : "(M)"
-    address = ""
-    if !patient_bean.state_province.blank? and !patient_bean.current_residence.blank?
-      address = patient_bean.state_province + ", " + patient_bean.current_residence
-    elsif !patient_bean.state_province.blank? and patient_bean.current_residence.blank?
-      address = patient_bean.state_province
-    elsif patient_bean.state_province.blank? and !patient_bean.current_residence.blank?
-      address = patient_bean.current_residence
+    
+    address = patient_bean.current_district rescue ""
+    if address.blank?
+      address = patient_bean.current_residence rescue ""
+    else
+      address += ", " + patient_bean.current_residence unless patient_bean.current_residence.blank?
     end
+
     label = ZebraPrinter::StandardLabel.new
     label.font_size = 2
     label.font_horizontal_multiplier = 2
