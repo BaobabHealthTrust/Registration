@@ -1,158 +1,149 @@
-<style>
-  body {
-    -moz-user-select:none;
-  }
+<html>
+  <head>
+<style type="text/css">
 
   table {
     vertical-align:center;
-    width: 100%;
+    width: 97%;
+    height: auto;
     -moz-user-select:none;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 10px;
+  }
+  
+
+  .title {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 1px 1px 0px 0px;
+  }
+  .title-top {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 0px 1px 0px 0px;
+  }
+ .data {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 1px 1px 0px 0px;
+
+  }
+  .data-top {
+    font-size: 25px;
+    text-align: left;
+    border-style: solid;
+    border-width: 0px 1px 0px 0px;
+
+  }
+  a {
+    border-radius: 7px;
+		background-color: #4A708B;
+		border-bottom: 1px outset black;
+		border-style: outset;
+		border-top: 1px outset black;
+		color: white;
+		display: block;
+		padding: 12px 32px 12px 32px;
+		text-align: center;
+		text-decoration: none;
   }
 
   .container {
-    height: 82%;
-    background-color: #FFFFDD;
+    height: 92%;
+    background-color: white;
     margin: 20px 20px 20px 20px;
     overflow: auto;
+    -moz-border-radius: 10px;
+    padding-top: 2%;
   }
 
-  .data { 
-    padding-left: 5px;
+  td a{
+    padding-top: 5px;
   }
 
-  td {
-    text-align: left;
-    border-style: solid;
-    border-width: 1px;
-    text-align: left;
-    word-wrap: break-word;
-  }
-
-  th {
-    text-align: left;
-    border-style: solid;
-    border-width: 1px;
-    padding-left: 5px;
-    text-align: left;
-  }
-
-  a {
-    background-color: grey;
-    border-bottom: 1px outset #EEEEEE;
-    border-style: outset;
-    border-top: 1px outset #EEEEEE;
-    color: white;
-    display: block;
-    padding: 10px 16px 10px 10px;
-    text-align: center;
-    text-decoration: none;
-  }
 </style>
 
-<script>
-  tt_cancel_destination = "/patients/show/<%=@person.id%>";
+<script type="text/javascript">
+  tt_cancel_destination = "/patients/show?id=<%= @patient_bean.patient_id%>";
 </script>
-
+  </head>
+  <body>
 <div class="container">
-  <table>
+  <div id="details" style="max-height:650px;overflow:auto;display:block">
+    <div>
 
-    <tr>
-      <th>Name</th>
-      <td class="data"><%=@patient_bean.name%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=name&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
+     <table>
+        <tr>
+          <td class='title-top'>
+              First Name
+          </td>
+          <td class='data-top'><%= @patient_bean.first_name %></td>
+		  <td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=first_name">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Last Name</td>
+          <td class='data'><%= @patient_bean.last_name %></td>
+          <td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=last_name">Edit</a></td>
+        </tr>
 
-    <tr>
-      <th>Gender</th>
-      <td><%=@patient_bean.sex%></td>
-      <td class="data"><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=sex&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
+        <tr>
+          <td class='title'>Date of Birth</td>
+          <td class='data'><%= @patient_bean.birth_date %></td>
+          <td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=birthdate">Edit</a></td>
+        </tr>
+        <tr>
+          <td class='title'>Gender</td>
+          <td class='data'><%= @patient_bean.sex %></td>
+          <td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=gender">Edit</a></td>
+        </tr>
+					<tr>
+            <td class='title'>Home District</td>
+            <td class='data'> <%= @patient_bean.home_district %></td>
+			<td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=home_district">Edit</a></td>
+          </tr>
+					<tr>
+            <td class='title'>Traditional Authority</td>
+            <td class='data'><%= @patient_bean.traditional_authority %></td>
+			<td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=home_district">Edit</a></td>
+          </tr>
+					<tr>
+            <td class='title'>Home Village</td>
+            <td class='data'> <%= @patient_bean.home_village %></td>
+ 			<td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=home_district">Edit</a></td>
+          </tr>
+					<tr>
+            <td class='title'>Current District</td>
+            <td class='data'> <%= @patient_bean.current_district   %></td>
+			<td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=current_district"> Edit</a></td>
+         <tr>
+            <td class='title'>Current Residence</td>
+            <td class='data'> <%= @patient_bean.current_residence %></td>
+			<td><a href="edit_demographics?id=<%= @patient_bean.patient_id %>&field=current_district"> Edit</a></td>
+          </tr>
 
-    <tr>
-      <th>Date of birth</th>
-      <td class="data"><%=@patient_bean.birth_date%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=age&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
+          <tr>
+            <td class='title'>Closest Landmark</td>
+            <td class='data'> <%= @patient_bean.landmark%></td>
+			<td><a href="edit_demographics?id=<%=@patient_bean.patient_id%>&field=landmark">Edit</a></td>
+          </tr>
 
-    <tr>
-      <th>Home district</th>
-      <td class="data"><%=@patient_bean.home_district%></td>
-      <td><%= link_to "Edit", "#",
-          :class => "anchor_class" %>
-      </td>
-    </tr>
+      </table>
 
-    <tr>
-      <th>Traditional authority</th>
-      <td class="data"><%=@patient_bean.traditional_authority%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=ta&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
-
-    <tr>
-      <th>Occupation</th>
-      <td class="data"><%=@patient_bean.occupation%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=occupation&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
-
-    <tr>
-      <th>Area of residence</th>
-      <td class="data"><%=@patient_bean.current_residence%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=location&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
-
-    <tr>
-      <th>Land mark</th>
-      <td class="data"><%=@patient_bean.landmark%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=address&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
-
-    <tr>
-      <th>Cell phone number</th>
-      <td class="data"><%=@patient_bean.cell_phone_number%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=cell_phone_number&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
-
-    <tr>
-      <th>Office phone number</th>
-      <td class="data"><%=@patient_bean.office_phone_number%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=office_phone_number&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
-
-    <tr>
-      <th>Home phone number</th>
-      <td class="data"><%=@patient_bean.home_phone_number%></td>
-      <td><%= link_to "Edit", 
-          "/patients/mastercard_modify?field=home_phone_number&id=#{@person.id}&from_demo=true", 
-          :class => "anchor_class" %>
-      </td>
-    </tr>
-
-  </table>
+    </div>
+  </div>
 </div>
+
+<div id="footer">
+
+</div>
+
+</body>
+</html>
+
+
+
+  

@@ -1,0 +1,125 @@
+<style>
+  body {
+    -moz-user-select:none;
+  }
+
+  table {
+    vertical-align:center;
+    width: 100%;
+    -moz-user-select:none;
+  }
+
+  .container {
+    height: 92%;
+    background-color: #FFFFDD;
+    margin: 20px 20px 20px 20px;
+    overflow: auto;
+  }
+
+  .data { 
+    padding-left: 5px;
+  }
+
+  td {
+    text-align: left;
+    border-style: solid;
+    border-width: 1px;
+    text-align: left;
+    word-wrap: break-word;
+  }
+
+  th {
+    text-align: left;
+    border-style: solid;
+    border-width: 1px;
+    padding-left: 5px;
+    text-align: left;
+  }
+
+  a {
+    background-color: grey;
+    border-bottom: 1px outset #EEEEEE;
+    border-style: outset;
+    border-top: 1px outset #EEEEEE;
+    color: white;
+    display: block;
+    padding: 10px 16px 10px 10px;
+    text-align: center;
+    text-decoration: none;
+  }
+</style>
+
+
+<script type="text/javascript">
+  tt_cancel_destination = "/patients/show/<%= @patient.patient_id%>";
+  tt_cancel_show = "/patients/show/<%= @patient.patient_id%>";
+</script>
+
+<div id="general_dashboard" style="margin:10px;">
+  <div id="details" style="float:none; width:97%;">
+    <form>
+      <%= hidden_field_tag("observations[][patient_id]", @patient.id) %>
+  </form>
+
+
+<div class="container">
+<table>
+  <tr>
+  	<th>First Name</th>
+  	<td class='data' style='border-width:1px 1px 1px'><%= @patient_bean.first_name %></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=first_name">Edit</a></td>
+
+  </tr>
+  <tr>
+  	<th>Last Name</th>
+    <td class='data'><%=@patient_bean.last_name %></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=last_name">Edit</a></td>
+  </tr>
+  <tr>
+  	<th>Birthdate</th>
+    <td class='data'><%=@patient_bean.birth_date%></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=birthdate">Edit </a></td>
+  </tr>
+  <tr>
+  	<th>Gender</th>
+    <td class='data'><%=@patient_bean.sex%></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=gender">Edit</a></td>
+  </tr>
+  <tr>
+  	<th>Current Residence</th>
+    <td class='data'> <%=@patient_bean.current_residence%></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=current_village"> Edit</a></td>
+  </tr>
+  <tr>
+  	<th>Current Traditional Authority</th>
+    <td class='data'><%=@patient_bean.traditional_authority%></td>
+    <td class='title'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=current_ta">Edit</a></td>
+  </tr>
+  <!-- tr> 
+  	<th>Current District</th>
+    <td class='data'> <%#=@patient_bean.current_district%></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=current_district"> Edit</a> </td> 
+  </tr -->
+  <tr> 
+  	<th>Home District</th>
+    <td class='data'><%=@patient_bean.home_district%></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=home_district"> Edit</a></td> 
+  </tr>
+  <tr> 
+  	<th>Primary Phone</th>
+    <td class='data'><%= @patient_bean.cell_phone_number %></td>
+    <td class='anchor_class'> <a href="modify_demographics?patient_id=<%=@patient.id%>&field=primary_phone">Edit</a></td> 
+  </tr>
+  <tr> 
+  	<th>Secondary Phone</th>
+  	<td class='data'><%=@patient_bean.home_phone_number%></td>
+  	<td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=secondary_phone">Edit</a></td> 
+  </tr>
+  <tr>
+  	<th>Occupation</th>
+    <td class='data'><%=@patient_bean.occupation%><br/></td>
+    <td class='anchor_class'><a href="modify_demographics?patient_id=<%=@patient.id%>&field=occupation">Edit</a></td>
+  </tr>
+</table>
+</div>
+<div>
