@@ -598,6 +598,17 @@ class GenericPeopleController < ApplicationController
       @field_value = @person.send(@field)
     end
   end
+
+  def edit_demographics
+    @patient = Patient.find(params[:patient_id]  || params[:id] || session[:patient_id]) rescue nil
+    @field = params[:field]
+    render :partial => "edit_demographics", :field =>@field, :layout => true and return
+  end
+
+  def update_demographics
+    PatientService.update_demographics(params)
+    redirect_to :action => 'demographics', :patient_id => params['person_id'] and return
+  end
   
   def dde_search
     # result = '[{"person":{"created_at":"2012-01-06T10:08:37Z","data":{"addresses":{"state_province":"Balaka","address2":"Hospital","city_village":"New Lines Houses","county_district":"Kalembo"},"birthdate":"1989-11-02","attributes":{"occupation":"Police","cell_phone_number":"0999925666"},"birthdate_estimated":"0","patient":{"identifiers":{"diabetes_number":""}},"gender":"M","names":{"family_name":"Banda","given_name":"Laz"}},"birthdate":"1989-11-02","creator_site_id":"1","birthdate_estimated":false,"updated_at":"2012-01-06T10:08:37Z","creator_id":"1","gender":"M","id":1,"family_name":"Banda","given_name":"Laz","remote_version_number":null,"version_number":"0","national_id":null}}]'
@@ -618,7 +629,12 @@ class GenericPeopleController < ApplicationController
   end
 
   def demographics
-    @person = Person.find(params[:id])
+    if params[:id].blank?
+      person_id = params[:patient_id]
+    else
+      person_id = params[:id]
+    end
+    @person = Person.find(person_id)
 		@patient_bean = PatientService.get_patient(@person)
 		render :layout => 'menu'
   end
