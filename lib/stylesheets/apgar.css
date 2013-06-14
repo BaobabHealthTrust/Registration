@@ -1,0 +1,128 @@
+
+	#red_apgar_alert {
+    background:red;
+  }
+
+  #yellow_apgar_alert {    
+    background:yellow;    
+  }
+
+  #normal_apgar_alert, #red_apgar_alert, #yellow_apgar_alert {
+    border-radius: 10px;
+    -moz-user-select: none;
+    height: 110px;
+    color:black;
+    width: 85%;
+    border:2px solid gray;
+    font-size: 30px;
+    text-align: center;
+    margin-left:auto;
+    margin-right:auto;   
+    margin-top: 40px;
+    vertical-align: middle;
+  }
+
+  #tt_page_summary .inputFrameClass { height: 84%;}
+
+  #qwerty{ display:none; }
+
+  .numericKeyboard #char, #slash, #star, #plus, #date, #minus, #comma, #percent {
+    display: none;
+  }
+
+  #selectWindow{
+    -moz-user-select: none;
+    display: table;
+    width: 85%;
+    height:55%;
+    border:1px solid #999999;
+    align: center;
+    border-spacing: 8px;
+    margin-left:auto;
+    margin-right:auto;
+    border-radius: 10px;
+    background: white;
+    margin-top: 17px;
+  }
+  .butt{
+    font-family: sans-serif;
+    font-size:1.1em;
+    font-weight: bold;
+    -moz-border-radius: 5px;
+    border-radius: 10px;
+    display:table-cell;
+    background: url('/images/btn_blue.png');
+    border:1px solid #999999;
+    border-color:gray;
+    color: white;
+    vertical-align: middle;
+    height: auto;
+    width: auto;
+    max-width: 73px;
+    text-align: center;    
+  }
+  .leftButt, .value{
+    font-size:1.3em;
+    border-radius: 4px;
+    font-weight: bold;
+    background: white;
+    display:table-cell;
+    border:1px solid #999999;
+    height: auto;
+    color: rgb(5, 30, 5);
+    width: auto;
+    vertical-align: middle;
+    text-align: center;
+    max-width: 73px;
+
+  }
+  .value{
+    height: 40px;
+    font-weight: bold;
+  }
+  .boardRow{
+    display: table-row;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border-spacing: 5px;
+  }
+  #row1{
+    display: table-row;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    border-spacing: 5px 5px 5px 5px;
+  }
+  #alertsTable{
+    -moz-user-select: none;
+    display: table;
+    border-radius: 4px;
+    background: gray;
+    border-spacing: 1px;
+    width: 98%;
+    height:auto;
+    border:1px solid #999999;
+    vertical-align: middle;
+    margin-left:auto;
+    margin-top: 12px;
+    margin-right:auto;
+    max-height: 99%;
+    overflow: auto;
+  }
+  .alertsRow, .alertsHeaderRow{
+    display: table-row;
+    height: 65px !important;
+  }
+  .alertsTitle, .alertsHeader, .alertsCell{
+    display: table-cell;
+    border: solid 1px lightgray;
+    font-size: 28px;
+    vertical-align: middle;   
+    text-align: center;
+    background: white;
+  }
+  .alertsHeader, .alertsTitle{
+    font-weight: bold;
+    text-align: center;
+    background: white;
+  }
+
