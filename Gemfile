@@ -1,8 +1,8 @@
 source 'http://rubygems.org'
 
 gem 'rails', '2.3.5'
-gem 'warden'
-gem 'devise'
+gem 'warden', '0.10.7'
+gem 'devise' , '1.0.11'
 gem 'will_paginate', '~> 2.0'
 gem 'settingslogic'                                                             
 gem 'fastercsv'                                                                 

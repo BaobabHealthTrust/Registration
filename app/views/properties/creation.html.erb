@@ -28,6 +28,9 @@
       property = 'show.lab.results'
     when 'ask_pills_remaining_at_home'
       property = 'ask.pills.remaining.at.home'
+    when 'confirm_before_creating_a_patient'                                    
+      property = 'confirm.before.creating'
+
   end
 %>
   <%= hidden_field_tag "property", property %>
