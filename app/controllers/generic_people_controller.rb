@@ -159,6 +159,7 @@ class GenericPeopleController < ApplicationController
 		render :text => art_info.to_json
 	end
 	
+=begin
 	def search
 		found_person = nil
 		if params[:identifier]
@@ -176,7 +177,6 @@ class GenericPeopleController < ApplicationController
 				end
 			end
 			if found_person
-
         patient = DDEService::Patient.new(found_person.patient)
 
         patient.check_old_national_id(params[:identifier])
@@ -184,6 +184,8 @@ class GenericPeopleController < ApplicationController
 				if params[:relation]
 					redirect_to search_complete_url(found_person.id, params[:relation]) and return
 				else
+          #creating patient's footprint so that we can track them later when they visit other sites
+          DDEService.create_footprint(PatientService.get_patient(found_person).national_id, session[:location_id])
 					redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
 				end
 			end
@@ -195,8 +197,8 @@ class GenericPeopleController < ApplicationController
 			patient = PatientService.get_patient(person) rescue nil
 			@patients << patient
 		end
-
 	end
+=end
   
   def search_from_dde
 		found_person = PatientService.person_search_from_dde(params)
@@ -307,9 +309,14 @@ class GenericPeopleController < ApplicationController
         patient_id = PatientService.get_patient_identifier(person.patient, "National id")
         if patient_id.length != 6 and create_from_dde_server
           patient.check_old_national_id(patient_id)
+          #creating patient's footprint so that we can track them later when they visit other sites
+          DDEService.create_footprint(PatientService.get_patient(person).national_id, session[:location_id])
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
         end
+        #creating patient's footprint so that we can track them later when they visit other sites
+        DDEService.create_footprint(PatientService.get_patient(person).national_id, session[:location_id])
       end
+      
       redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
 
       redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
@@ -427,6 +434,10 @@ class GenericPeopleController < ApplicationController
         person = PatientService.create_patient_from_dde(params)
         success = true
       end
+
+    #If we are creating from DDE then we must create a footprint of the 
+    #just created patient to enable future                                                              
+    DDEService.create_footprint(PatientService.get_patient(person).national_id, session[:location_id])
 
     #for now BART2 will use BART1 for patient/person creation until we upgrade BART1 to 2
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
