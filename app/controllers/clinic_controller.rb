@@ -57,6 +57,7 @@ class ClinicController < GenericClinicController
   def properties_tab
     @settings = [
       ["Set Site Code", "/properties/site_code"],
+      ["Confirm patient creation", "/properties/creation?value=confirm_before_creating_a_patient"],
       ["Manage Roles", "/properties/set_role_privileges"]
     ]
     render :layout => false

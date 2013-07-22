@@ -43,9 +43,13 @@ class PeopleController < GenericPeopleController
         if params[:relation]
           redirect_to search_complete_url(found_person.id, params[:relation]) and return
         elsif national_id_replaced.to_s == "true"
+          #creating patient's footprint so that we can track them later when they visit other sites
+          DDEService.create_footprint(PatientService.get_patient(found_person).national_id, Location.find(session[:location_id]).name)
           print_and_redirect("/patients/national_id_label?patient_id=#{found_person.id}", next_task(found_person.patient)) and return
           redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
         else
+          #creating patient's footprint so that we can track them later when they visit other sites
+          DDEService.create_footprint(PatientService.get_patient(found_person).national_id, Location.find(session[:location_id]).name)
           redirect_to :action => 'confirm', :found_person_id => found_person.id, :relation => params[:relation] and return
         end
       end
