@@ -261,7 +261,6 @@ module DDEService
   end
 
   def self.search_by_identifier(identifier)
-    identifier = identifier.gsub("-","").strip
     people = PatientIdentifier.find_all_by_identifier(identifier).map{|id|
       id.patient.person
     } unless identifier.blank? rescue nil
@@ -273,16 +272,9 @@ module DDEService
       dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""
       uri = "http://#{dde_server_username}:#{dde_server_password}@#{dde_server}/people/find.json"
       uri += "?value=#{identifier}"
-      p = JSON.parse(RestClient.get(uri)) rescue nil
-      return [] if p.blank?
-      return "found duplicate identifiers" if p.count > 1
-      p = p.first
+      p = JSON.parse(RestClient.get(uri)).first rescue nil
 
-      passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
-      passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
-      if passed_national_id.blank?
-       return [DDEService.get_remote_person(p["person"]["id"])]
-      end
+      return [] if p.blank?
 
       birthdate_year = p["person"]["birthdate"].to_date.year rescue "Unknown"
       birthdate_month = p["person"]["birthdate"].to_date.month rescue nil
@@ -315,13 +307,6 @@ module DDEService
        "relation"=>""
       }
 
-      unless passed_national_id.blank?
-        patient = PatientIdentifier.find(:first,
-          :conditions =>["voided = 0 AND identifier = ?",passed_national_id]).patient rescue nil
-        return [patient.person] unless patient.blank?
-      end
-
-      passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
       return [self.create_from_form(passed["person"])]
     end
     return people
@@ -642,10 +627,10 @@ module DDEService
     return PatientService.create_from_form(passed["person"])
   end
 
-  def self.create_footprint(national_id, location_id)
+  def self.create_footprint(national_id, app_name)
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
-    return unless create_from_dde_server 
-    paramz = {:value => national_id, :location_id => location_id}
+    return unless create_from_dde_server
+    paramz = {:value => national_id, :application_name => app_name}
     dde_server = GlobalProperty.find_by_property("dde_server_ip").property_value rescue ""
     dde_server_username = GlobalProperty.find_by_property("dde_server_username").property_value rescue ""
     dde_server_password = GlobalProperty.find_by_property("dde_server_password").property_value rescue ""

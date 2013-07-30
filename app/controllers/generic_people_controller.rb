@@ -310,11 +310,11 @@ class GenericPeopleController < ApplicationController
         if patient_id.length != 6 and create_from_dde_server
           patient.check_old_national_id(patient_id)
           #creating patient's footprint so that we can track them later when they visit other sites
-          DDEService.create_footprint(PatientService.get_patient(person).national_id, session[:location_id])
+          DDEService.create_footprint(PatientService.get_patient(person).national_id, 'Registration')
           print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
         end
         #creating patient's footprint so that we can track them later when they visit other sites
-        DDEService.create_footprint(PatientService.get_patient(person).national_id, session[:location_id])
+        DDEService.create_footprint(PatientService.get_patient(person).national_id, 'Registration')
       end
       
       redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
@@ -437,7 +437,7 @@ class GenericPeopleController < ApplicationController
 
     #If we are creating from DDE then we must create a footprint of the 
     #just created patient to enable future                                                              
-    DDEService.create_footprint(PatientService.get_patient(person).national_id, session[:location_id])
+    DDEService.create_footprint(PatientService.get_patient(person).national_id, 'Registration')
 
     #for now BART2 will use BART1 for patient/person creation until we upgrade BART1 to 2
     #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
