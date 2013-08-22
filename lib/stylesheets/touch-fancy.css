@@ -584,6 +584,7 @@ button:hover.dark span {
 
 .NoControls #viewport,
 .NoControls #keyboard,
+.NoControls #clearButton,
 .NoControls .touchscreenTextInput{
     display: none;
 }
