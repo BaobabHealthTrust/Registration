@@ -1100,6 +1100,8 @@ EOF
     patient.office_phone_number = get_attribute(person, 'Office phone number')
     patient.home_phone_number = get_attribute(person, 'Home phone number')
     patient.guardian = art_guardian(person.patient) rescue nil
+    patient.race = get_attribute(person, 'Race')
+    patient.citizenship = get_attribute(person, 'Citizenship')
     patient
   end
 
