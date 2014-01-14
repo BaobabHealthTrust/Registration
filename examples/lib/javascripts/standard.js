@@ -5020,7 +5020,7 @@ function createMultipleSelectControl(){
       
 function createSingleSelectControl(){
     if(__$("keyboard")){
-        __$("keyboard").style.display = "none";
+        setTimeout("__$('keyboard').style.display = 'none'", 10);
     }
     
     if(__$("viewport")){
