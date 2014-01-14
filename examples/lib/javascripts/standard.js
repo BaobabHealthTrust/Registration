@@ -5020,7 +5020,7 @@ function createMultipleSelectControl(){
       
 function createSingleSelectControl(){
     if(__$("keyboard")){
-        // __$("keyboard").style.display = "none";
+        __$("keyboard").style.display = "none";
     }
     
     if(__$("viewport")){
@@ -5029,10 +5029,8 @@ function createSingleSelectControl(){
     }
     
     if(__$("touchscreenInput" + tstCurrentPage)){
-        // __$("touchscreenInput" + tstCurrentPage).style.display = "none";
+        __$("touchscreenInput" + tstCurrentPage).style.display = "none";
     }
-    
-    // __$("inputFrame" + tstCurrentPage).innerHTML = "";
     
     var parent = document.createElement("div");
     parent.style.width = "100%";
