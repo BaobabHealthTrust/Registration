@@ -16,7 +16,6 @@ class PeopleController < GenericPeopleController
           uri += "?value=#{params[:identifier]}"
           output = RestClient.get(uri)
           p = JSON.parse(output)
-          
           if p.count > 1
             redirect_to :action => 'duplicates' ,:search_params => params
             return
