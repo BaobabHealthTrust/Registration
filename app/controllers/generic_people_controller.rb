@@ -811,7 +811,7 @@ class GenericPeopleController < ApplicationController
     render :text => PatientService.remote_demographics(people.first).to_json rescue ""
     return
   end
-
+=begin
   def duplicates
     @duplicates = []
     people = PatientService.person_search(params[:search_params])
@@ -829,6 +829,7 @@ class GenericPeopleController < ApplicationController
     @selected_identifier = params[:search_params][:identifier]
     render :layout => 'menu'
   end
+=end
 
   def reassign_dde_national_id
     person = DDEService.reassign_dde_identification(params[:dde_person_id],params[:local_person_id])

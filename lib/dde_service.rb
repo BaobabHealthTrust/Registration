@@ -123,12 +123,12 @@ module DDEService
     output = RestClient.get(uri)
     p = JSON.parse(output)
     return p.count if p.count > 1
-    p = p.first rescue nil
+    #pp = p.first rescue nil
     passed_national_id = (p["person"]["patient"]["identifiers"]["National id"])rescue nil
     passed_national_id = (p["person"]["value"]) if passed_national_id.blank? rescue nil
-
+           
     if passed_national_id.blank? and not p.blank?
-      DDEService.reassign_dde_identification(p["person"]["id"], self.patient.patient_id)
+      #DDEService.reassign_dde_identification(p["person"]["id"], self.patient.patient_id)
       return true
     end
 

@@ -20,6 +20,7 @@ class PeopleController < GenericPeopleController
             redirect_to :action => 'duplicates' ,:search_params => params
             return
           end
+
         end
         found_person = local_results.first
       else
@@ -126,7 +127,7 @@ class PeopleController < GenericPeopleController
     estimate = birthdate_estimated == 1
     patient_age += (estimate && birth_date.month == 7 && birth_date.day == 1  &&
         today.month < birth_date.month && date_created.year == today.year) ? 1 : 0
-  end
+  end	
 
   def birthdate_formatted(birthdate,birthdate_estimated)
     if birthdate_estimated == 1

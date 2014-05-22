@@ -33,17 +33,18 @@ module PatientService
       uri += "?value=#{identifier}"
       people = JSON.parse(RestClient.get(uri)) rescue nil
       return [] if people.blank?
-
+      p = JSON.parse(people)
+      raise p.inspect
       local_people = []
       people.each do |person|
-        national_id = person['person']["value"] rescue nil
+        national_id = person["person"]["value"] rescue nil
         old_national_id = person["person"]["old_identification_number"] rescue nil
 
         birthdate_year = person["person"]["data"]["birthdate"].to_date.year rescue "Unknown"
         birthdate_month = person["person"]["data"]["birthdate"].to_date.month rescue nil
         birthdate_day = person["person"]["data"]["birthdate"].to_date.day rescue nil
-        birthdate_estimated = person["person"]["data"]["birthdate_estimated"]
-        gender = person["person"]["data"]["gender"] == "F" ? "Female" : "Male"
+        birthdate_estimated = person["person"]["data"]["birthdate_estimated"] rescue nil
+        gender = (person["person"]["data"]["gender"] == "F" ? "Female" : "Male") rescue nil
         passed_person = {
          "person"=>{"occupation"=>person["person"]["data"]["attributes"]["occupation"],
          "age_estimate"=> birthdate_estimated ,
@@ -1460,8 +1461,8 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     end
     return people
   end
-  
   def self.set_birthdate_by_age(person, age, today = Date.today)
+  
     person.birthdate = Date.new(today.year - age.to_i, 7, 1)
     person.birthdate_estimated = 1
   end
