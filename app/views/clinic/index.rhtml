@@ -1,7 +1,6 @@
 <html>
   <head>
-    <title>Clinic</title>
-    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
+    <title>Clinic</title>    
     <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
     <script language="javascript">
       tstUsername = "<%= User.current_user rescue "" %>";
@@ -12,7 +11,10 @@
   </head>
   <body><div id='content'>
       <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-        <form id = 'home' action=''>
+        <% form_tag("http://#{(@settings["dde_username"])}:#{(@settings["dde_password"])}@#{(@settings["dde_server"])}/search", "method" => 'post', "enctype" => 'multipart/form-data', 
+          "id" => 'home', "class" => "form-horizontal", "autocomplete" => "off", "role" => "form", "novalidate" => "novalidate") do %>
+          
+        <!--form id = 'home' action=''-->
           <table cellpadding=10>
             <tr>
               <th colspan=2>Home Page</th>
@@ -75,8 +77,66 @@
               </td>
             </tr>
           </table>
-        </form>
+        <!--/form-->
+        
+          <textarea id="person" name="person" style="display: none;" condition="false"></textarea>
+          
+        <% end %>
       </center>
     </div>
+    
+    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" ></script>
+    
+    <script type="text/javascript">
+      <!--
+      
+      var json = <%= {
+            "national_id" => nil,
+            "application" => "#{@settings["application_name"]}",
+            "site_code" => "#{@settings["site_code"]}",
+            "return_path" => "http://#{request.host_with_port}/process_result",
+            "names" =>
+                {
+                    "family_name" => nil,
+                    "given_name" => nil
+                },
+                "gender" => "#{params["gender"]}",
+                "attributes" => {
+                    "occupation" => nil,
+                    "cell_phone_number" => nil
+                },
+                "birthdate" => nil,
+                "patient" => {
+                    "identifiers" => []
+                },
+                "birthdate_estimated" => nil,
+                "addresses" => {
+                    "current_residence" => nil,
+                    "current_village" => nil,
+                    "current_ta" => nil,
+                    "current_district" => nil,
+                    "home_village" => nil,
+                    "home_ta" => nil,
+                    "home_district" => nil
+                }
+            }.to_json %>;
+  
+      function barcodeScanAction(){
+        if(__$("barcode")){
+    
+            console.log("inside");
+    
+            json["national_id"] = __$("barcode").value.replace("$", "");
+          
+            __$("person").innerHTML = JSON.stringify(json);
+          
+            document.forms[0].submit();
+                     
+        }
+      }
+      
+      //-->
+    </script>
+    
   </body>
 </html>

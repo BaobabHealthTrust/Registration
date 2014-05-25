@@ -16,3 +16,5 @@ nbproject
 tmp/*
 Gemfile.lock
 .ruby-version
+dde_connection.yml
+public/touchscreentoolkit

@@ -37,7 +37,8 @@
 	<%= select_tag "observations[][value_text]", options_for_select(@select_options['services']),
 				{	:id => 'select_services',
 					:ttMatchFromBeginning => "true",
-					:helpText => "Select Services"}%>
+					:helpText => "Select Services",
+					:tt_onLoad => "__$('keyboard').style.display = 'none';"}%>
         
         <%= hidden_field_tag("observations[][value_coded_or_text]", nil) %>
         <%= hidden_field_tag("observations[][concept_name]", "SERVICES") %>

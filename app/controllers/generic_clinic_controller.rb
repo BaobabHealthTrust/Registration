@@ -13,6 +13,8 @@ class GenericClinicController < ApplicationController
 
     @roles = current_user.user_roles.collect{|r| r.role} rescue []
 
+    @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
+    
     render :template => 'clinic/index', :layout => false
   end
 

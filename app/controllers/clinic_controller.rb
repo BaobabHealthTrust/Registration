@@ -63,5 +63,4 @@ class ClinicController < GenericClinicController
     render :layout => false
   end
 
-
 end

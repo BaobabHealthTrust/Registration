@@ -112,6 +112,9 @@ class PeopleController < GenericPeopleController
 		(@search_results || {}).each do | npid , data |
 			@patients << data
 		end
+		
+    @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
+
 	end
   
   private
