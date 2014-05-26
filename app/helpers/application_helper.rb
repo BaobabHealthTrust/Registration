@@ -36,7 +36,7 @@ module ApplicationHelper
   end
   
   def ask_home_village
-    get_global_property_value("demographics.home_village").to_s == "true" rescue false
+    get_global_property_value("demographics.home_village").to_s == "true" rescue true
   end
 
   def site_prefix

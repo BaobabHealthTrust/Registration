@@ -21,4 +21,6 @@ ActionController::Routing::Routes.draw do |map|
 	map.connect ':controller/:action/'
 	map.process_result '/process_result', :controller => 'dde', :action => 'process_result'
 	map.process_data '/process_data/:id', :controller => 'dde', :action => 'process_data'
+	map.search '/search', :controller => 'dde', :action => 'search_name'
+	map.new_patient '/new_patient', :controller => 'dde', :action => 'new_patient'
 end

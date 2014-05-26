@@ -6,12 +6,16 @@
       #applicationname {
         border: 1px solid #4e63a7 !important;
       }
+      
+      #barcode {
+        border-bottom: 1px solid #4e63a7 !important;
+      }
     </style>
     <script language="javascript">
       tstUsername = "<%= User.current_user rescue "" %>";
       tstCurrentDate = "<%= @date %>";
       tt_cancel_destination = '/logout';
-      tt_cancel_show = '/people/search';
+      tt_cancel_show = '/dde/search';
     </script>
   </head>
   <body><div id='content'>
@@ -57,7 +61,7 @@
             <select id="links">
 
               <option value='/logout' link='/logout'>Logout</option>
-              <option value='/people/search' link='/people/search' ttSize="300px">Find or Register Patient</option>
+              <option value='/dde/search' link='/dde/search' ttSize="300px">Find or Register Patient</option>
 
               <% if development_environment? %>
                 <option value='/location?from=clinic' ttSize="150px">Swap Desk</option>

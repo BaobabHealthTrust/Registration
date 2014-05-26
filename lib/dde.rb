@@ -1,39 +1,6 @@
 module DDE
  
     def self.search_and_or_create(json)
-=begin
-    person = {
-      "names"=>{
-        "family_name_code"=>"T633", 
-        "given_name_code"=>"T63", 
-        "family_name"=>"Tested", 
-        "given_name"=>"Test"
-      }, 
-      "_id"=>"000000", 
-      "addresses"=>{
-        "home_village"=>nil, 
-        "current_residence"=>nil, 
-        "home_district"=>nil, 
-        "current_ta"=>nil, 
-        "home_ta"=>nil, 
-        "current_district"=>nil, 
-        "current_village"=>nil
-      }, 
-      "patient"=>{
-        "identifiers"=>[""]
-      }, 
-      "gender"=>"M", 
-      "birthdate_estimated"=>false, 
-      "_rev"=>"2-5f23c9d0ce68b97fe27750c610f89180", 
-      "old_identification_number"=>nil, 
-      "assigned_site"=>nil, 
-      "type"=>"Person", 
-      "created_at"=>"2014-05-13T16:38:26.236Z", 
-      "person_attributes"=>nil, 
-      "patient_assigned"=>false, 
-      "birthdate"=>"2000-01-01"
-    }
-=end
     
       raise "Argument expected to be a JSON Object" if (JSON.parse(json) rescue nil).nil?
 
@@ -56,7 +23,7 @@ module DDE
               "neighborhood_cell"=>(person["addresses"]["home_village"] rescue nil),
               "county_district"=>(person["addresses"]["home_ta"] rescue nil)},
          "gender"=> gender ,
-         "patient"=>{"identifiers"=>{"National id" => person["_id"]}},
+         "patient"=>{"identifiers"=>{"National id" => person["national_id"]}},
          "birth_day"=>birthdate_day,
          "home_phone_number"=>(person["person_attributes"]["home_phone_number"] rescue nil),
          "names"=>{"family_name"=>person["names"]["family_name"],
@@ -71,14 +38,14 @@ module DDE
         
       # Check if this patient exists locally
       result = PatientIdentifier.find_by_identifier(person["national_id"])
-          
+         
       if result.blank?
         # if patient does not exist locally, first verify if the patient is similar
         # to an existing one by national_id so you can update else create one
         
         person["patient"]["identifiers"].each do |identifier|
           
-          result = PatientIdentifier.find_by_identifier(identifier, 
+          result = PatientIdentifier.find_by_identifier(identifier[identifier.keys[0]], 
               :conditions => ["identifier_type = ?", 
               PatientIdentifierType.find_by_name("National id").id]) rescue nil
           
@@ -95,11 +62,15 @@ module DDE
           self.set_identifier("Old Identification Number", current_national_id.identifier, result.patient_id)
           current_national_id.void("National ID version change")
         
-        else      
+        elsif person["patient_id"].blank?     
         
           self.create_from_form(passed["person"])
           
           result = PatientIdentifier.find_by_identifier(person["national_id"])
+          
+        else
+        
+          result = Patient.find(person["patient_id"]) rescue nil
           
         end
         
@@ -108,8 +79,8 @@ module DDE
         # TODO: Add method to update updates from DDE to local copy
       
       end
-      
-      return result.patient_id # rescue nil
+       
+      return result.patient_id rescue nil
         
     end
     
