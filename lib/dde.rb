@@ -43,7 +43,7 @@ module DDE
         # if patient does not exist locally, first verify if the patient is similar
         # to an existing one by national_id so you can update else create one
         
-        person["patient"]["identifiers"].each do |identifier|
+        (person["patient"]["identifiers"] || []).each do |identifier|
           
           result = PatientIdentifier.find_by_identifier(identifier[identifier.keys[0]], 
               :conditions => ["identifier_type = ?", 
