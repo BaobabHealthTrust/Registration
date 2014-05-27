@@ -74,7 +74,7 @@ class DdeController < ApplicationController
       },
       "birthdate" => (patient.person.birthdate rescue nil),
       "patient" => {
-          "identifiers" => patient.patient_identifiers.collect{|id| {id.type.name => id.identifier} if id.type.name.downcase != "national id"}.delete_if{|x| x.nil?}
+          "identifiers" => (patient.patient_identifiers.collect{|id| {id.type.name => id.identifier} if id.type.name.downcase != "national id"}.delete_if{|x| x.nil?} rescue [])
       },
       "birthdate_estimated" => nil,
       "addresses" => {
