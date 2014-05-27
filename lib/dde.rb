@@ -23,7 +23,7 @@ module DDE
               "neighborhood_cell"=>(person["addresses"]["home_village"] rescue nil),
               "county_district"=>(person["addresses"]["home_ta"] rescue nil)},
          "gender"=> gender ,
-         "patient"=>{"identifiers"=>{"National id" => person["national_id"]}},
+         "patient"=>{"identifiers"=>{"National id" => ((person["national_id"] || person["_id"]) || person["_id"])}},
          "birth_day"=>birthdate_day,
          "home_phone_number"=>(person["person_attributes"]["home_phone_number"] rescue nil),
          "names"=>{"family_name"=>person["names"]["family_name"],
@@ -37,7 +37,7 @@ module DDE
         }
         
       # Check if this patient exists locally
-      result = PatientIdentifier.find_by_identifier(person["national_id"])
+      result = PatientIdentifier.find_by_identifier((person["national_id"] || person["_id"]))
          
       if result.blank?
         # if patient does not exist locally, first verify if the patient is similar
@@ -55,10 +55,10 @@ module DDE
         
         if !result.blank?
         
-        # raise person["national_id"].inspect
+        # raise (person["national_id"] || person["_id"]).inspect
       
           current_national_id = self.get_full_identifier("National id", result.patient_id)        
-          self.set_identifier("National id", person["national_id"], result.patient_id)
+          self.set_identifier("National id", (person["national_id"] || person["_id"]), result.patient_id)
           self.set_identifier("Old Identification Number", current_national_id.identifier, result.patient_id)
           current_national_id.void("National ID version change")
         
@@ -66,7 +66,7 @@ module DDE
         
           self.create_from_form(passed["person"])
           
-          result = PatientIdentifier.find_by_identifier(person["national_id"])
+          result = PatientIdentifier.find_by_identifier((person["national_id"] || person["_id"]))
           
         else
         
