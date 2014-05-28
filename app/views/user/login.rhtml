@@ -35,12 +35,12 @@
     <label for="user_username">Username</label>
     <%= text_field(:user, :username, :helpText=> "Enter Username", 
         :textCase => "lower",
-        :field_type => "password",
+        :field_type => "text",
         :tt_pageonload=>"loadBarcodePage") %><br>
     <label for="user_password">Password</label>
     <%= password_field(:user, :password, :helpText => "Enter Password", 
         :textCase => "lower",
-        :field_type => "password") %><br>
+        :field_type => "text") %><br>
     <% ask_location = get_global_property_value("ask_location") rescue "false"
        current_health_center_id = get_global_property_value("current_health_center_id") rescue "7"
      if ask_location == "false" %>

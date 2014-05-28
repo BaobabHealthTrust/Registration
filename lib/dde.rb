@@ -21,6 +21,7 @@ module DDE
               "city_village"=>(person["addresses"]["current_village"] rescue nil),
               "state_province"=>(person["addresses"]["current_district"] rescue nil),
               "neighborhood_cell"=>(person["addresses"]["home_village"] rescue nil),
+              "township_division"=>(person["addresses"]["current_ta"] rescue nil),
               "county_district"=>(person["addresses"]["home_ta"] rescue nil)},
          "gender"=> gender ,
          "patient"=>{"identifiers"=>{"National id" => ((person["national_id"] || person["_id"]) || person["_id"])}},
@@ -76,7 +77,158 @@ module DDE
         
       else
       
-        # TODO: Add method to update updates from DDE to local copy
+        patient = result.patient 
+      
+        address = patient.person.addresses.last rescue nil
+        
+        local = {
+            "gender"=>(patient.person.gender rescue nil), 
+            "birthdate_estimated"=>(patient.person.birthdate_estimated rescue nil), 
+            "patient_id"=>(patient.patient_id rescue nil), 
+            "national_id"=>(patient.patient_identifiers.find_by_identifier_type(PatientIdentifierType.find_by_name("National id").id).identifier rescue nil), 
+            "addresses"=>{
+              "current_residence" => (address.address1 rescue nil),
+              "current_village" => (address.city_village rescue nil),
+              "current_ta" => (address.township_division rescue nil),
+              "current_district" => (address.state_province rescue nil),
+              "home_village" => (address.neighborhood_cell rescue nil),
+              "home_ta" => (address.county_district rescue nil),
+              "home_district" => (address.address2 rescue nil)
+            }, 
+            "person_attributes"=>{
+              "occupation"=>nil, 
+              "cell_phone_number"=>nil
+            }, 
+            "patient"=>{
+              "identifiers"=>(patient.patient_identifiers.collect{|id| {id.type.name => id.identifier} if id.type.name.downcase != "national id"}.delete_if{|x| x.nil?} rescue [])
+            }, 
+            "birthdate"=>(patient.person.birthdate.strftime("%Y-%m-%d") rescue nil), 
+            "names"=>{
+              "given_name"=>(patient.person.names.first.given_name rescue nil), 
+              "family_name"=>(patient.person.names.first.family_name rescue nil)
+            }
+          }
+      
+        if (local["gender"].downcase.strip != person["gender"].downcase.strip) or 
+              (local["birthdate"].strip != person["birthdate"].strip) or 
+              (local["birthdate_estimated"] != person["birthdate_estimated"])
+              
+          patient.person.update_attributes(
+              "gender" => person["gender"], 
+              "birthdate" => person["birthdate"], 
+              "birthdate_estimated" => person["birthdate_estimated"]
+            ) 
+            
+        end
+        
+        if (local["names"]["given_name"].downcase.strip != person["names"]["given_name"].downcase.strip) or 
+              (local["names"]["family_name"].downcase.strip != person["names"]["family_name"].downcase.strip)
+        
+          patient.person.names.first.update_attributes(
+              "given_name" => person["names"]["given_name"], 
+              "family_name" => person["names"]["family_name"]
+            ) 
+          
+        end
+      
+        defidtype = PatientIdentifierType.find_by_name("Unknown ID").id rescue nil
+        
+        person["patient"]["identifiers"].each do |identifier|
+        
+          if !local["patient"]["identifiers"].include?(identifier)
+          
+            idtype = PatientIdentifierType.find_by_name(identifier.keys[0]).id rescue nil
+            
+            if !defidtype.blank?
+            
+              uuid = PatientIdentifier.find_by_sql("SELECT UUID() uuid")
+              
+              PatientIdentifier.create(
+                  "patient_id" => patient.id, 
+                  "identifier" => identifier[identifier.keys[0]], 
+                  "identifier_type" => (idtype || defidtype), 
+                  "uuid" => uuid                
+                )
+            
+            end
+          
+          end
+        
+        end
+      
+        fields = [
+          {"occupation" => "Occupation"},
+          {"cell_phone_number" => "Cell Phone Number"},
+          {"home_phone_number" => "Home Phone Number"},
+          {"race" => "Race"},
+          {"citizenship" => "Citizenship"}
+        ]
+      
+        fields.each do |field|
+        
+          if (local["person_attributes"][field.keys[0]] rescue nil).to_s.strip.downcase != (person["person_attributes"][field.keys[0]] rescue nil).to_s.strip.downcase
+            pattribute = PersonAttribute.find_by_person_attribute_type_id(PersonAttributeType.find_by_name(field[field.keys[0]]).id) rescue nil
+            
+            if !pattribute.blank?
+            
+              pattribute.update_attributes("value" => (person["person_attributes"][field.keys[0]] rescue nil))
+            
+            else
+            
+              PersonAttribute.create(
+                  "person_id" => patient.person.person_id, 
+                  "value" => (person["person_attributes"][field.keys[0]] rescue nil),
+                  "person_attribute_type_id" => PersonAttributeType.find_by_name(field[field.keys[0]]).id,
+                  "uuid" => (PersonAttribute.find_by_sql("SELECT UUID() uuid").first.uuid)
+                )
+            
+            end
+            
+          end
+          
+        end
+         
+        if (local["addresses"]["current_residence"] rescue nil).to_s.strip.downcase != (person["addresses"]["current_residence"] rescue nil).to_s.strip.downcase or
+            (local["addresses"]["current_village"] rescue nil).to_s.strip.downcase != (person["addresses"]["current_village"] rescue nil).to_s.strip.downcase or
+            (local["addresses"]["current_ta"] rescue nil).to_s.strip.downcase != (person["addresses"]["current_ta"] rescue nil).to_s.strip.downcase or 
+            (local["addresses"]["current_district"] rescue nil).to_s.strip.downcase != (person["addresses"]["current_district"] rescue nil).to_s.strip.downcase or
+            (local["addresses"]["home_village"] rescue nil).to_s.strip.downcase != (person["addresses"]["home_village"] rescue nil).to_s.strip.downcase or
+            (local["addresses"]["home_ta"] rescue nil).to_s.strip.downcase != (person["addresses"]["home_ta"] rescue nil).to_s.strip.downcase or 
+            (local["addresses"]["home_district"] rescue nil).to_s.strip.downcase != (person["addresses"]["home_district"] rescue nil).to_s.strip.downcase
+            
+          address = patient.person.addresses.last # rescue nil
+          
+          if !address.blank?
+          
+            address.update_attributes(
+                "address1" => (person["addresses"]["current_residence"] rescue nil),
+                "address2" => (person["addresses"]["home_district"] rescue nil),
+                "city_village" => (person["addresses"]["current_village"] rescue nil),
+                "state_province" => (person["addresses"]["current_district"] rescue nil),
+                "county_district" => (person["addresses"]["home_ta"] rescue nil),
+                "neighborhood_cell" => (person["addresses"]["home_village"] rescue nil),
+                "township_division" => (person["addresses"]["current_ta"] rescue nil)
+              )
+          
+          else 
+          
+            PersonAddress.create(
+                "person_id" => patient.person.id,
+                "address1" => (person["addresses"]["current_residence"] rescue nil),
+                "address2" => (person["addresses"]["home_district"] rescue nil),
+                "city_village" => (person["addresses"]["current_village"] rescue nil),
+                "state_province" => (person["addresses"]["current_district"] rescue nil),
+                "county_district" => (person["addresses"]["home_ta"] rescue nil),
+                "neighborhood_cell" => (person["addresses"]["home_village"] rescue nil),
+                "township_division" => (person["addresses"]["current_ta"] rescue nil),
+                "uuid" => (PersonAddress.find_by_sql("SELECT UUID() uuid").first.uuid)
+              )
+          
+          end
+            
+        end 
+        
+        # raise local.inspect
       
       end
        

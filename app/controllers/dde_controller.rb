@@ -52,12 +52,14 @@ class DdeController < ApplicationController
     
     patient = PatientIdentifier.find_by_identifier(params[:id]).patient rescue nil
     
+    national_id = ((patient.patient_identifiers.find_by_identifier_type(PatientIdentifierType.find_by_name("National id").id).identifier rescue nil) || params[:id])
+    
     name = patient.person.names.last rescue nil
     
     address = patient.person.addresses.last rescue nil
     
     person = {
-      "national_id" => (params[:id] rescue nil),
+      "national_id" => national_id,
       "application" => "#{@settings["application_name"]}",
       "site_code" => "#{@settings["site_code"]}",
       "return_path" => "http://#{request.host_with_port}/process_result",
@@ -68,7 +70,7 @@ class DdeController < ApplicationController
           "given_name" => (name.given_name rescue nil)
       },
       "gender" => (patient.person.gender rescue nil),
-      "attributes" => {
+      "person_attributes" => {
           "occupation" => nil,
           "cell_phone_number" => nil
       },
@@ -80,7 +82,7 @@ class DdeController < ApplicationController
       "addresses" => {
           "current_residence" => (address.address1 rescue nil),
           "current_village" => (address.city_village rescue nil),
-          "current_ta" => nil,
+          "current_ta" => (address.township_division rescue nil),
           "current_district" => (address.state_province rescue nil),
           "home_village" => (address.neighborhood_cell rescue nil),
           "home_ta" => (address.county_district rescue nil),
