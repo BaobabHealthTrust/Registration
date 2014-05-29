@@ -16,6 +16,18 @@
         color: black;
         font-weight: bold;
       }
+      
+      #patient-dashboard-applicationname {
+        border: 1px solid #4e63a7 !important;
+      }
+      
+      #patient-dashboard-applicationname div {
+        margin-top: 15px !important;
+      }
+      
+      #buttonlinks {
+        padding-right: 25px !important;
+      }
     </style>
   </head>
   <body><div id='content'>
@@ -26,7 +38,9 @@
               <th colspan=2>Patient Dashboard</th>
             </tr>
             <h1 id='project_name'>
-              PR
+              <div style="font-size: 0.4em; margin-top: 20px; color: #4e63a7;">
+                  Patient<br/>Registration
+              </div>
             </h1>
             <span id='patient_name'><%= @patient_bean.name rescue "" %></span>
             <span id='patient_id'><%= @patient_bean.national_id_with_dashes rescue "" %></span>
@@ -61,7 +75,7 @@
              <% else %>
                 <select id="links">
                  <!-- <option value='/patients/programs_dashboard/<%= @patient.id -%>'>States</option> -->
-                  <option value='/people/demographics?id=<%=@patient.id%>'>Edit Demographics</option>
+                  <option value='/dde/edit_patient?id=<%=@patient.id%>'>Edit Demographics</option>
                   <option value='/patients/dashboard_print_national_id/<%=@patient.id%>'>Print National ID</option>
                   
                 </select>
