@@ -351,6 +351,10 @@ class DdeController < ApplicationController
     
       @dontstop = true
     
+    elsif JSON.parse(@results).length == 0
+    
+      redirect_to "/patient_not_found/#{(@json["national_id"] || @json["_id"])}" and return
+    
     end
     
     render :layout => "ts"
@@ -390,6 +394,12 @@ class DdeController < ApplicationController
     end
     
     render :text => @results  
+  end
+  
+  def patient_not_found
+    @id = params[:id]
+    
+    redirect_to "/" and return if !params[:create].blank? and params[:create] == "false"
   end
   
 end
