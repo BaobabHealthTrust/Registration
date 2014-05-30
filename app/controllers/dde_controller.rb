@@ -1,3 +1,5 @@
+require "rest-client"
+
 class DdeController < ApplicationController
 
   def index
@@ -31,7 +33,23 @@ class DdeController < ApplicationController
 
   def process_result
   
-    patient_id = DDE.search_and_or_create(params["person"]) # rescue nil 
+    json = JSON.parse(params["person"]) rescue {}
+    
+    if json["patient"]["identifiers"].class.to_s.downcase == "hash"
+      
+      tmp = json["patient"]["identifiers"]
+      
+      json["patient"]["identifiers"] = []
+      
+      tmp.each do |key, value|
+        
+        json["patient"]["identifiers"] << {key => value}
+        
+      end
+    
+    end 
+    
+    patient_id = DDE.search_and_or_create(json.to_json) # rescue nil 
     
     json = JSON.parse(params["person"]) rescue {}
     
@@ -303,4 +321,75 @@ class DdeController < ApplicationController
     redirect_to "/clinic" and return
   end
 
+  def process_scan_data
+
+    @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
+    
+    @json = JSON.parse(params[:person]) rescue {}
+    
+    @results = []
+    
+    if !@json.blank?
+    
+      @results = RestClient.post("http://#{@settings["dde_username"]}:#{@settings["dde_password"]}@#{@settings["dde_server"]}/ajax_process_data", {:person => @json, :page => params[:page]}, {:accept => :json})    
+      
+    end
+    
+    @dontstop = false
+    
+    if JSON.parse(@results).length == 1
+    
+      result = JSON.parse(JSON.parse(@results)[0])
+      
+      result["patient_id"] = @json["patient_id"] if !@json["patient_id"].blank?
+      
+      @results = result.to_json
+    
+      person = JSON.parse(@results)#["person"]
+    
+      @results = RestClient.post("http://#{@settings["dde_username"]}:#{@settings["dde_password"]}@#{@settings["dde_server"]}/process_confirmation", {:person => person, :target => "select"})
+    
+      @dontstop = true
+    
+    end
+    
+    render :layout => "ts"
+  end
+
+  def ajax_process_data
+
+    settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
+    
+    person = JSON.parse(params[:person]) rescue {}
+    
+    result = []
+    
+    if !person.blank?
+    
+      result = RestClient.post("http://#{settings["dde_username"]}:#{settings["dde_password"]}@#{settings["dde_server"]}/ajax_process_data", {:person => person, :page => params[:page]}, {:accept => :json})    
+      
+    end
+    
+    render :text => result
+  end
+  
+  def process_confirmation
+  
+    raise params.inspect
+  
+    @json = params[:person] rescue {}
+    
+    @results = []
+    
+    target = params[:target]
+    
+    target = "update" if target.blank?
+    
+    if !@json.blank?    
+      @results = RestClient.post("http://#{settings["dde_username"]}:#{settings["dde_password"]}@#{settings["dde_server"]}/process_confirmation", {:person => person, :target => target}, {:accept => :json})    
+    end
+    
+    render :text => @results  
+  end
+  
 end

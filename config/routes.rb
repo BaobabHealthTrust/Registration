@@ -23,4 +23,6 @@ ActionController::Routing::Routes.draw do |map|
 	map.process_data '/process_data/:id', :controller => 'dde', :action => 'process_data'
 	map.search '/search', :controller => 'dde', :action => 'search_name'
 	map.new_patient '/new_patient', :controller => 'dde', :action => 'new_patient'
+	map.ajax_process_data '/ajax_process_data', :controller => 'dde', :action => {'ajax_process_data' => [:post]}
+	map.process_confirmation '/process_confirmation', :controller => 'dde', :action => {'process_confirmation' => [:post]}
 end

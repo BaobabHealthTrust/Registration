@@ -20,7 +20,10 @@
   </head>
   <body><div id='content'>
       <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
-        <% form_tag("http://#{(@settings["dde_username"])}:#{(@settings["dde_password"])}@#{(@settings["dde_server"])}/process_data", "method" => 'post', "enctype" => 'multipart/form-data', 
+        <%# form_tag("http://#{(@settings["dde_username"])}:#{(@settings["dde_password"])}@#{(@settings["dde_server"])}/process_data", "method" => 'post', "enctype" => 'multipart/form-data', 
+          "id" => 'home', "class" => "form-horizontal", "autocomplete" => "off", "role" => "form", "novalidate" => "novalidate") do %>
+          
+        <% form_tag("/dde/process_scan_data", "method" => 'post', "enctype" => 'multipart/form-data', 
           "id" => 'home', "class" => "form-horizontal", "autocomplete" => "off", "role" => "form", "novalidate" => "novalidate") do %>
           
         <!--form id = 'home' action=''-->
