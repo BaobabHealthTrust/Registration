@@ -33,9 +33,11 @@ class DdeController < ApplicationController
 
   def process_result
   
+    # raise params.inspect
+  
     json = JSON.parse(params["person"]) rescue {}
     
-    if json["patient"]["identifiers"].class.to_s.downcase == "hash"
+    if (json["patient"]["identifiers"].class.to_s.downcase == "hash" rescue false)
       
       tmp = json["patient"]["identifiers"]
       
@@ -379,8 +381,6 @@ class DdeController < ApplicationController
   
   def process_confirmation
   
-    raise params.inspect
-  
     @json = params[:person] rescue {}
     
     @results = []
@@ -400,6 +400,117 @@ class DdeController < ApplicationController
     @id = params[:id]
     
     redirect_to "/" and return if !params[:create].blank? and params[:create] == "false"
+  end
+  
+  def ajax_search
+
+    pagesize = 4
+    
+    page = (params[:page] || 1)
+    
+    offset = ((page.to_i - 1) * pagesize)
+    
+    offset = 0 if offset < 0
+
+    result = []
+    
+    filter = {}
+    
+    Person.find(:all, :joins => [:names], :limit => pagesize, :offset => offset, :conditions => ["given_name = ? AND family_name = ? AND gender = ?", params["given_name"], params["family_name"], params["gender"]]).each do |person|
+    
+      patient = person.patient # rescue nil
+    
+      national_id = (patient.patient_identifiers.find_by_identifier_type(PatientIdentifierType.find_by_name("National id").id).identifier rescue nil)
+      
+      filter[national_id] = true
+      
+      name = patient.person.names.last rescue nil
+      
+      address = patient.person.addresses.last rescue nil
+      
+      person = {
+        "national_id" => national_id,
+        "patient_id" => (patient.patient_id rescue nil),
+        "age" => (((Date.today - patient.person.birthdate.to_date).to_i / 365) rescue nil),
+        "names" =>
+        {
+            "family_name" => (name.family_name rescue nil),
+            "given_name" => (name.given_name rescue nil)
+        },
+        "gender" => (patient.person.gender rescue nil),
+        "person_attributes" => {
+            "occupation" => (patient.person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Occupation").id).value rescue nil),
+            "cell_phone_number" => (patient.person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Cell Phone Number").id).value rescue nil),
+            "home_phone_number" => (patient.person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Home Phone Number").id).value rescue nil),
+            "race" => (patient.person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Race").id).value rescue nil),
+            "citizenship" => (patient.person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Citizenship").id).value rescue nil)
+        },
+        "birthdate" => (patient.person.birthdate rescue nil),
+        "patient" => {
+            "identifiers" => (patient.patient_identifiers.collect{|id| {id.type.name => id.identifier} if id.type.name.downcase != "national id"}.delete_if{|x| x.nil?} rescue [])
+        },
+        "birthdate_estimated" => nil,
+        "addresses" => {
+            "current_residence" => (address.address1 rescue nil),
+            "current_village" => (address.city_village rescue nil),
+            "current_ta" => (address.township_division rescue nil),
+            "current_district" => (address.state_province rescue nil),
+            "home_village" => (address.neighborhood_cell rescue nil),
+            "home_ta" => (address.county_district rescue nil),
+            "home_district" => (address.address2 rescue nil)
+        }
+      }
+    
+      result << person
+      
+    end
+
+    settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] # rescue {}
+    
+    search_hash = {
+        "names" => {
+          "given_name" => (params["given_name"] rescue nil),
+          "family_name" => (params["family_name"] rescue nil)
+        },
+        "gender" => params["gender"]
+      }
+    
+    if !search_hash["names"]["given_name"].blank? and !search_hash["names"]["family_name"].blank? and !search_hash["gender"].blank? # and result.length < pagesize
+    
+      pagesize += pagesize - result.length
+    
+      remote = RestClient.post("http://#{settings["dde_username"]}:#{settings["dde_password"]}@#{settings["dde_server"]}/ajax_process_data", {:person => search_hash, :page => page, :pagesize => pagesize}, {:accept => :json})    
+      
+      json = JSON.parse(remote)
+      
+      json.each do |person|
+      
+        entry = JSON.parse(person)
+      
+        entry["national_id"] = entry["_id"] if entry["national_id"].blank? and !entry["_id"].blank?
+          
+        entry["age"] = (((Date.today - entry["birthdate"].to_date).to_i / 365) rescue nil)
+          
+        next if filter[entry["national_id"]]  
+          
+        entry.delete("created_at") rescue nil
+        entry.delete("patient_assigned") rescue nil
+        entry.delete("assigned_site") rescue nil
+        entry["names"].delete("family_name_code") rescue nil
+        entry["names"].delete("given_name_code") rescue nil
+        entry.delete("_id") rescue nil
+        entry.delete("updated_at") rescue nil
+        entry.delete("old_identification_number") rescue nil
+        entry.delete("type") rescue nil
+        entry.delete("_rev") rescue nil
+          
+        result << entry
+      
+      end
+      
+    end
+    
+    render :text => result.to_json
   end
   
 end

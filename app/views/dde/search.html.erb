@@ -60,7 +60,8 @@
       tt_cancel_destination = '/';
       tt_cancel_show = '/';
       
-      var patients = {};
+      var patients = [];
+      var page = 1;
       
       function hidekeyboard(){
         if(__$("keyboard")){
@@ -123,7 +124,63 @@
           
           footer.appendChild(newPatient);
       
-          ajaxSearch();
+          var btnRight = document.createElement("button");
+          btnRight.innerHTML = "<span>&rarr;</span>";
+          btnRight.id = "btnFirst";
+          btnRight.style.cssFloat = "right";
+          
+          btnRight.onmousedown = function(){
+            page += 1;
+              
+            if(__$("nextButton")){
+              __$("nextButton").className = "button gray navButton";
+              __$("nextButton").onclick = function(){};
+            }
+                  
+            ajaxSearch(page);
+          }
+          
+          footer.appendChild(btnRight);
+      
+          var btnLeft = document.createElement("button");
+          btnLeft.innerHTML = "<span>&larr;</span>";
+          btnLeft.id = "btnFirst";
+          btnLeft.style.cssFloat = "right";
+          
+          btnLeft.onmousedown = function(){
+            if(page - 1 > 0){
+              page -= 1;
+            }
+              
+            if(__$("nextButton")){
+              __$("nextButton").className = "button gray navButton";
+              __$("nextButton").onclick = function(){};
+            }
+                  
+            ajaxSearch(page);
+          }
+          
+          footer.appendChild(btnLeft);
+      
+          var btnFirst = document.createElement("button");
+          btnFirst.innerHTML = "<span>|&larr;</span>";
+          btnFirst.id = "btnFirst";
+          btnFirst.style.cssFloat = "right";
+          
+          btnFirst.onmousedown = function(){
+            page = 1;
+                
+            if(__$("nextButton")){
+              __$("nextButton").className = "button gray navButton";
+              __$("nextButton").onclick = function(){};
+            }
+                  
+            ajaxSearch(page);
+          }
+          
+          footer.appendChild(btnFirst);
+      
+          ajaxSearch(page);
       }
       
       function deselectAllAndSelect(me){
@@ -136,11 +193,16 @@
         }
       }
       
-      function ajaxSearch(){      
-          var url = "/search?given_name=" + __$("given_name").value.trim() + 
+      function ajaxSearch(page){      
+          var url = "/ajax_search?given_name=" + __$("given_name").value.trim() + 
               "&family_name=" + __$("family_name").value.trim() + "&gender=" + 
-               __$("gender").value.trim();
-                     
+               __$("gender").value.trim() + "&page=" + page;
+                 
+          if(__$("nextButton")){
+            __$("nextButton").className = "button gray navButton";
+            __$("nextButton").onclick = function(){};
+          }
+               
           var httpRequest = new XMLHttpRequest();
           httpRequest.onreadystatechange = function() {
               handleAjaxRequest(httpRequest);
@@ -173,13 +235,10 @@
               __$("rightpanel").innerHTML = "<div style='margin: auto; padding: 20px; font-size: 24px; font-style: italic;'>No results found!</div>";
             }
             
-            i = 0;
-            for(var uuid in patients){
-              
-              i++;
+            for(var i = 0; i < patients.length; i++){
               
               var div = document.createElement("div");
-              div.id = uuid;
+              div.id = i;
               div.className = "element " + (i%2 > 0 ? "odd" : "");
               div.setAttribute("tag", (i%2 > 0 ? "odd" : "even"))
               
@@ -200,25 +259,12 @@
                 }
               }
               
-              var identifier = "&nbsp;";
-              
-              for(var k = 0; k < patients[uuid]["identifiers"].length; k++){
-              
-                if(patients[uuid]["identifiers"][k]["idtype"].toLowerCase() == "national id"){
-                  
-                  identifier = patients[uuid]["identifiers"][k]["identifier"] 
-                  
-                  break;
-                  
-                }
-              
-              }
-              
-              div.innerHTML = "<table width='100%'><tr><td style='width: 50%'>" + patients[uuid]["name"] + 
-                  " (" + patients[uuid]["age"] + ")" + "</td><td>" + identifier + 
+              div.innerHTML = "<table width='100%'><tr><td style='width: 50%'>" + 
+                  patients[i]["names"]["given_name"] + " " + patients[i]["names"]["family_name"] +
+                  " (" + patients[i]["age"] + ")" + "</td><td>" + patients[i]["national_id"] + 
                   "</td><td style='width: 30px; background-color: white; border-radius: 60px; padding: 5px; border: 1px solid #666;'>" + 
-                  (patients[uuid]["gender"] == "M" ? "<img src='/images/male.png' width='50px' alt='Male' />" : 
-                  (patients[uuid]["gender"] == "F" ? "<img src='/images/female.png' width='50px' alt='Female' />" : "")) + "</td></tr></table>";
+                  (patients[i]["gender"] == "M" ? "<img src='/images/male.png' width='50px' alt='Male' />" : 
+                  (patients[i]["gender"] == "F" ? "<img src='/images/female.png' width='50px' alt='Female' />" : "")) + "</td></tr></table>";
               
               __$("rightpanel").appendChild(div);
               
@@ -228,11 +274,13 @@
       
       }
         
-      function showPatient(uuid){
+      function showPatient(pos){
         __$("leftpanel").innerHTML = "";
         
-        document.forms[0].setAttribute("action", "/encounters/new/registration?patient_id=" + uuid);
-        
+        if(__$("json")){                   
+          __$("json").innerHTML = JSON.stringify(patients[pos]);
+        }
+          
         var table = document.createElement("table");
         table.style.margin = "auto";
         table.style.paddingTop = "10px";
@@ -262,7 +310,7 @@
         
         var cell1_2 = document.createElement("td");
         cell1_2.style.fontStyle = "italic";
-        cell1_2.innerHTML = patients[uuid]["name"];
+        cell1_2.innerHTML = patients[pos]["names"]["given_name"] + " " + patients[pos]["names"]["family_name"];
         
         tr1.appendChild(cell1_2);
         
@@ -280,11 +328,29 @@
         
         var cell2_2 = document.createElement("td");
         cell2_2.style.fontStyle = "italic";
-        cell2_2.innerHTML = (patients[uuid]["estimated"] ? "~" : "") + patients[uuid]["age"];
+        cell2_2.innerHTML = (patients[pos]["birthdate_estimated"] ? "~" : "") + patients[pos]["age"];
         
         tr2.appendChild(cell2_2);
         
-        for(var k = 0; k < patients[uuid]["identifiers"].length; k++){
+        var tr3 = document.createElement("tr");
+        
+        tbody.appendChild(tr3);
+      
+        var cell3_1 = document.createElement("th");
+        cell3_1.style.textAlign = "right";
+        cell3_1.style.color = "#175034";
+        cell3_1.innerHTML = "National ID";
+        cell3_1.style.borderRight = "1px dotted #175034";
+        
+        tr3.appendChild(cell3_1);
+        
+        var cell3_2 = document.createElement("td");
+        cell3_2.style.fontStyle = "italic";
+        cell3_2.innerHTML = patients[pos]["national_id"];
+        
+        tr3.appendChild(cell3_2);
+          
+        for(var k = 0; k < patients[pos]["patient"]["identifiers"].length; k++){
         
           var tr3 = document.createElement("tr");
           
@@ -293,14 +359,14 @@
           var cell3_1 = document.createElement("th");
           cell3_1.style.textAlign = "right";
           cell3_1.style.color = "#175034";
-          cell3_1.innerHTML = patients[uuid]["identifiers"][k]["idtype"] + ":";
+          cell3_1.innerHTML = Object.keys(patients[pos]["patient"]["identifiers"][k])[0] + ":";
           cell3_1.style.borderRight = "1px dotted #175034";
           
           tr3.appendChild(cell3_1);
           
           var cell3_2 = document.createElement("td");
           cell3_2.style.fontStyle = "italic";
-          cell3_2.innerHTML = patients[uuid]["identifiers"][k]["identifier"] ;
+          cell3_2.innerHTML = patients[pos]["patient"]["identifiers"][k][Object.keys(patients[pos]["patient"]["identifiers"][k])[0]] ;
           
           tr3.appendChild(cell3_2);
           
@@ -320,9 +386,9 @@
         
         var cell4_2 = document.createElement("td");
         cell4_2.style.fontStyle = "italic";
-        cell4_2.innerHTML = "<div class='" + (patients[uuid]["gender"] == "M" ? "male" : 
-            (patients[uuid]["gender"] == "F" ? "female" : "")) + "'>" + (patients[uuid]["gender"] == "M" ? "<img src='/images/male.png' height='250' alt='Male' />" : 
-            (patients[uuid]["gender"] == "F" ? "<img src='/images/female.png' height='250' alt='Female' />" : "")) + "</div>";
+        cell4_2.innerHTML = "<div class='" + (patients[pos]["gender"] == "M" ? "male" : 
+            (patients[pos]["gender"] == "F" ? "female" : "")) + "'>" + (patients[pos]["gender"] == "M" ? "<img src='/images/male.png' height='250' alt='Male' />" : 
+            (patients[pos]["gender"] == "F" ? "<img src='/images/female.png' height='250' alt='Female' />" : "")) + "</div>";
             
         cell4_2.setAttribute("align", "center");
             
@@ -342,7 +408,7 @@
         
         var cell5_2 = document.createElement("td");
         cell5_2.style.fontStyle = "italic";
-        cell5_2.innerHTML = patients[uuid]["village"];
+        cell5_2.innerHTML = patients[pos]["addresses"]["current_village"];
         
         tr5.appendChild(cell5_2);
         
@@ -353,7 +419,8 @@
   </head>
   <body>
     <div id='content'>
-      <% form_tag '/' do -%>
+      <%# form_tag '/' do -%>
+      <% form_tag("/process_result", "method" => 'post', "enctype" => 'multipart/form-data', "id" => 'form', "style" => "display: none") do %>
         <%= hidden_field_tag "patient", nil %>
         <table width='100%' cellpadding=10 cellspacing=0>
           <tr>
@@ -397,11 +464,13 @@
             </td>
             <td>
               <input type="text" id="selected_patient" name="selected_patient" value="" 
-                  helpText="Select Patient or Create New Patient" tt_onLoad="loadNames(); hidekeyboard();" optional="true" 
+                  helpText="Select Patient or Create New Patient" tt_onLoad="loadNames(); hidekeyboard(); __$('nextButton').onmousedown = function(){};" optional="true" 
                    tt_pageStyleClass="NoControls NoKeyboard hidekeyboard" tt_onUnLoad="__$('nextButton').className = 'green navButton'; __$('nextButton').onmousedown = function(){gotoNextPage()}; if(__$('extras')) __$('buttons').removeChild(__$('extras'));" />
             </td>
           </tr>
         </table>
+        
+        <textarea id="json" name="person" condition=false ></textarea>
         
       <% end %>
     </div>

@@ -1652,7 +1652,8 @@ function clearInput(){
         return;
     }
     
-    __$('touchscreenInput'+tstCurrentPage).value = "";
+    if(__$('touchscreenInput'+tstCurrentPage))
+        __$('touchscreenInput'+tstCurrentPage).value = "";
 
     if(doListSuggestions){
         listSuggestions(tstCurrentPage);

@@ -81,7 +81,7 @@
               Birthdate:
             </div>
             <div class="cell  input_cell">
-              &nbsp;<%= ((@json["birthdate_estimated"] rescue false) ? "~" : "") %><%= @json["birthdate"] rescue nil %>
+              &nbsp;<%= ((@json["birthdate_estimated"] rescue false) ? "~" : "") %><%= @json["birthdate"].to_date.strftime("%d/%b/%Y") rescue nil %>
             </div>
           </div>
           
@@ -262,8 +262,6 @@
             operson["patient_id"] = iperson["patient_id"];
           }
                         
-          alert(operson["patient_id"]);              
-                           
           __$("json").innerHTML = JSON.stringify(operson);
         }
         
@@ -440,6 +438,8 @@
           ajaxProcessRequest("update");
         }
       }
+          
+      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
               
       var rows = [
           [
@@ -459,7 +459,8 @@
             },
             {
               field:"Birthdate",
-              value: (obj.birthdate_estimated ? "~" : "") + obj.birthdate
+              value: (obj.birthdate_estimated ? "~" : "") + (new Date(obj.birthdate)).getDate() + "/" + 
+                    months[(new Date(obj.birthdate)).getMonth()] + "/" + (new Date(obj.birthdate)).getFullYear()
             }
           ],
           [
