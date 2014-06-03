@@ -313,6 +313,7 @@
 			{	:id => 'region_region_name',
 				:tt_requireNextClick => false,
 				:ajaxURL => '/people/region_of_origin/Region?field=role&value=',
+				:tt_onLoad => "$('nextButton').style.display = 'none';",
 				:helpText => 'Region of origin' } if ask_home_village %>
 
   <%= text_field_tag "person[addresses][address2]", params[:address2],
