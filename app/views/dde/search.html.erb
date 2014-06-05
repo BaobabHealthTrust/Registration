@@ -242,16 +242,6 @@
               div.className = "element " + (i%2 > 0 ? "odd" : "");
               div.setAttribute("tag", (i%2 > 0 ? "odd" : "even"));
               
-              if(patients[i]["local"] != undefined){
-                
-                div.setAttribute("local", true);
-                
-              } else {
-              
-                div.removeAttribute("local");
-              
-              }                              
-              
               div.onclick = function(){
                 deselectAllAndSelect(this.id);
                 
@@ -263,22 +253,14 @@
                   __$("nextButton").innerHTML = "<span>Select</span>"
                   __$("nextButton").className = "green navButton";
                   
-                  if(this.getAttribute("local") != undefined){
-                    
-                    __$("nextButton").setAttribute("local", true);
-                    
-                  } else {
-                  
-                    __$("nextButton").removeAttribute("local");
-                  
-                  }
-                
                   __$('nextButton').onmousedown = function(){
-                    if(this.getAttribute("local") == true){
-                      document.forms[0].setAttribute("action", "/process_scan_data");
-                    } else {
+                    // if(this.getAttribute("local") == true){
+                    
+                    document.forms[0].setAttribute("action", "/dde/process_scan_data");
+                      
+                    /*} else {
                       document.forms[0].setAttribute("action", "/process_result");
-                    }
+                    }*/
                     
                     document.forms[0].submit();
                   }
