@@ -322,7 +322,8 @@
 			    {	:id => 'region_region_name',
 				    :tt_requireNextClick => false,
 				    :ajaxURL => '/people/region_of_origin/Region?field=role&value=',
-				    :helpText => 'Region of origin' } if ask_home_village %>
+				    :helpText => 'Region of origin',
+				    :tt_onLoad => "$('nextButton').style.display = 'none';" } if ask_home_village %>
 
       <%= text_field_tag "person[addresses][address2]", params[:address2],
       	 {:id => 'address2',
@@ -332,7 +333,7 @@
       	  :field_type => 'alpha',
       	  :helpText => 'Home District/Country',
       	  :allowFreeText => true,
-			    :tt_onLoad => "seen(tstCurrentPage); set_ajaxURL_for_suggestions('/people/district/District?filter_value=' ,$('region_region_name').value);$('nextButton').style.display = 'none';" } if ask_home_village %>  
+			    :tt_onLoad => "seen(tstCurrentPage); set_ajaxURL_for_suggestions('/people/district/District?filter_value=', $('region_region_name').value); $('nextButton').style.display = 'none';" } if ask_home_village %>  
 
       <%= text_field_tag "p['address2_a']" , nil,
       	 {:id => 'address2_a',
@@ -353,6 +354,7 @@
         :field_type => 'alpha',
         :helpText => "Home Village",
         :tt_requireNextClick => false,
+        :condition => '$("region_region_name").value != "Foreign"',
         :tt_pageStyleClass => "azButton",
         :ajaxURL => '/people/village?search_string=',
         :allowFreeText => false ,

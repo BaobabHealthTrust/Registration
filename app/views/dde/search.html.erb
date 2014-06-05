@@ -240,7 +240,17 @@
               var div = document.createElement("div");
               div.id = i;
               div.className = "element " + (i%2 > 0 ? "odd" : "");
-              div.setAttribute("tag", (i%2 > 0 ? "odd" : "even"))
+              div.setAttribute("tag", (i%2 > 0 ? "odd" : "even"));
+              
+              if(patients[i]["local"] != undefined){
+                
+                div.setAttribute("local", true);
+                
+              } else {
+              
+                div.removeAttribute("local");
+              
+              }                              
               
               div.onclick = function(){
                 deselectAllAndSelect(this.id);
@@ -252,8 +262,24 @@
                 if(__$('nextButton')){
                   __$("nextButton").innerHTML = "<span>Select</span>"
                   __$("nextButton").className = "green navButton";
+                  
+                  if(this.getAttribute("local") != undefined){
+                    
+                    __$("nextButton").setAttribute("local", true);
+                    
+                  } else {
+                  
+                    __$("nextButton").removeAttribute("local");
+                  
+                  }
                 
                   __$('nextButton').onmousedown = function(){
+                    if(this.getAttribute("local") == true){
+                      document.forms[0].setAttribute("action", "/process_scan_data");
+                    } else {
+                      document.forms[0].setAttribute("action", "/process_result");
+                    }
+                    
                     document.forms[0].submit();
                   }
                 }
@@ -419,7 +445,6 @@
   </head>
   <body>
     <div id='content'>
-      <%# form_tag '/' do -%>
       <% form_tag("/process_result", "method" => 'post', "enctype" => 'multipart/form-data', "id" => 'form', "style" => "display: none") do %>
         <%= hidden_field_tag "patient", nil %>
         <table width='100%' cellpadding=10 cellspacing=0>

@@ -69,7 +69,8 @@
               Gender:
             </div>
             <div class="cell  input_cell">
-              &nbsp;<%= @json["gender"] rescue nil %>
+              <% gender = {"F" => "Female", "M" => "Male"} %>
+              &nbsp;<%= gender[@json["gender"]] rescue nil %>
             </div>
             <div class="cell">
               &nbsp;
@@ -370,7 +371,7 @@
             li.style.cursor = "pointer";
             li.style.backgroundColor = (i % 2 == 0 ? "#eee" : "");
             li.style.border = (i % 2 > 0 ? "1px solid #eee" : "");
-            li.innerHTML = obj["names"]["given_name"] + " " + obj["names"]["family_name"] + " (" + gender[obj["gender"]] + " - " + obj["_id"] + ")";
+            li.innerHTML = obj["names"]["given_name"] + " " + obj["names"]["family_name"] + " (" + gender[obj["gender"]] + " - " + obj["_id"] + ")" + (obj.local != undefined ? " <i style='color: blue;'>[Local]</i>" : "");
             
             li.onclick = function(){ 
               for(var j = 0; j < __$("options").children.length; j++){
@@ -440,6 +441,7 @@
       }
           
       var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var gender = {"F":"Female", "M":"Male"};
               
       var rows = [
           [
@@ -455,7 +457,7 @@
           [
             {
               field:"Gender",
-              value: obj.gender
+              value: gender[obj.gender]
             },
             {
               field:"Birthdate",

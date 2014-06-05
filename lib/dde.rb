@@ -136,7 +136,7 @@ module DDE
       
         defidtype = PatientIdentifierType.find_by_name("Unknown ID").id rescue nil
         
-        person["patient"]["identifiers"].each do |identifier|
+        (person["patient"]["identifiers"] rescue []).each do |identifier|
         
           if !local["patient"]["identifiers"].include?(identifier)
           
@@ -337,4 +337,26 @@ module DDE
       end
     end
 
+    def self.compare_people(personA,personB )
+
+      single_attributes = ['birthdate', 'gender']
+      addresses = ['current_residence','current_village','current_ta','current_district','home_village','home_ta','home_district',]
+      attributes = ['citizenship', 'race', 'occupation','home_phone_number', 'cell_phone_number']
+
+      single_attributes.each do |metric|
+        if personA[metric].gsub(/\-/,"").gsub(/\//, "") != personB[metric].gsub(/\-/,"").gsub(/\//, "")
+          return false
+        end
+      end
+
+      addresses.each do |metric|
+        if personA['addresses'][metric] != personB['addresses'][metric]
+          return false
+        end
+      end
+
+      return true
+
+    end
+    
 end
