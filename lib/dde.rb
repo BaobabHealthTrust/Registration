@@ -44,7 +44,7 @@ module DDE
         # if patient does not exist locally, first verify if the patient is similar
         # to an existing one by national_id so you can update else create one
         
-        (person["patient"]["identifiers"] || []).each do |identifier|
+        (person["patient"]["identifiers"] rescue []).each do |identifier|
           
           result = PatientIdentifier.find_by_identifier(identifier[identifier.keys[0]], 
               :conditions => ["identifier_type = ?", 
@@ -344,7 +344,7 @@ module DDE
       attributes = ['citizenship', 'race', 'occupation','home_phone_number', 'cell_phone_number']
 
       single_attributes.each do |metric|
-        if personA[metric].gsub(/\-/,"").gsub(/\//, "") != personB[metric].gsub(/\-/,"").gsub(/\//, "")
+        if (personA[metric].gsub(/\-/,"").gsub(/\//, "") rescue "") != (personB[metric].gsub(/\-/,"").gsub(/\//, "") rescue "")
           return false
         end
       end

@@ -357,6 +357,18 @@ class DdeController < ApplicationController
       
         @dontstop = true
         
+      elsif !checked and @json["names"]["given_name"].blank? and @json["names"]["family_name"].blank? and @json["gender"].blank?
+              
+        # result["patient_id"] = @json["patient_id"] if !@json["patient_id"].blank?
+        
+        @results = result.to_json
+      
+        person = JSON.parse(@results)#["person"]
+      
+        @results = RestClient.post("http://#{@settings["dde_username"]}:#{@settings["dde_password"]}@#{@settings["dde_server"]}/process_confirmation", {:person => person, :target => "select"})
+      
+        @dontstop = true        
+      
       else
            
         @results = []
