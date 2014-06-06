@@ -613,6 +613,9 @@ class DdeController < ApplicationController
       
         entry = JSON.parse(person)
       
+        entry["application"] = "#{settings["application_name"]}"
+        entry["site_code"] = "#{settings["site_code"]}"
+      
         entry["national_id"] = entry["_id"] if entry["national_id"].blank? and !entry["_id"].blank?
           
         filter[entry["national_id"]] = true
@@ -682,6 +685,9 @@ class DdeController < ApplicationController
         }
       }
     
+      person["application"] = "#{settings["application_name"]}"
+      person["site_code"] = "#{settings["site_code"]}"
+      
       result << person
       
     end
