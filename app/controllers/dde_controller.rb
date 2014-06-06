@@ -407,8 +407,6 @@ class DdeController < ApplicationController
                           
           checked = DDE.compare_people(result, verifier) # rescue false
           
-          raise checked.inspect
-          
           if checked    
             
             result["patient_id"] = @json["patient_id"] if !@json["patient_id"].blank?
