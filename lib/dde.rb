@@ -344,13 +344,13 @@ module DDE
       attributes = ['citizenship', 'race', 'occupation','home_phone_number', 'cell_phone_number']
 
       single_attributes.each do |metric|
-        if (personA[metric].gsub(/\-/,"").gsub(/\//, "") rescue "") != (personB[metric].gsub(/\-/,"").gsub(/\//, "") rescue "")
+        if ((personA[metric].gsub(/\-/,"").gsub(/\//, "") rescue "") || "").strip.downcase != ((personB[metric].gsub(/\-/,"").gsub(/\//, "") rescue "") || "").strip.downcase
           return false
         end
       end
 
       addresses.each do |metric|
-        if personA['addresses'][metric] != personB['addresses'][metric]
+        if ((personA['addresses'][metric] rescue "") || "").strip.downcase != ((personB['addresses'][metric] rescue "") || "").strip.downcase
           return false
         end
       end
