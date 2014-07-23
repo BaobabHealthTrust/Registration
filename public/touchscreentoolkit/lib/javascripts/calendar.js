@@ -116,8 +116,16 @@ function createMonth(date, selected, initialdate, startweekdate, endweekdate){
     if(typeof(endweekdate) != "undefined"){                    
         end_week_date = endweekdate;
     }
-                
-    if(typeof(date) != "undefined" && date != null){
+         
+    if(typeof(date) != "undefined" && date != "" && date != null){
+        var test_date = Date.parse(date);
+
+        if(isNaN(test_date)){
+            var str = date.match(/^\d{4}\-\d{2}\-/);
+
+            date = str + "01";
+        }
+        
         selected_date = new Date(date);
         current_year = selected_date.getFullYear();
         current_month = monthNames[selected_date.getMonth()];        
@@ -363,7 +371,7 @@ function createCalendar(control, target, date, selected, startweekdate, endweekd
             targetControl.getAttribute("helpText").substring(0,14) + "..." : 
             targetControl.getAttribute("helpText")) : "");
 
-        bannerrow.appendChild(bannerrowcell2);
+        // bannerrow.appendChild(bannerrowcell2);
         
         var bannerrowcell3 = document.createElement("div");
         bannerrowcell3.className = "cCell";
@@ -405,8 +413,6 @@ function handleCalendarResult(element, aXMLHttpRequest, date) {
 
     if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 || aXMLHttpRequest.status == 304)) {
         var result = JSON.parse(aXMLHttpRequest.responseText);                
-        
-        console.log(result);
         
         if(result[date]){
         

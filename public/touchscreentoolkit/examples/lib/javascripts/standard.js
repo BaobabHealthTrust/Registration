@@ -309,7 +309,7 @@ function enableTouchscreenInterface(){
             // create one page for the 3 date elements
             // called 445 times on staging page
             var formElementName = tstFormElements[i].getAttribute("name");
-            if (formElementName.match(/2i|3i|\[month\]|\[day\]/)){
+            if (formElementName && formElementName.match(/2i|3i|\[month\]|\[day\]/)){
                 continue;
             }
         }
@@ -425,7 +425,7 @@ function populateInputPage(pageNum) {
 
     setTouchscreenAttributes(touchscreenInputNode, tstFormElements[i], pageNum);
 
-    if (tstFormElements[i].value) {
+    if (tstFormElements[i].value && tstFormElements[i].getAttribute("doublepane") == null) {
         if (tstFormElements[i].tagName == "SELECT") {
             try {
                 touchscreenInputNode.value = tstFormElements[i].options[tstFormElements[i].selectedIndex].innerHTML;
@@ -439,10 +439,20 @@ function populateInputPage(pageNum) {
 
     tstInputTarget = touchscreenInputNode;
 
-    // options
     inputDiv.appendChild(getOptions());
 
     contentContainer.appendChild(wrapperPage);
+
+    // options
+    if (tstFormElements[i].tagName == "SELECT") {
+        if(tstFormElements[i].getAttribute("doublepane") != null){
+            if(tstFormElements[i].getAttribute("doublepane").toLowerCase().trim() == "true"){
+                createMultipleSelectControl();
+            } else {
+                createSingleSelectControl();
+            }
+        } 
+    } 
 
     tstInputTarget.addEventListener("keyup", checkKey, false)
     tstInputTarget.focus();
@@ -509,22 +519,24 @@ function getFormPostParams() {
 }
 
 function setTouchscreenAttributes(aInputNode, aFormElement, aPageNum) {
-    aFormElement.setAttribute('touchscreenInputID',aPageNum);
-    aInputNode.setAttribute('refersToTouchscreenInputID',aPageNum);
-    aInputNode.setAttribute('page',aPageNum);
-    aInputNode.setAttribute('id','touchscreenInput'+aPageNum);
+    if(aInputNode){
+        aFormElement.setAttribute('touchscreenInputID',aPageNum);
+        aInputNode.setAttribute('refersToTouchscreenInputID',aPageNum);
+        aInputNode.setAttribute('page',aPageNum);
+        aInputNode.setAttribute('id','touchscreenInput'+aPageNum);
 
-    // Invoke different CSS declaration for TEXTAREA control
-    if(aFormElement.tagName == "TEXTAREA" ){
-        aInputNode.setAttribute('class','touchscreenTextAreaInput');
-        aInputNode.setAttribute('cols','56');
-        aInputNode.setAttribute('rows','8');
-    } else {
-        aInputNode.setAttribute('class','touchscreenTextInput');
+        // Invoke different CSS declaration for TEXTAREA control
+        if(aFormElement.tagName == "TEXTAREA" ){
+            aInputNode.setAttribute('class','touchscreenTextAreaInput');
+            aInputNode.setAttribute('cols','56');
+            aInputNode.setAttribute('rows','8');
+        } else {
+            aInputNode.setAttribute('class','touchscreenTextInput');
+        }
+
+        aInputNode.setAttribute("v", aFormElement.getAttribute("validationRegexp"));
+        if (aInputNode.type == "password") aInputNode.value = "";
     }
-
-    aInputNode.setAttribute("v", aFormElement.getAttribute("validationRegexp"));
-    if (aInputNode.type == "password") aInputNode.value = "";
 }
 
 function getInfoBar(inputElement, aPageNum) {
@@ -642,26 +654,34 @@ function getOptions() {
         }
         else {
             if(tstFormElements[i].tagName == "SELECT") {
-                var selectOptions = tstFormElements[i].getElementsByTagName("option");
+                
+                if(tstFormElements[i].getAttribute("nested") != null){
 
-                if(selectOptions.length > 0){
-                    // Append an empty option first
-                    if(selectOptions[0].innerHTML.trim().length > 0){
-                        tstFormElements[i].innerHTML = "<option></option>" + tstFormElements[i].innerHTML;
-                    }
-                }
-
-                if(tstFormElements[i].getAttribute("dualView") != undefined &&
-                    tstFormElements[i].getAttribute("dualViewOptions") != undefined){
-                    loadSelectOptions(selectOptions, options, tstFormElements[i].getAttribute("dualViewOptions"));
+                    setTimeout("nested_select('" + tstFormElements[i].id + 
+                        "', 'options'); __$('viewport').style.height='22em'; __$('keyboard').style.display='none';", 50);
+                    
                 } else {
-                    loadSelectOptions(selectOptions, options);
-                }
+                    var selectOptions = tstFormElements[i].getElementsByTagName("option");
+
+                    if(selectOptions.length > 0){
+                        // Append an empty option first
+                        if(selectOptions[0].innerHTML.trim().length > 0){
+                            tstFormElements[i].innerHTML = "<option></option>" + tstFormElements[i].innerHTML;
+                        }
+                    }
+
+                    if(tstFormElements[i].getAttribute("dualView") != undefined &&
+                        tstFormElements[i].getAttribute("dualViewOptions") != undefined){
+                        loadSelectOptions(selectOptions, options, tstFormElements[i].getAttribute("dualViewOptions"));
+                    } else {
+                        loadSelectOptions(selectOptions, options);
+                    }
                       
-                var val = elementSelectedValue(tstFormElements[i]);
-                if (val == null) val = "";
-                tstInputTarget.value = val;
-                if (tstFormElements[i].multiple) tstInputTarget.setAttribute("multiple", "multiple");
+                    var val = elementSelectedValue(tstFormElements[i]);
+                    if (val == null) val = "";
+                    tstInputTarget.value = val;
+                    if (tstFormElements[i].multiple) tstInputTarget.setAttribute("multiple", "multiple");
+                }
             }else if (tstFormElements[i].getAttribute("type") == "radio") {
                 var selectOptions = document.getElementsByName(tstFormElements[i].name);
                 for(var j=0;j<selectOptions.length;j++){
@@ -764,6 +784,7 @@ function toggleShowProgress() {
 }
 
 function loadSelectOptions(selectOptions, options, dualViewOptions) {
+    
     if(dualViewOptions != undefined || dualViewOptions != null) {
         tstDualViewOptions = eval(dualViewOptions);
         setTimeout("addSummary(" + selected + ")", 0);
@@ -1320,9 +1341,6 @@ function gotoPage(destPage, validate, navback){
     else if (currentPage > destPage) {
         unloadElementId = 'touchscreenInput'+(destPage+1);
     }
-    else if (currentPage > destPage) {
-        unloadElementId = 'touchscreenInput'+(destPage+1);
-    }
 
     var unloadElement = __$(unloadElementId);
     if (unloadElement) {
@@ -1335,12 +1353,10 @@ function gotoPage(destPage, validate, navback){
                 // corresponding function for earlier cancelling when required
                 tstTimerHandle = setTimeout("navigateToPage(" + destPage + ", " + validate + ", " + navback + ");", 3000);
                 tstTimerFunctionCall = "navigateToPage(" + destPage + ", " + validate + ", " + navback + ");";
-            }
-            else {
+            } else {
                 navigateToPage(destPage, validate, navback);
             }
-        }
-        else {
+        } else {
             navigateToPage(destPage, validate, navback);
         }
     } else {
@@ -1587,6 +1603,34 @@ function cancelConfirmValue() {
 }
 
 function clearInput(){
+    if(tstFormElements[tstCurrentPage].getAttribute("doublepane")){
+        var options = tstFormElements[tstCurrentPage].options;
+        
+        __$("touchscreenInput"+tstCurrentPage).value = "";
+        
+        __$('touchscreenInput'+tstCurrentPage).setAttribute("tstvalue", "");
+        
+        for(var i = 0; i < options.length; i++){
+            if(options[i].selected){
+                if(tstFormElements[tstCurrentPage].getAttribute("doublepane") == "true"){
+                    if(__$(i)){
+                        __$(i).click();
+                    }
+                } else {
+                    options[i].selected = false;
+                    if(__$(i)){
+                        var image = __$(i).getElementsByTagName("img")[0];
+                
+                        image.setAttribute("src", "lib/images/unchecked.png");
+                        __$(i).setAttribute("class", __$(i).getAttribute("group"));
+                    }
+                }
+            }
+        }
+        
+        return;
+    }
+    
     __$('touchscreenInput'+tstCurrentPage).value = "";
 
     if(doListSuggestions){
@@ -1594,20 +1638,33 @@ function clearInput(){
     }
     
     if(tstFormElements[tstPages[tstCurrentPage]].tagName == "SELECT"){
-        var options = __$("tt_currentUnorderedListOptions").getElementsByTagName("li");
+        if(__$("tt_currentUnorderedListOptions")){
+            var options = __$("tt_currentUnorderedListOptions").getElementsByTagName("li");
             
-        if(tstFormElements[tstPages[tstCurrentPage]].getAttribute("multiple")){
-            for(var i = 0; i < options.length; i++){
-                if(options[i].style.backgroundColor == "lightblue"){
-                    options[i].click();
+            if(tstFormElements[tstPages[tstCurrentPage]].getAttribute("multiple")){
+                for(var i = 0; i < options.length; i++){
+                    if(options[i].style.backgroundColor == "lightblue"){
+                        options[i].click();
+                    }
+                }
+            } else {
+                for(var i = 0; i < options.length; i++){
+                    if(options[i].style.backgroundColor == "lightblue"){
+                        options[i].style.backgroundColor = "";
+                        tstFormElements[tstPages[tstCurrentPage]].value = "";
+                        __$('touchscreenInput'+tstCurrentPage).setAttribute("tstvalue", "");
+                    }
                 }
             }
         } else {
-            for(var i = 0; i < options.length; i++){
-                if(options[i].style.backgroundColor == "lightblue"){
-                    options[i].style.backgroundColor = "";
-                    tstFormElements[tstPages[tstCurrentPage]].value = ""; 
-                    __$('touchscreenInput'+tstCurrentPage).setAttribute("tstvalue", "");
+            var controls = __$("options").getElementsByTagName("img");
+
+            for(var j = 0; j < controls.length; j++){
+                try{
+                    if(controls[j].getAttribute("src").match(/un/) == null){
+                        controls[j].click();
+                    }
+                } catch(e){
                 }
             }
         }
@@ -1698,17 +1755,21 @@ function toggleShift() {
 
 function showBestKeyboard(aPageNum) {
     var inputElement = tstFormElements[tstPages[aPageNum]];
+
+    __$("keyboard").style.display = "block";
+    
     if (isDateElement(inputElement)) {
         var thisDate = new RailsDate(inputElement);
+        
         if (tstSearchPage) {
             if (thisDate.isDayOfMonthElement()) getDatePicker();
             else __$("keyboard").innerHTML = getNumericKeyboard();
-        }	else {
+        } else {
             getDatePicker();
         }
         return;
     }
-    var optionCount = __$('options').getElementsByTagName("li").length;
+    var optionCount = (__$('options') ? __$('options').getElementsByTagName("li").length : 0);
     if ((optionCount > 0 && optionCount < 6 && inputElement.tagName == "SELECT") || (inputElement.getAttribute("multiple") == "multiple")) {
         __$("keyboard").innerHTML = "";
         return;
@@ -1815,6 +1876,9 @@ function getDatePart(aElementName) {
 
 
 function gotoNextPage() {
+    if(__$("category")){
+        document.body.removeChild(__$("category"));
+    }
     gotoPage(tstCurrentPage+1, true);
 }
 
@@ -2159,6 +2223,10 @@ function press(pressedChar){
     if (singleButtonMode)
         inputTarget.value = "";
 
+    var unknownClickedEarlier = inputTarget.value.toLowerCase();
+    if (unknownClickedEarlier == "unknown" || unknownClickedEarlier == "n/a")
+        inputTarget.value = "";
+
     if (pressedChar.length == 1) {
         inputTarget.value += getRightCaseValue(pressedChar);
 
@@ -2238,6 +2306,9 @@ function listSuggestions(inputTargetPageNumber) {
         return;
     }
     var inputElement = __$('touchscreenInput'+inputTargetPageNumber);
+
+    if(!inputElement) 
+        return;
 
     if(inputElement.getAttribute("ajaxURL") != null){
         ajaxRequest(__$('options'),inputElement.getAttribute("ajaxURL")+inputElement.value);
@@ -3158,6 +3229,7 @@ var DateSelector = function() {
 
 DateSelector.prototype = {
     build: function() {
+        
         var node = document.createElement('div');
         // TODO: move style stuff to a css file
         node.innerHTML = ' \
@@ -3660,12 +3732,13 @@ function showKeyboard(full_keyboard, qwerty){
         td5.vAlign = "middle";
         td5.style.cursor = "pointer";
         td5.bgColor = "#ffffff";
-        td5.width = "30px";
+        td5.style.minWidth = "30px";
 
         tr5.appendChild(td5);
 
         var btn = document.createElement("button");
         btn.className = "blue";
+        btn.style.width = "80%";
         btn.innerHTML = "<span>" + row5[i] + "</span>";
         btn.onclick = function(){
             if(!this.innerHTML.match(/^$/)){
@@ -3689,12 +3762,13 @@ function showKeyboard(full_keyboard, qwerty){
         td1.vAlign = "middle";
         td1.style.cursor = "pointer";
         td1.bgColor = "#ffffff";
-        td1.width = "30px";
+        td1.style.minWidth = "30px";
 
         tr1.appendChild(td1);
 
         var btn = document.createElement("button");
         btn.className = "blue";
+        btn.style.width = "80%";
         btn.innerHTML = "<span>" + row1[i] + "</span>";
         btn.onclick = function(){
             if(!this.innerHTML.match(/^$/)){
@@ -3716,12 +3790,13 @@ function showKeyboard(full_keyboard, qwerty){
         td2.vAlign = "middle";
         td2.style.cursor = "pointer";
         td2.bgColor = "#ffffff";
-        td2.width = "30px";
+        td2.style.minWidth = "30px";
 
         tr2.appendChild(td2);
 
         var btn = document.createElement("button");
         btn.className = "blue";
+        btn.style.width = "80%";
         btn.innerHTML = "<span>" + row2[i] + "</span>";
         btn.onclick = function(){
             if(!this.innerHTML.match(/^$/)){
@@ -3743,12 +3818,13 @@ function showKeyboard(full_keyboard, qwerty){
         td3.vAlign = "middle";
         td3.style.cursor = "pointer";
         td3.bgColor = "#ffffff";
-        td3.width = "30px";
+        td3.style.minWidth = "30px";
 
         tr3.appendChild(td3);
 
         var btn = document.createElement("button");
         btn.className = "blue";
+        btn.style.width = "80%";
         btn.innerHTML = "<span>" + row3[i] + "</span>";
         btn.onclick = function(){
             if(!this.innerHTML.match(/^$/)){
@@ -3770,12 +3846,13 @@ function showKeyboard(full_keyboard, qwerty){
         td6.vAlign = "middle";
         td6.style.cursor = "pointer";
         td6.bgColor = "#ffffff";
-        td6.width = "30px";
+        td6.style.minWidth = "30px";
 
         tr6.appendChild(td6);
 
         var btn = document.createElement("button");
         btn.className = "blue";
+        btn.style.width = "80%";
         btn.innerHTML = "<span>" + row6[i] + "</span>";
         btn.onclick = function(){
             if(!this.innerHTML.match(/^$/)){
@@ -3820,7 +3897,7 @@ function showKeyboard(full_keyboard, qwerty){
         btn.innerHTML = (row4[i].trim().length > 0 ? "<span>" + row4[i] + "</span>" : "");
         
         if(row4[i] == "space"){
-            btn.style.width = "80%";
+            btn.style.minWidth = "60%";
         }
         
         btn.onclick = function(){
@@ -3986,6 +4063,47 @@ function showStatus(){
     __$("popupBox").style.display = "block";
 }
 
+function checkCtrl(obj){
+    var o = obj;
+    var t = o.offsetTop;
+    var l = o.offsetLeft + 1;
+    var w = o.offsetWidth;
+    var h = o.offsetHeight;
+
+    while((o ? (o.offsetParent != document.body) : false)){
+        o = o.offsetParent;
+        t += (o ? o.offsetTop : 0);
+        l += (o ? o.offsetLeft : 0);
+    }
+    return [w, h, t, l];
+}
+     
+function showCategory(category){
+    var pos = checkCtrl(__$("content"));
+    
+    if(__$("category")){
+        document.body.removeChild(__$("category"));
+    }
+    
+    var cat = document.createElement("div");
+    cat.id = "category";
+    cat.style.position = "absolute";
+    cat.style.left = (pos[3] + (pos[0] - 378)) + "px";
+    cat.style.top = (pos[2] + 5) + "px";
+    cat.style.width = "350px";
+    cat.style.minHeight = "45px";
+    cat.style.fontSize = "36px";
+    cat.style.padding = "10px";
+    cat.style.backgroundColor = "#9e9";
+    cat.style.color = "#000";
+    cat.style.opacity = "0.95";
+    cat.style.zIndex = 100;
+    cat.style.textAlign = "center";
+    cat.innerHTML = category;
+    
+    document.body.appendChild(cat);
+}  
+
 function getAdvancedTimePicker() {
     if (typeof(AdvancedTimeSelector) == "undefined")
         return;
@@ -4003,7 +4121,7 @@ function getAdvancedTimePicker() {
     var defaultDate = joinDateValues(inputElement);
     //defaultDate = defaultDate.replace("-", "/", "g");
     var arrDate = defaultDate.split(':');
-    var date = new Date();
+    __$("touchscreenInput"+tstCurrentPage).value = defaultDate;
     
     if (arrDate.length == 3) {
         ds = new AdvancedTimeSelector({
@@ -4024,8 +4142,8 @@ function getAdvancedTimePicker() {
         });
     }
     
-    __$("touchscreenInput"+tstCurrentPage).value = (arrDate ? defaultDate : padZeros(date.getHours(),2) + ":" + 
-        padZeros(date.getMinutes(),2) + ":" + padZeros(date.getSeconds(),2));
+    // __$("touchscreenInput"+tstCurrentPage).value = (arrDate ? defaultDate : padZeros(date.getHours(),2) + ":" + 
+    //    padZeros(date.getMinutes(),2) + ":" + padZeros(date.getSeconds(),2));
 
 // __$("options" + tstCurrentPage).innerHTML = "";
 }
@@ -4394,7 +4512,7 @@ function addSelectAllButton(){
     row.appendChild(cell2);  
     
     var checkbox = document.createElement("img");
-    checkbox.src = "/touchscreentoolkit/examples/lib/images/unticked.jpg";
+    checkbox.src = "lib/images/unticked.jpg";
     checkbox.id = "chkSelectAll";
     checkbox.setAttribute("checked", "false")
     
@@ -4402,12 +4520,12 @@ function addSelectAllButton(){
         if(this.getAttribute("checked") == "false"){
             toggleState("uncheck");
             this.setAttribute("checked", "true");
-            this.src = "/touchscreentoolkit/examples/lib/images/ticked.jpg";
+            this.src = "lib/images/ticked.jpg";
             __$("lblSelectAll").innerHTML = "Deselect All";
         } else {
             toggleState("check");
             this.setAttribute("checked", "false");
-            this.src = "/touchscreentoolkit/examples/lib/images/unticked.jpg";
+            this.src = "lib/images/unticked.jpg";
             __$("lblSelectAll").innerHTML = "Select All";
         }
     }
@@ -4446,3 +4564,617 @@ function unCheckAll(){
         }
     }
 }
+
+/*
+ * Part of the Module containing methods to cater for nested select options.
+ * The module expects a select control with tag "<optgroup>" in which case the
+ * following happens:
+ *      1. We get a collection of each top level child
+ *      2. With the top level kids,
+ *          a.) if the kid is of type "<option>", we just
+ *                  create its node and proceed
+ *          b.) if it is of type "<optgroup>", we create the parent node which
+ *              has the following behaviours:
+ *                  i.) it has the name of the group as its label taken from its
+ *                      label attribute
+ *                  ii.) initially, all its children are colapsed
+ *                  iii.) when it is clicked,
+ *                          - all children expanded
+ *                          - all children are deselected
+ *                        These children correspond to the elements under a
+ *                        corresponding source control
+ *              The behaviours for this control would also map to standard
+ *              behaviours for cases where the source control is a
+ *              "multipe select"
+ *
+ */
+var peerGroup = "";
+
+function nested_select(id, destination){
+    __$("viewport").style.backgroundColor = "white";
+    peerGroup = "";
+    var parent = document.createElement("div");
+    parent.style.display = "table";
+    parent.style.width = "100%";
+    parent.style.backgroundColor = "white";
+    parent.style.marginTop = "20px";
+
+    __$(destination).appendChild(parent);
+
+    var row3 = document.createElement("div");
+    row3.style.display = "table-row";
+
+    parent.appendChild(row3);
+
+    var cell3 = document.createElement("div");
+    cell3.style.display = "table-cell";
+
+    row3.appendChild(cell3);
+
+    var container = document.createElement("div");
+    container.className = "selectContent";
+    container.style.overflow = "auto";
+
+    cell3.appendChild(container);
+
+    var select = document.createElement("div")
+    select.style.display = "table";
+    select.style.width = "100%";
+    select.style.borderSpacing = "5px";
+    var multiple = (__$(id).getAttribute("multiple") ? true : false);
+
+    container.appendChild(select);
+
+    var options = __$(id).children;
+
+    for(var i = 0; i < options.length; i++){
+        if(options[i].tagName.toUpperCase() == "OPTGROUP"){
+            add_opt_group(options[i], select, multiple, i);
+        } else {
+            add_options([options[i]], select, multiple, false, i);
+        }
+        if(!multiple){
+            peerGroup += "group" + i + "|";
+        }
+    }
+
+}
+
+function add_opt_group(control, parent, single, groupNumber){
+    var multiple = (typeof(single) != "undefined" ? single : false);
+
+    var row = document.createElement("div");
+    row.style.display = "table-row";
+    row.style.fontSize = "32px";
+
+    parent.appendChild(row);
+
+    var cell1_1 = document.createElement("div");
+    cell1_1.style.display = "table-cell";
+    cell1_1.style.verticalAlign = "middle";
+    cell1_1.style.padding = "5px";
+    cell1_1.style.width = "52px";
+
+    row.appendChild(cell1_1);
+
+    var img = document.createElement("img");
+    img.setAttribute("multiple", (multiple ? "true" : "false"));
+    img.setAttribute("src", "lib/images/un" + (multiple ? "ticked" : "checked") + ".jpg");
+    img.setAttribute("groupNumber", groupNumber);
+    img.id = "group" + groupNumber;
+
+    img.onclick = function(){
+        var multiple = (this.getAttribute("multiple") == "true" ? true : false);
+        var colorPartner = this.parentNode.parentNode.getElementsByTagName("div");
+        var group = this.getAttribute("groupNumber");
+
+        if(!multiple){
+            deselectSection(peerGroup);
+        }
+
+        if(this.getAttribute("src").match(/un/)){
+            this.setAttribute("src", "lib/images/" + (multiple ? "ticked" : "checked") + ".jpg");
+            colorPartner[1].style.backgroundColor = "lightblue";
+            __$("groupRow" + group).style.display = "table-row";
+        } else {
+            this.setAttribute("src", "lib/images/un" + (multiple ? "ticked" : "checked") + ".jpg");
+            deselectSection(this.getAttribute("childrenGroup"));
+
+            colorPartner[1].style.backgroundColor = "";
+            __$("groupRow" + group).style.display = "none";
+        }
+
+    }
+
+    cell1_1.appendChild(img);
+
+    var cell1_2 = document.createElement("div");
+    cell1_2.style.display = "table-cell";
+    cell1_2.innerHTML = control.label;
+    cell1_2.style.verticalAlign = "middle";
+    cell1_2.style.padding = "5px";
+    cell1_2.style.width = "100%";
+    cell1_2.style.borderBottom = "1px solid #ccc";
+
+    cell1_2.onclick = function(){
+        var colorPartner = this.parentNode.getElementsByTagName("img");
+
+        colorPartner[0].click();
+    }
+
+    row.appendChild(cell1_2);
+
+    var row2 = document.createElement("div");
+    row2.style.display = "none";
+    row2.id = "groupRow" + groupNumber;
+
+    parent.appendChild(row2);
+
+    var cell2_1 = document.createElement("div");
+    cell2_1.style.display = "table-cell";
+    cell2_1.innerHTML = "&nbsp;";
+    cell2_1.style.width = "52px";
+
+    row2.appendChild(cell2_1);
+
+    var cell2_2 = document.createElement("div");
+    cell2_2.style.display = "table-cell";
+
+    row2.appendChild(cell2_2);
+
+    var table = document.createElement("div");
+    table.style.display = "table";
+    table.style.width = "100%";
+    table.style.borderSpacing = "5px";
+
+    cell2_2.appendChild(table);
+
+    var groupKids = control.children;
+
+    add_options(groupKids, table, single, true, groupNumber);
+
+}
+
+function add_options(groupKids, parent, single, mapToParent, groupNumber){
+    var multiple = (typeof(single) != "undefined" ? single : false);
+    var parentTag = "";
+
+    for(var i = 0; i < groupKids.length; i++){
+        if(groupKids[i].innerHTML.trim() == ""){
+            continue;
+        }
+
+        var row = document.createElement("div");
+        row.style.display = "table-row";
+
+        parent.appendChild(row);
+
+        var cell1_1 = document.createElement("div");
+        cell1_1.style.display = "table-cell";
+        cell1_1.style.verticalAlign = "middle";
+        cell1_1.style.padding = "5px";
+        cell1_1.style.width = "52px";
+
+        row.appendChild(cell1_1);
+
+        var img = document.createElement("img");
+        img.setAttribute("multiple", (multiple ? "true" : "false"));
+        img.setAttribute("src", "lib/images/un" + (multiple ? "ticked" : "checked") + ".jpg");
+        img.setAttribute("groupNumber", groupNumber);
+        img.id = (mapToParent == true ? "child" + groupNumber + "_" + i : "group" + groupNumber);
+
+        if(mapToParent){
+            parentTag += img.id + "|";
+        }
+
+        if (groupKids[i].value) {
+            img.setAttribute("tstValue", groupKids[i].value);
+        }
+
+        img.onclick = function(){
+            var multiple = (this.getAttribute("multiple") == "true" ? true : false);
+            var colorPartner = this.parentNode.parentNode.getElementsByTagName("div");
+
+            if(this.getAttribute("src").match(/un/)){
+                if(!multiple){
+                    if(this.id != "group" + this.getAttribute("groupNumber")){
+                        deselectSection(__$("group" + this.getAttribute("groupNumber")).getAttribute("childrenGroup"));
+                    } else {
+                        deselectSection(peerGroup);
+                    }
+                }
+
+                this.setAttribute("src", "lib/images/" + (multiple ? "ticked" : "checked") + ".jpg");
+                colorPartner[1].style.backgroundColor = "lightblue";
+
+                __$("touchscreenInput" + tstCurrentPage).setAttribute("tstValue", this.getAttribute("tstValue"));
+                
+                __$("touchscreenInput" + tstCurrentPage).value =
+                (multiple ? __$("touchscreenInput" + tstCurrentPage).value : "") +
+                unescape(colorPartner[1].innerHTML) + (multiple ? ";" : "");
+
+            } else {
+                this.setAttribute("src", "lib/images/un" + (multiple ? "ticked" : "checked") + ".jpg");
+                colorPartner[1].style.backgroundColor = "";
+
+                __$("touchscreenInput" + tstCurrentPage).value = subtract(colorPartner[1].innerHTML + (multiple ? ";" : ""));
+            }
+        }
+
+        cell1_1.appendChild(img);
+
+        var cell1_2 = document.createElement("div");
+        cell1_2.style.display = "table-cell";
+        cell1_2.innerHTML = groupKids[i].innerHTML;
+        cell1_2.style.verticalAlign = "middle";
+        cell1_2.style.padding = "5px";
+        cell1_2.style.borderBottom = "1px solid #ccc";
+        cell1_2.style.fontSize = "32px";
+
+        cell1_2.onclick = function(){
+            var colorPartner = this.parentNode.getElementsByTagName("img");
+
+            colorPartner[0].click();
+        }
+
+        row.appendChild(cell1_2);
+    }
+
+    if(mapToParent){
+        __$("group" + groupNumber).setAttribute("childrenGroup", parentTag);
+    }
+
+}
+
+function deselectSection(group){
+    var controls = group.split("|");
+
+    for(var i = 0; i < controls.length; i++){
+        if(controls[i].trim() != ""){
+            if(__$(controls[i])){
+                if(!__$(controls[i]).getAttribute("src").match(/un/)){
+                    __$(controls[i]).click();
+                }
+            }
+        }
+    }
+}
+
+function subtract(string){
+    var result = __$("touchscreenInput" + tstCurrentPage).value.replace(string, "");
+    return result
+}
+
+function hideCategory(){
+    if(__$("category")){
+        document.body.removeChild(__$("category"));
+    }
+}
+
+function createMultipleSelectControl(){
+    if(__$("keyboard")){
+        __$("keyboard").style.display = "none";
+    }
+    
+    if(__$("viewport")){
+        __$("viewport").style.display = "none";
+    }
+    
+    if(__$("touchscreenInput" + tstCurrentPage)){
+        __$("touchscreenInput" + tstCurrentPage).style.display = "none";
+    }
+    
+    var parent = document.createElement("div");
+    parent.style.width = "100%";
+    parent.style.height = "80%";
+    parent.style.borderRadius = "10px";
+    parent.style.marginTop = "10px";
+    parent.style.overflow = "auto";
+        
+    __$("inputFrame" + tstCurrentPage).appendChild(parent);
+        
+    var table = document.createElement("div");
+    table.style.display = "table";
+    table.style.width = "98.5%";
+    table.style.margin = "10px";
+        
+    parent.appendChild(table);
+        
+    var row = document.createElement("div");
+    row.style.display = "table-row";
+        
+    table.appendChild(row);
+        
+    var cell1 = document.createElement("div");
+    cell1.style.display = "table-cell";
+    cell1.border = "1px solid #666";  
+    cell1.style.minWidth = "50%";      
+        
+    row.appendChild(cell1);
+        
+    var cell2 = document.createElement("div");
+    cell2.style.display = "table-cell";
+    cell2.border = "1px solid #666";
+    cell2.style.minWidth = "50%";
+        
+    row.appendChild(cell2);
+        
+    var list1 = document.createElement("ul");
+    list1.style.listStyle = "none";
+    list1.style.padding = "0px";
+    list1.margin = "0px";
+        
+    cell1.appendChild(list1);
+        
+    var list2 = document.createElement("ul");
+    list2.style.listStyle = "none";
+    list2.style.padding = "0px";
+    list2.margin = "0px";
+        
+    cell2.appendChild(list2);
+        
+    var options = tstFormElements[tstCurrentPage].options;
+        
+    var j = 0;
+        
+    for(var i = 0; i < options.length; i++){
+        if(options[i].text.trim().length > 0){
+            var li = document.createElement("li");
+            li.id = i;
+            li.setAttribute("pos", i);
+            li.setAttribute("source_id", tstFormElements[tstCurrentPage].id)
+          
+            li.onclick = function(){
+                var img = this.getElementsByTagName("img")[0];
+            
+                if(img.getAttribute("src").toLowerCase().trim().match(/unticked/)){
+                    img.setAttribute("src", "lib/images/ticked.jpg");
+                    this.setAttribute("class", "highlighted");
+              
+                    if(__$(this.getAttribute("source_id"))){
+                        __$(this.getAttribute("source_id")).options[parseInt(this.getAttribute("pos"))].selected = true;
+                        
+                        __$("touchscreenInput" + tstCurrentPage).value += 
+                        __$(this.getAttribute("source_id")).options[parseInt(this.getAttribute("pos"))].value + tstMultipleSplitChar;
+                    }                                        
+                } else {
+                    img.setAttribute("src", "lib/images/unticked.jpg");
+                    this.setAttribute("class", this.getAttribute("group"));
+              
+                    if(__$(this.getAttribute("source_id"))){
+                        __$(this.getAttribute("source_id")).options[parseInt(this.getAttribute("pos"))].selected = false;
+                        
+                        if(__$(this.getAttribute("source_id")).options[parseInt(this.getAttribute("pos"))].value + tstMultipleSplitChar){
+                            __$("touchscreenInput" + tstCurrentPage).value = 
+                            __$("touchscreenInput" + tstCurrentPage).value.replace(__$(this.getAttribute("source_id")).options[parseInt(this.getAttribute("pos"))].value + tstMultipleSplitChar, "");
+                        } 
+                    }
+                }
+            }
+          
+            if(i % 2 == 0){
+                list1.appendChild(li);
+            
+                if(j % 2 == 0){
+                    li.className = "even";
+                    li.setAttribute("group", "even");
+                } else {
+                    li.className = "odd";
+                    li.setAttribute("group", "odd");
+                }
+            } else {
+                list2.appendChild(li);
+            
+                if(j % 2 == 0){
+                    li.className = "even";
+                    li.setAttribute("group", "even");
+                } else {
+                    li.className = "odd";
+                    li.setAttribute("group", "odd");
+                }
+            
+                j++;
+          
+            }
+          
+            var innerTable = document.createElement("div");
+            innerTable.style.display = "table";
+            innerTable.style.width = "100%";
+          
+            li.appendChild(innerTable);
+          
+            var innerRow = document.createElement("div")          ;
+            innerRow.style.display = "table-row";
+          
+            innerTable.appendChild(innerRow);
+          
+            var innerCell1 = document.createElement("div");
+            innerCell1.style.display = "table-cell";
+            innerCell1.style.width = "30px";
+          
+            innerCell1.innerHTML = "<img src='lib/images/unticked.jpg' height='45' />";
+        
+            innerRow.appendChild(innerCell1);
+          
+            var innerCell2 = document.createElement("div");
+            innerCell2.style.display = "table-cell";
+            innerCell2.style.verticalAlign = "middle";
+            innerCell2.style.paddingLeft = "20px";
+          
+            innerCell2.innerHTML = options[i].innerHTML;
+        
+            innerRow.appendChild(innerCell2);
+          
+            if(options[i].selected){
+                innerCell1.innerHTML = "<img src='lib/images/ticked.jpg' height='45' />";
+                li.setAttribute("class", "highlighted");
+            }
+        }     
+    }
+    
+    if(__$("touchscreenInput" + tstCurrentPage).value.trim().length > 0){
+        setTimeout("__$('touchscreenInput' + tstCurrentPage).value += tstMultipleSplitChar", 200);
+    }
+    
+}
+      
+function createSingleSelectControl(){
+    if(__$("keyboard")){
+        setTimeout("__$('keyboard').style.display = 'none'", 10);
+    }
+    
+    if(__$("viewport")){
+        __$("viewport").style.display = "none";
+        __$("viewport").innerHTML = "";
+    }
+    
+    if(__$("touchscreenInput" + tstCurrentPage)){
+        __$("touchscreenInput" + tstCurrentPage).style.display = "none";
+    }
+    
+    var parent = document.createElement("div");
+    parent.style.width = "100%";
+    parent.style.height = "80%";
+    parent.style.marginTop = "10px";
+    parent.style.overflow = "auto";
+        
+    __$("inputFrame" + tstCurrentPage).appendChild(parent);
+        
+    var table = document.createElement("div");
+    table.style.display = "table";
+    table.style.width = "98.5%";
+    table.style.margin = "10px";
+        
+    parent.appendChild(table);
+        
+    var row = document.createElement("div");
+    row.style.display = "table-row";
+        
+    table.appendChild(row);
+        
+    var cell1 = document.createElement("div");
+    cell1.style.display = "table-cell";
+    cell1.border = "1px solid #666"; 
+    cell1.style.minWidth = "50%";       
+        
+    row.appendChild(cell1);
+        
+    var cell2 = document.createElement("div");
+    cell2.style.display = "table-cell";
+    cell2.border = "1px solid #666";
+    cell2.style.minWidth = "50%";
+        
+    row.appendChild(cell2);
+        
+    var list1 = document.createElement("ul");
+    list1.style.listStyle = "none";
+    list1.style.padding = "0px";
+    list1.margin = "0px";
+        
+    cell1.appendChild(list1);
+        
+    var list2 = document.createElement("ul");
+    list2.style.listStyle = "none";
+    list2.style.padding = "0px";
+    list2.margin = "0px";
+        
+    cell2.appendChild(list2);
+        
+    var options = tstFormElements[tstCurrentPage].options;
+        
+    var j = 0;
+        
+    for(var i = 0; i < options.length; i++){
+        var li = document.createElement("li");
+        li.id = i;
+        li.setAttribute("pos", i);
+        li.setAttribute("source_id", tstFormElements[tstCurrentPage].id)
+          
+        li.onclick = function(){
+            var img = this.getElementsByTagName("img")[0];
+            
+            if(__$(this.getAttribute("source_id"))){
+                var opts = __$(this.getAttribute("source_id")).options;
+              
+                for(var k = 0; k < opts.length; k++){
+                    var image = __$(k).getElementsByTagName("img")[0];
+                
+                    image.setAttribute("src", "lib/images/unchecked.png");
+                    __$(k).setAttribute("class", __$(k).getAttribute("group"));
+                }
+            }
+            
+            if(img.getAttribute("src").toLowerCase().trim().match(/unchecked/)){
+                img.setAttribute("src", "lib/images/checked.png");
+                this.setAttribute("class", "highlighted");
+              
+                if(__$(this.getAttribute("source_id"))){
+                    __$(this.getAttribute("source_id")).options[parseInt(this.getAttribute("pos"))].selected = true;
+                    
+                    __$("touchscreenInput" + tstCurrentPage).value = 
+                        __$(this.getAttribute("source_id")).options[parseInt(this.getAttribute("pos"))].value;
+                }
+            } 
+        }
+          
+        if(i % 2 == 0){
+            list1.appendChild(li);
+            
+            if(j % 2 == 0){
+                li.className = "even";
+                li.setAttribute("group", "even");
+            } else {
+                li.className = "odd";
+                li.setAttribute("group", "odd");
+            }
+        } else {
+            list2.appendChild(li);
+            
+            if(j % 2 == 0){
+                li.className = "even";
+                li.setAttribute("group", "even");
+            } else {
+                li.className = "odd";
+                li.setAttribute("group", "odd");
+            }
+            
+            j++;
+          
+        }
+          
+        var innerTable = document.createElement("div");
+        innerTable.style.display = "table";
+        innerTable.style.width = "100%";
+          
+        li.appendChild(innerTable);
+          
+        var innerRow = document.createElement("div")          ;
+        innerRow.style.display = "table-row";
+          
+        innerTable.appendChild(innerRow);
+          
+        var innerCell1 = document.createElement("div");
+        innerCell1.style.display = "table-cell";
+        innerCell1.style.width = "30px";
+          
+        innerCell1.innerHTML = "<img src='lib/images/unchecked.png' height='45' />";
+        
+        innerRow.appendChild(innerCell1);
+          
+        var innerCell2 = document.createElement("div");
+        innerCell2.style.display = "table-cell";
+        innerCell2.style.verticalAlign = "middle";
+        innerCell2.style.paddingLeft = "20px";
+          
+        innerCell2.innerHTML = options[i].innerHTML;
+        
+        innerRow.appendChild(innerCell2);
+          
+        if(options[i].selected){
+            innerCell1.innerHTML = "<img src='lib/images/checked.png' height='45' />";
+            li.setAttribute("class", "highlighted");
+        }
+    }        
+        
+}
+      
