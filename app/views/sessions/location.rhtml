@@ -33,8 +33,12 @@
     }
   </style>
 
-<form id='sessions' action="/sessions/update" method='post'>
+  <form id='sessions' action="/sessions/update" method='post'>
     <label for="location">Location</label>
-    <%= text_field_tag(:location, nil, :helpText => "Workstation location", :field_type => "number", :tt_onLoad => "inform();") %><br>
+    <%= text_field_tag(:location, nil, :helpText => "Workstation location", :field_type => "number", :tt_onLoad => "inform();$('keyboard').style.display = 'none';") %><br>
     <%= submit_tag :value => "Submit" %>
 </form>
+
+  <div id="popupBox"  align="center">
+    <p id="p1"align="center">Processing.Please wait...</p>
+  </div>
