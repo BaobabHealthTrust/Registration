@@ -1,0 +1,170 @@
+<html>
+  <head>
+    <title>Clinic</title>
+    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer ></script>
+    <meta http-equiv='content-type' content='text/html;charset=UTF-8' />
+    <script language="javascript">
+      tstUsername = "<%= User.current_user rescue "" %>";
+      tstCurrentDate = "<%= @date %>";
+      tt_cancel_destination = '/logout';
+      tt_cancel_show = '/dde/search';
+    </script>
+  </head>
+  <body><div id='content'>
+      <div id='description' style='color:#777;position:absolute;margin-top:-70px;'></div><center>
+        <form id = 'home' action=''>
+          <table cellpadding=10>
+            <tr>
+              <th colspan=2>Home Page</th>
+            </tr>
+            <h1 id='project_name'>
+              <div style="font-size: 0.8em; margin-top: 28px;">
+                  PR
+              </div>
+            </h1>
+
+            <div id="facility">Kamuzu central hospital<%#= @facility %></div>
+            <div id="location"><%= @location %></div>
+            <% retrospective = 'false'
+               if session[:datetime]
+               	if session[:datetime].to_date != Date.today.to_date
+               		retrospective = 'true'
+               	end 
+               end
+            %>
+
+            <div id="date" retrospective="<%= retrospective %>"><%= @date %></div>
+            <div id="user"><%= @user %></div>
+
+            <select id="tabs">
+              <option value='/clinic/overview_tab'>Overview</option>
+              <option value='/clinic/reports_tab'>Reports</option>
+              <%if @location == 'Chronic Cough'%>
+                <option value='/clinic/lab_tab'>Laboratory</option>
+              <%end%>
+              <% if current_user.admin? %>
+                <option value='/clinic/properties_tab'>Properties</option>
+              <%end%>
+              <option value='/clinic/administration_tab'>Administration</option>
+            </select>
+            <select id="links">
+
+              <option value='/logout' link='/logout'>Logout</option>
+              <option value='/dde/search' link='/dde/search' ttSize="300px">Find or Register Patient</option>
+
+              <% if development_environment? %>
+                <option value='/location?from=clinic' ttSize="150px">Swap Desk</option>
+              <% end %>
+
+							<%
+								session_datetime = ''
+								if session[:datetime]
+		             	if session[:datetime].to_date != Date.today.to_date
+		             		session_datetime = session[:datetime].to_date
+		             	end 
+               	end
+							%>
+
+              <option value='<%= ((session_datetime.to_date rescue '') != '' ?
+                          "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="150px">
+                <%= ((session_datetime.to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+            </select>
+            <tr>
+              <td align='center'>
+                <input type='submit' value='Finish' />
+              </td>
+            </tr>
+          </table>
+        </form>
+      </center>
+    </div>
+
+    <% form_tag("/dde/process_scan_data", "method" => 'post', "enctype" => 'multipart/form-data', 
+      "id" => 'dde-home', "class" => "form-horizontal", "autocomplete" => "off", "role" => "form", "novalidate" => "novalidate") do %>
+      
+      <textarea id="person" name="person" style="display: none;" condition="false"></textarea>
+      
+    <% end %>
+        
+    <script type="text/javascript">
+      <!--
+      
+      var json = <%= {
+              "national_id" => nil,
+              "application" => "#{@settings["application_name"]}",
+              "site_code" => "#{@settings["site_code"]}",
+              "return_path" => "http://#{request.host_with_port}/process_result",
+              "names" =>
+              {
+                  "family_name" => nil,
+                  "given_name" => nil
+              },
+              "gender" => "#{params["gender"]}",
+              "attributes" => {
+                  "occupation" => nil,
+                  "cell_phone_number" => nil
+              },
+              "birthdate" => nil,
+              "patient" => {
+                  "identifiers" => []
+              },
+              "birthdate_estimated" => nil,
+              "addresses" => {
+                  "current_residence" => nil,
+                  "current_village" => nil,
+                  "current_ta" => nil,
+                  "current_district" => nil,
+                  "home_village" => nil,
+                  "home_ta" => nil,
+                  "home_district" => nil
+              }
+            }.to_json %>;
+  
+      <% if !@settings["dde_username"].blank? %>
+      
+        function barcodeScanAction(){
+          if(__$("barcode")){
+      
+              var npid = __$("barcode").value.replace("$", "");
+              
+              ajaxRequest(npid);
+            
+          }
+        }
+                
+        function ajaxRequest(id){
+          var url = "/process_data/" + id;
+          
+          var httpRequest = new XMLHttpRequest();
+          httpRequest.onreadystatechange = function() {
+              handleAjaxRequest(httpRequest);
+          };
+          try {
+              httpRequest.open("GET", url, true);
+              httpRequest.send(null);
+          } catch(e){
+          }
+        }
+        
+        function handleAjaxRequest(aXMLHttpRequest){
+          if (!aXMLHttpRequest) return;                    
+          
+          if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 || 
+                aXMLHttpRequest.status == 304)) {
+                        
+              var result = aXMLHttpRequest.responseText;
+              
+              __$("person").innerHTML = result; 
+            
+              document.getElementById("dde-home").submit();
+                       
+          }
+        }
+        
+      <% end %>
+      
+      //-->
+    </script>
+    
+  </body>
+</html>
