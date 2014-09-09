@@ -46,7 +46,7 @@
    if [ "$RB_VERSION" == "$RB_INSTALLED_VERSION" ] ; then
      echo "ruby $RB_INSTALLED_VERSION already installed"
    else 
-     echo "ruby $RB_VERSION not installed"
+     echo -e "${red}ruby $RB_VERSION not installed${NC}"
      exit 0
    fi
     #compare installed rubygems with specified rubygems

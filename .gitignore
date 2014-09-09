@@ -4,6 +4,7 @@
 config/database.yml
 config/settings.yml
 config/application.yml
+config/application_requirements.yml
 notes
 doc
 development.sql
