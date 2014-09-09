@@ -59,21 +59,28 @@
 
    #compare installed databases with specified database
    if [ "$FIRST_DB_INSTALLED_NAME" == "$DB_NAME" ] || [ "$SECOND_DB_INSTALLED_NAME" == "$DB_NAME" ] ; then
-     echo "$DB_NAME already installed"
+     echo "$DB_NAME database already installed"
    else 
-     echo -e "${red}$DB_NAME not installed${NC}"
+     echo -e "${red}$DB_NAME database not installed${NC}"
+     exit 0
+   fi
+
+   if [ "$BD_VERSION" == "$BD_INSTALLED_VERSION" ] ; then
+     echo "bundler $BD_VERSION already installed"
+   else 
+     echo -e "${red}bundler $BD_VERSION not installed${NC}"
      exit 0
    fi
 
 #echo  $RB_VERSION
 #echo  $RG_VERSION
-echo  $DB_NAME
+#echo  $DB_NAME
 #echo  $BD_VERSION
 
 #echo $RB_INSTALLED_VERSION
 #echo $RG_INSTALLED_VERSION
-echo $FIRST_DB_INSTALLED_NAME
-echo $SECOND_DB_INSTALLED_NAME
+#echo $FIRST_DB_INSTALLED_NAME
+#echo $SECOND_DB_INSTALLED_NAME
 #echo $BD_INSTALLED_VERSION
 
 
