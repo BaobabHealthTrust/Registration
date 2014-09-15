@@ -1,7 +1,7 @@
 #!/bin/bash
    set -x # turns on stacktrace mode which gives useful debug information
 
-		if [ ! -x config/application_requirements.yml ] ; then
+		if [ ! -f config/application_requirements.yml ] ; then
 			cp config/application_requirements.yml.example config/application_requirements.yml
 		fi
    
@@ -41,9 +41,9 @@
      SECOND_DB_INSTALLED_NAME='couchdb not installed'
    fi
    #check for bundler gem
-   BUNDLER_INSTALLED_VERSION=`echo "$(gem list -i bundler --version 1.6.2)"`
+   BUNDLER_INSTALLED_VERSION=`echo "$(gem list -i bundler --version $BD_VERSION)"`
    if $BUNDLER_INSTALLED_VERSION; then
-     BD_INSTALLED_VERSION='1.6.2'
+     BD_INSTALLED_VERSION=$BD_VERSION
    else 
      BD_INSTALLED_VERSION='not correct version'
    fi
@@ -108,7 +108,7 @@ fi
 
 set -x # turns on stacktrace mode which gives useful debug information
 
-if [ ! -x config/database.yml ] ; then
+if [ ! -f config/database.yml ] ; then
   cp config/database.yml.example config/database.yml
 fi
 
