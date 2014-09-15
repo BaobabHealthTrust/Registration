@@ -10,6 +10,7 @@ usage(){
 
 ENV=$1
 SITE=$2
+PSWD=$3
 
 if [ -z "$ENV" ] || [ -z "$SITE" ] ; then
   usage

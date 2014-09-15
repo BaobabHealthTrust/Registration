@@ -6,10 +6,10 @@
 #   host: localhost
 
 development:
-  adapter: mysql
-  database: bart2_development
+  adapter: mysql2
+  database: openmrs_pr3
   username: root
-  password: password
+  password: p@ssword
   host: localhost
 
 test: &TEST
