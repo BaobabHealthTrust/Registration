@@ -71,6 +71,15 @@
      exit 0
    fi
 
+   #check if nginx is installed
+   if [ ! -f /opt/nginx/conf/nginx.conf ]; then
+      echo "Nginx not installed"
+      exit 0
+   else
+      echo "Nginx installed"
+   fi
+
+   #compare bundler versions
    if [ "$BD_VERSION" == "$BD_INSTALLED_VERSION" ] ; then
      echo "bundler $BD_VERSION already installed"
    else 
