@@ -17,3 +17,5 @@ tmp/*
 Gemfile.lock
 .ruby-version
 public/touchscreentoolkit
+.idea/
+config/*.yml
