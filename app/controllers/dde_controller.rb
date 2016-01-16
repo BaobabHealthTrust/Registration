@@ -69,9 +69,7 @@ class DdeController < ApplicationController
 
     patient = Patient.find(patient_id) rescue nil
 
-    print_and_redirect("/patients/national_id_label?patient_id=#{patient_id}", next_task(patient)) and return if !patient.blank? and (json["print_barcode"] rescue false)
-
-    # redirect_to "/encounters/new/registration?patient_id=#{patient_id}" and return if !patient_id.blank?
+    print_and_redirect("/patients/national_id_label?patient_id=#{patient_id}", "/patients/show/#{patient_id}") and return if !patient.blank? and (json["print_barcode"] rescue false)
 
     redirect_to next_task(patient) and return if !patient.blank?
 
