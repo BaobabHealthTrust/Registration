@@ -1,10 +1,24 @@
 class GenericPersonAddressesController < ApplicationController
   def village
-    search("city_village", params[:search_string])
+    traditional_authority_id = DDETraditionalAuthority.find_by_name("#{params[:filter_value]}").id
+    village_conditions = ["name LIKE (?) AND traditional_authority_id = ?", "%#{params[:search_string]}%", traditional_authority_id]
+
+    villages = DDEVillage.find(:all,:conditions => village_conditions, :order => 'name')
+    villages = villages.map do |v|
+      "<li value=\"#{v.name}\">#{v.name}</li>"
+    end
+    render :text => villages.join('') + "<li value='Other'>Other</li>" and return
   end
 
   def traditional_authority
-    search("county_district", params[:search_string])
+    district_id = DDEDistrict.find_by_name("#{params[:filter_value]}").id
+    traditional_authority_conditions = ["name LIKE (?) AND district_id = ?", "%#{params[:search_string]}%", district_id]
+
+    traditional_authorities = DDETraditionalAuthority.find(:all,:conditions => traditional_authority_conditions, :order => 'name')
+    traditional_authorities = traditional_authorities.map do |t_a|
+      "<li value=\"#{t_a.name}\">#{t_a.name}</li>"
+    end
+    render :text => traditional_authorities.join('') + "<li value='Other'>Other</li>" and return
   end
   
   def landmark
