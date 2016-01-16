@@ -15,8 +15,8 @@ FasterCSV.foreach(Rails.root.join('db','missing_villages.csv')) do |row|
   
  if village.blank?
    DDEVillage.create(:name => row[2], :traditional_authority_id => ta.traditional_authority_id, :creator => 1, :date_created => Date.today)
-   puts "#{row[2]} created." 
+   puts "#{row[2]} village in TA #{row[1]} in #{row[0]} district created." 
  else
-   puts "#{row[2]} already exists." 
+   puts "#{row[2]} village in TA #{row[1]} in #{row[0]}  district already exists." 
  end
 end
