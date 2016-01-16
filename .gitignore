@@ -5,6 +5,8 @@
 config/database.yml
 config/settings.yml
 config/application.yml
+config/nginx.conf
+config/globals.yml
 notes
 doc
 development.sql
