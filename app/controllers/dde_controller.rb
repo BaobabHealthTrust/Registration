@@ -70,8 +70,8 @@ class DdeController < ApplicationController
     patient = Patient.find(patient_id) rescue nil
 
     print_and_redirect("/patients/national_id_label?patient_id=#{patient_id}", "/patients/show/#{patient_id}") and return if !patient.blank? and (json["print_barcode"] rescue false)
-
-    redirect_to next_task(patient) and return if !patient.blank?
+    
+    redirect_to "/patients/show/#{patient.patient_id}" and return if !patient.blank?
 
     flash["error"] = "Sorry! Something went wrong. Failed to process properly!"
 
