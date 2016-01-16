@@ -39,105 +39,18 @@
       </tr>
       <% @types.each do |type| %>
         <tr class="<%= cycle('even', 'odd') %>">
-          <td style="text-align:left;">Newly registered patients<%#= type.capitalize %></td>
+          <td style="text-align:left;">Newly Registered <%#= type.capitalize %></td>
           <td><%= @me[type].to_i %></td>
           <td><%= @today[type].to_i %></td>
         </tr>
       <% end %>
 
       <tr class="<%= cycle('even', 'odd') %>">
-        <td style="text-align:left;">Returning patients</td>
+        <td style="text-align:left;">Returning</td>
         <td><%= @existing_patients_by_current_user %></td>
         <td><%= @existing_patients_by_all_users %></td>
       </tr>
-
-
-      <%# if !@casualty.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Casualty</td>
-		        <td><%= @casualty.length.to_i %></td>
-		        <td><%= @all_casualty.length.to_i %></td>
-        	</tr>
-       <%# end %>
-        <%# if !@dental.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Dental</td>
-		        <td><%= @dental.length.to_i %></td>
-		        <td><%= @all_dental.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@eye.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Eye</td>
-		        <td><%= @eye.length.to_i %></td>
-		        <td><%= @all_eye.length.to_i %></td>
-        	</tr>
-        <%# end %>
-      	<%# if !@family_planing.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Family planing</td>
-		        <td><%= @family_planing.length.to_i %></td>
-		        <td><%= @all_family_planing.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@medical.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Medical</td>
-		        <td><%= @medical.length.to_i %></td>
-		        <td><%= @all_medical.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@ob_gyn.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">OB/Gyn</td>
-		        <td><%= @ob_gyn.length.to_i %></td>
-		        <td><%= @all_ob_gyn.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@orthopedics.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Orthopedics</td>
-		        <td><%= @orthopedics.length.to_i %></td>
-		        <td><%= @all_orthopedics.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@pediatrics.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Pediatrics</td>
-		        <td><%= @pediatrics.length.to_i %></td>
-		        <td><%= @all_pediatrics.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@skin.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Skin</td>
-		        <td><%= @skin.length.to_i %></td>
-		        <td><%= @all_skin.length.to_i %></td>
-        	</tr>
-        <%# end %>
-       <%# if !@sti_clinic.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">STI Clinic</td>
-		        <td><%= @sti_clinic.length.to_i %></td>
-		        <td><%= @all_sti_clinic.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@surgical.empty? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Surgical</td>
-		        <td><%= @surgical.length.to_i %></td>
-		        <td><%= @all_surgical.length.to_i %></td>
-        	</tr>
-        <%# end %>
-        <%# if !@other.blank? %>
-      		<tr class="<%= cycle('even', 'odd') %>">
-		        <td style="text-align:left;">Other</td>
-		        <td><%= @other.length.to_i %></td>
-		        <td><%= @all_other.length.to_i %></td>
-        	</tr>
-        <%# else %>
-        <%# end %>
- 
+       
     </table>
   </div>
 </div>

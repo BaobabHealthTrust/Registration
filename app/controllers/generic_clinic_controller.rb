@@ -96,7 +96,7 @@ class GenericClinicController < ApplicationController
 		end
 
     @types = EncounterType.all.map{|encounter_type| encounter_type.name if encounter_type.name == "REGISTRATION"}.to_s
-
+    
     @current_user_id = current_user.user_id
 
     @me = Encounter.patient_registration(@types, @current_user_id, :conditions => ['DATE(patient.date_created) = DATE(NOW()) AND patient.creator = ?', current_user.user_id])
@@ -127,77 +127,13 @@ class GenericClinicController < ApplicationController
 		if @existing_patients_by_current_user < 0
 			@existing_patients_by_current_user = 0
 		end
-		
-		@casualty = []; @dental = []; @eye = []; @family_planing = []; @medical = []; @ob_gyn = [];
-		@orthopedics = []; @other = []; @pediatrics = []; @skin = []; @sti_clinic = []; @surgical = []
-
- 		@services.each do |service|
- 			if service.value_text.capitalize.include?("Casualty")
- 				@casualty << service
- 			elsif service.value_text.capitalize.include?("Dental")
- 				@dental << service
- 			elsif service.value_text.capitalize.include?("Eye")
- 				@eye << service
- 			elsif service.value_text.include?("Family Planing")
- 				@family_planing << service
- 			elsif service.value_text.capitalize.include?("Medical")
- 				@medical << service
- 			elsif service.value_text.include?("OB/Gyn")
- 				@ob_gyn << service
- 			elsif service.value_text.capitalize.include?("Orthopedics")
- 				@orthopedics << service
- 			elsif service.value_text.capitalize.include?("Pediatrics")
- 				@pediatrics << service
- 			elsif service.value_text.strip.include?("Skin")
- 				@skin << service
- 			elsif service.value_text.include?("STI Clinic")
- 				@sti_clinic << service
- 			elsif service.value_text.capitalize.include?("Surgical")
- 				@surgical << service
- 			else service.value_text.capitalize.include?(" Other ")
- 				@other << service
- 			end
- 		end
-
-		@all_services = PatientService.all_services(@session_date)
-		
+				
 		@existing_patients_by_all_users = 0
 		@existing_patients_by_all_users = PatientService.all_patient_services.length - @today['REGISTRATION'].to_i
 		if @existing_patients_by_all_users < 0
 			@existing_patients_by_all_users = 0
 		end
 		
-		@all_casualty = []; @all_dental = []; @all_eye = []; @all_family_planing = []; @all_medical = []; @all_ob_gyn = [];
-		@all_orthopedics = []; @all_other = []; @all_pediatrics = []; @all_skin = []; @all_sti_clinic = []; @all_surgical = []
-
- 		@all_services.each do |service|
- 			if service.value_text.capitalize.include?("Casualty")
- 				@all_casualty << service
- 			elsif service.value_text.capitalize.include?("Dental")
- 				@all_dental << service
- 			elsif service.value_text.capitalize.include?("Eye")
- 				@all_eye << service
- 			elsif service.value_text.include?("Family Planing")
- 				@all_family_planing << service
- 			elsif service.value_text.capitalize.include?("Medical")
- 				@all_medical << service
- 			elsif service.value_text.include?("OB/Gyn")
- 				@all_ob_gyn << service
- 			elsif service.value_text.capitalize.include?("Orthopedics")
- 				@all_orthopedics << service
- 			elsif service.value_text.capitalize.include?("Pediatrics")
- 				@all_pediatrics << service
- 			elsif service.value_text.strip.include?("Skin")
- 				@all_skin << service
- 			elsif service.value_text.include?("STI Clinic")
- 				@all_sti_clinic << service
- 			elsif service.value_text.capitalize.include?("Surgical")
- 				@all_surgical << service
- 			else service.value_text.capitalize.include?(" Other ")
- 				@all_other << service
- 			end
- 		end
-
     if simple_overview
         render :template => 'clinic/overview_simple.rhtml' , :layout => false
         return
