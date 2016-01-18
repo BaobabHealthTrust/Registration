@@ -355,13 +355,13 @@
                             :ajaxURL => "",
                             :tt_requireNextClick => false,
                             :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/nationality?filter_value=', __$('nationality').value);",
-                            :helptext => "Nationality"} %>
+                            :helptext => "Nationality"} if @show_nationality %>
 
         <%= select_tag "REGION OF ORIGIN", options_for_select([["Northern Region", "Northern+Region"],
                                                                ["Central Region", "Central+Region"], ["Southern Region", "Southern+Region"], ["", ""]]),
                        {:id => "region_region_name",
                         :tt_requireNextClick => false,
-                        :condition => "__$('nationality').value == 'Malawian'",
+                        :condition => "__$('nationality') == null || __$('nationality').value == 'Malawian'",
                         :tt_onLoad => "$('nextButton').style.display = 'none';",
                         :helptext => "Region Of Origin"}%>
 
@@ -369,7 +369,7 @@
                            params[:state_province], {:field_type => 'alpha',
                                                      :helpText => 'Home District',
                                                      :id => "address2",
-                                                     :condition => "__$('nationality').value == 'Malawian'",
+                                                     :condition => "__$('nationality') == null ||__$('nationality').value == 'Malawian'",
                                                      :tt_requireNextClick => false,
                                                      :ajaxURL => '',
                                                      :allowFreeText => true,
@@ -383,7 +383,7 @@
                             :helpText => "Tradional Authority (T/A)",
                             :ajaxURL => '',
                             :allowFreeText => false,
-                            :condition => "__$('nationality').value == 'Malawian'",
+                            :condition => "__$('nationality') == null || __$('nationality').value == 'Malawian'",
                             :tt_requireNextClick => false,
                             :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/traditional_authority/TraditionalAuthority?filter_value=' ,document.getElementById('address2').value);"
                            } %>
@@ -394,7 +394,7 @@
                                    :helpText => "Home Village",
                                    :tt_requireNextClick => true,
                                    :tt_pageStyleClass => "azButton",
-                                   :condition => "__$('nationality').value == 'Malawian'",
+                                   :condition => "__$('nationality') == null || __$('nationality').value == 'Malawian'",
                                    :ajaxURL => '/dde/village?search_string=',
                                    :allowFreeText => false,
                                    :tt_onLoad => "$('nextButton').style.display = 'block'; set_ajaxURL_for_suggestions('/dde/village/Village?filter_value=' ,document.getElementById('person_addresses_county_district').value);"} %>

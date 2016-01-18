@@ -322,6 +322,57 @@ class DdeController < ApplicationController
     @person = Person.find(person_id)
 
     @patient = @person.patient rescue nil
+    
+    
+    settings = YAML.load_file("#{Rails.root}/config/globals.yml")[Rails.env] rescue {}
+
+    @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
+
+    @show_middle_name = (settings["show_middle_name"] == true ? true : false) rescue false
+
+    @show_maiden_name = (settings["show_maiden_name"] == true ? true : false) rescue false
+
+    @show_birthyear = (settings["show_birthyear"] == true ? true : false) rescue false
+
+    @show_birthmonth = (settings["show_birthmonth"] == true ? true : false) rescue false
+
+    @show_birthdate = (settings["show_birthdate"] == true ? true : false) rescue false
+
+    @show_age = (settings["show_age"] == true ? true : false) rescue false
+
+    @show_region_of_origin = (settings["show_region_of_origin"] == true ? true : false) rescue false
+
+    @show_district_of_origin = (settings["show_district_of_origin"] == true ? true : false) rescue false
+
+    @show_t_a_of_origin = (settings["show_t_a_of_origin"] == true ? true : false) rescue false
+
+    @show_home_village = (settings["show_home_village"] == true ? true : false) rescue false
+
+    @show_current_region = (settings["show_current_region"] == true ? true : false) rescue false
+
+    @show_current_district = (settings["show_current_district"] == true ? true : false) rescue false
+
+    @show_current_t_a = (settings["show_current_t_a"] == true ? true : false) rescue false
+
+    @show_current_village = (settings["show_current_village"] == true ? true : false) rescue false
+
+    @show_current_landmark = (settings["show_current_landmark"] == true ? true : false) rescue false
+
+    @show_cell_phone_number = (settings["show_cell_phone_number"] == true ? true : false) rescue false
+
+    @show_office_phone_number = (settings["show_office_phone_number"] == true ? true : false) rescue false
+
+    @show_home_phone_number = (settings["show_home_phone_number"] == true ? true : false) rescue false
+
+    @show_occupation = (settings["show_occupation"] == true ? true : false) rescue false
+
+    @show_nationality = (settings["show_nationality"] == true ? true : false) rescue false
+    
+    @show_country_of_residence = (settings["show_country_of_residence"] == true ? true : false) rescue false
+
+    @occupations = ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
+                    'Student','Security guard','Domestic worker', 'Police','Office worker',
+                    'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
 
   end
 
