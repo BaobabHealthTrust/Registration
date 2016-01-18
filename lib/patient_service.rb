@@ -1487,17 +1487,16 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
   end
 
   def self.birthdate_formatted(person)
-    if person.birthdate_estimated==1
-      if person.birthdate.day == 1 and person.birthdate.month == 7
-        person.birthdate.strftime("??/???/%Y")
-      elsif person.birthdate.day == 15
-        person.birthdate.strftime("??/%b/%Y")
-      elsif person.birthdate.day == 1 and person.birthdate.month == 1
-        person.birthdate.strftime("??/???/%Y")
-      end
-    else
-      person.birthdate.strftime("%d/%b/%Y")
-    end
+        
+    day = person.birthdate_estimated.to_s == '1' ? '?' : (person.birthdate.to_date.strftime("%d") rescue "?")
+    
+    month = (person.birthdate_estimated.to_s == '1' and (person.birthdate.to_date.strftime("%d") rescue 0).to_s.strip == '10') ? '?' :
+                        (person.birthdate.to_date.strftime("%b") rescue "?")
+                        
+    year = person.birthdate.to_date.strftime("%Y")
+    
+    person.birthdate = "#{day}"+"/"+"#{month}"+"/"+"#{year}"
+    
   end
 
   def self.age_in_months(person, today = Date.today)
