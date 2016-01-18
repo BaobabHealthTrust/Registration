@@ -63,8 +63,6 @@ class DdeController < ApplicationController
 
     patient_id = DDE.search_and_or_create(json.to_json) # rescue nil
 
-    # raise patient_id.inspect
-
     json = JSON.parse(params["person"]) rescue {}
 
     patient = Patient.find(patient_id) rescue nil
@@ -164,8 +162,6 @@ class DdeController < ApplicationController
       }
 
     end
-
-    # raise json.inspect
 
     json["results"].each do |o|
 
@@ -378,10 +374,10 @@ class DdeController < ApplicationController
 
   def update_demographics
 
-    # raise params.inspect
+    paramz = params
 
     @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
-
+   
     patient = Person.find(params[:person_id]).patient rescue nil
 
     if patient.blank?
@@ -433,8 +429,6 @@ class DdeController < ApplicationController
       identifiers << {id.type.name => id.identifier} if id.type.name.downcase != "national id"
     }
 
-    # raise identifiers.inspect
-
     person = {
         "national_id" => national_id,
         "application" => "#{@settings["application_name"]}",
@@ -475,13 +469,13 @@ class DdeController < ApplicationController
         },
         "birthdate_estimated" => estimate,
         "addresses" => {
-            "current_residence" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:address1] rescue nil) : (address.address1 rescue nil)),
-            "current_village" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:city_village] rescue nil) : (address.city_village rescue nil)),
-            "current_ta" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:township_division] rescue nil) : (address.township_division rescue nil)),
-            "current_district" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:state_province] rescue nil) : (address.state_province rescue nil)),
-            "home_village" => (!(params[:person][:attributes][:citizenship] rescue nil).blank? ? (params[:person][:addresses][:neighborhood_cell] rescue nil) : (address.neighborhood_cell rescue nil)),
-            "home_ta" => (!(params[:person][:attributes][:citizenship] rescue nil).blank? ? (params[:person][:addresses][:county_district] rescue nil) : (address.county_district rescue nil)),
-            "home_district" => (!(params[:person][:attributes][:citizenship] rescue nil).blank? ? (params[:person][:addresses][:address2] rescue nil) : (address.address2 rescue nil))
+            "current_residence" => (!(params[:person][:addresses][:address1]  rescue nil).blank? ? (params[:person][:addresses][:address1] rescue nil) : (address.address1 rescue nil)),
+            "current_village" => (!(params[:person][:addresses][:city_village] rescue nil).blank? ? (params[:person][:addresses][:city_village] rescue nil) : (address.city_village rescue nil)),
+            "current_ta" => (!(params[:person][:addresses][:township_division] rescue nil).blank? ? (params[:person][:addresses][:township_division] rescue nil) : (address.township_division rescue nil)),
+            "current_district" => (!(params[:person][:addresses][:state_province] rescue nil).blank? ? (params[:person][:addresses][:state_province] rescue nil) : (address.state_province rescue nil)),
+            "home_village" => (!(params[:person][:addresses][:neighborhood_cell] rescue nil).blank? ? (params[:person][:addresses][:neighborhood_cell] rescue nil) : (address.neighborhood_cell rescue nil)),
+            "home_ta" => (!(params[:person][:addresses][:county_district] rescue nil).blank? ? (params[:person][:addresses][:county_district] rescue nil) : (address.county_district rescue nil)),
+            "home_district" => (!(params[:person][:addresses][:address2] rescue nil).blank? ? (params[:person][:addresses][:address2] rescue nil) : (address.address2 rescue nil))
         }
     }
     
@@ -507,11 +501,9 @@ class DdeController < ApplicationController
       end
 
     end
-
-    patient_id = DDE.search_and_or_create(json.to_json) # rescue nil 
-
-    # raise patient_id.inspect
-
+  
+    patient_id = DDE.search_and_or_create(json.to_json, paramz) # rescue nil 
+    
     patient = Patient.find(patient_id) rescue nil
 
     print_and_redirect("/patients/national_id_label?patient_id=#{patient_id}", "/dde/edit_patient/id=#{patient_id}") and return if !patient.blank? and (json["print_barcode"] rescue false)

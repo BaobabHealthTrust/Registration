@@ -388,7 +388,7 @@
                             :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/traditional_authority/TraditionalAuthority?filter_value=' ,document.getElementById('address2').value);"
                            } %>
 
-        <%= text_field_tag "person[addresses][neighborhood_cell]", params[:city_village],
+        <%= text_field_tag "person[addresses][neighborhood_cell]", params[:neighborhood_cell],
                            {
                                    :field_type => 'alpha',
                                    :helpText => "Home Village",

@@ -1,7 +1,7 @@
 module DDE
 
   def self.search_and_or_create(json, par=nil)
-
+   
     raise "Argument expected to be a JSON Object" if (JSON.parse(json) rescue nil).nil?
 
     person = JSON.parse(json) rescue {}
@@ -79,8 +79,6 @@ module DDE
 
       if !result.blank?
 
-        # raise (person["national_id"] || person["_id"]).inspect
-
         current_national_id = self.get_full_identifier("National id", result.patient_id)
         self.set_identifier("National id", (person["national_id"] || person["_id"]), result.patient_id)
         self.set_identifier("Old Identification Number", current_national_id.identifier, result.patient_id)
@@ -140,19 +138,20 @@ module DDE
               "maiden_name" => (patient.person.names.first.family_name2 rescue nil)
           }
       }
-
-      if (((local["gender"].downcase.strip != person["gender"].downcase.strip) or
-          (local["birthdate"].strip != person["birthdate"].strip) or
+       
+       
+      if (((local["gender"].downcase.strip != person["gender"].first.downcase.strip) ||
+          (local["birthdate"].strip != person["birthdate"].strip) ||
           (local["birthdate_estimated"].to_s.strip.downcase != person["birthdate_estimated"].to_s.strip.downcase)) rescue false)
-
+    
         patient.person.update_attributes(
-            "gender" => person["gender"],
+            "gender" => person["gender"].first,
             "birthdate" => person["birthdate"],
             "birthdate_estimated" => (person["birthdate_estimated"].to_s.strip.downcase == 'true' ? 1 : 0)
         )
 
       end
-
+      
       if ((local["names"]["given_name"].downcase.strip rescue "") != (person["names"]["given_name"].downcase.strip rescue "")) or
           ((local["names"]["family_name"].downcase.strip rescue "") != (person["names"]["family_name"].downcase.strip rescue "")) or
           ((local["names"]["maiden_name"].downcase.strip rescue "") != (person["names"]["maiden_name"].downcase.strip rescue "")) or
@@ -268,8 +267,6 @@ module DDE
         end
 
       end
-
-      # raise local.inspect
 
     end
 
@@ -407,14 +404,36 @@ module DDE
   end
   
   def self.build_person(patient_identifier, par=nil)
-  
     identifiers = []
     patient_identifier.patient.patient_identifiers.each { |id|
       identifiers << {id.type.name => id.identifier} if id.type.name.downcase != "national id"
     }
     
     patient_obj =  PatientService.get_patient(Person.find(patient_identifier.patient_id))
+    
+    dob = (Date.parse(patient_obj.birth_date).strftime("%Y-%m-%d") rescue nil)
+    
+    estimate = false
+
+    if !(par[:person][:birth_month] rescue nil).blank? and (par[:person][:birth_month] rescue nil).to_s.downcase == "unknown"
    
+      dob = "#{par[:person][:birth_year]}-07-10"
+
+      estimate = true
+
+    elsif !(par[:person][:birth_month] rescue nil).blank? and (par[:person][:birth_month] rescue nil).to_s.downcase != "unknown" and !(par[:person][:birth_day] rescue nil).blank? and (par[:person][:birth_day] rescue nil).to_s.downcase == "unknown"
+    
+      dob = "#{par[:person][:birth_year]}-#{"%02d" % par[:person][:birth_month].to_i}-05"
+
+      estimate = true
+
+    elsif !(par[:person][:birth_month] rescue nil).blank? and (par[:person][:birth_month] rescue nil).to_s.downcase != "unknown" and !(par[:person][:birth_day] rescue nil).blank? and (par[:person][:birth_day] rescue nil).to_s.downcase != "unknown" and !(par[:person][:birth_year] rescue nil).blank? and (par[:person][:birth_year] rescue nil).to_s.downcase != "unknown"
+      
+      dob = "#{par[:person][:birth_year]}-#{"%02d" % par[:person][:birth_month].to_i}-#{"%02d" % par[:person][:birth_day].to_i}"
+     
+      estimate = false
+    end
+    
   	person = {
         "national_id" => patient_obj.national_id,
         "patient_id" => patient_obj.person_id,
@@ -422,10 +441,10 @@ module DDE
             {
                 "family_name" => (!(par[:person][:names][:family_name] rescue nil).blank? ? (par[:person][:names][:family_name] rescue nil) : (patient_obj.last_name rescue nil)),
                 "given_name" =>  (!(par[:person][:names][:given_name] rescue nil).blank? ? (par[:person][:names][:given_name] rescue nil) : (patient_obj.first_name rescue nil)),
-                "middle_name" => (!(params[:person][:names][:middle_name] rescue nil).blank? ? (params[:person][:names][:middle_name] rescue nil) : (patient_obj.middle_name rescue nil)),
-                "maiden_name" => (!(params[:person][:names][:family_name2] rescue nil).blank? ? (params[:person][:names][:family_name2] rescue nil) : (patient_obj.maiden_name rescue nil))
+                "middle_name" => (!(par[:person][:names][:middle_name] rescue nil).blank? ? (par[:person][:names][:middle_name] rescue nil) : (patient_obj.middle_name rescue nil)),
+                "maiden_name" => (!(par[:person][:names][:family_name2] rescue nil).blank? ? (par[:person][:names][:family_name2] rescue nil) : (patient_obj.maiden_name rescue nil))
             },
-        "gender" => ( !par["gender"].blank? ? par["gender"] : (patient_obj.sex rescue nil)),
+        "gender" => (par["gender"].present? ? par["gender"].first : (patient_obj.sex rescue nil)),
         "person_attributes" => {
             "occupation" => (!(par[:person][:attributes][:occupation] rescue nil).blank? ? (par[:person][:attributes][:occupation] rescue nil) : (:patient_obj.occupation rescue nil)),
 
@@ -439,22 +458,22 @@ module DDE
 
             "citizenship" => (!(par[:person][:attributes][:citizenship] rescue nil).blank? ? (pa[:person][:attributes][:citizenship] rescue nil) :(patient_obj.citizenship rescue nil))
         },
-        "birthdate" => (patient_obj.birth_date rescue nil),
+        "birthdate" => (dob),
         "patient" => {
             "identifiers" => identifiers
         },
-        "birthdate_estimated" => (patient_obj.birthdate_estimated rescue nil),
+        "birthdate_estimated" => (estimate),
         "addresses" => {
             "current_residence" => (!(par[:person][:addresses][:address1] rescue nil).blank? ? (par[:person][:addresses][:address1] rescue nil) :(patient_obj.landmark rescue nil)),
             "current_village" => (!(par[:person][:addresses][:city_village] rescue nil).blank? ? (par[:person][:addresses][:city_village] rescue nil) :(patient_obj.current_residence rescue nil)),
             "current_ta" => (!(par[:person][:addresses][:township_division] rescue nil).blank? ? (par[:person][:addresses][:township_division] rescue nil) :(patient_obj.current_ta rescue nil)),
             "current_district" => (!(par[:person][:addresses][:state_province] rescue nil).blank? ? (par[:person][:addresses][:state_province] rescue nil) : (patient_obj.current_district rescue nil)),
-            "home_village" => (!(params[:person][:addresses][:neighborhood_cell] rescue nil).blank? ? (par[:person][:addresses][:neighborhood_cell] rescue nil) : (patient_obj.home_village rescue nil)),
+            "home_village" => (!(par[:person][:addresses][:neighborhood_cell] rescue nil).blank? ? (par[:person][:addresses][:neighborhood_cell] rescue nil) : (patient_obj.home_village rescue nil)),
             "home_ta" => (!(par[:person][:addresses][:county_district] rescue nil).blank? ? (par[:person][:addresses][:county_district] rescue nil) : (patient_obj.home_ta rescue nil)),
             "home_district" => (!(par[:person][:addresses][:address2] rescue nil).blank? ? (par[:person][:addresses][:address2] rescue nil) :(patient_obj.home_district rescue nil))
         }
     }
-    
+     
     return person
   end
 
