@@ -237,7 +237,9 @@ class DdeController < ApplicationController
     @show_occupation = (settings["show_occupation"] == true ? true : false) rescue false
 
     @show_nationality = (settings["show_nationality"] == true ? true : false) rescue false
-
+    
+    @show_country_of_residence = (settings["show_country_of_residence"] == true ? true : false) rescue false
+    
     @occupations = ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
                     'Student','Security guard','Domestic worker', 'Police','Office worker',
                     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
@@ -296,6 +298,8 @@ class DdeController < ApplicationController
     @show_occupation = (settings["show_occupation"] == true ? true : false) rescue false
 
     @show_nationality = (settings["show_nationality"] == true ? true : false) rescue false
+    
+    @show_country_of_residence = (settings["show_country_of_residence"] == true ? true : false) rescue false
 
     @occupations = ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
                     'Student','Security guard','Domestic worker', 'Police','Office worker',
