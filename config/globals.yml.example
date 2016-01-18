@@ -14,11 +14,12 @@ default: &default
   show_current_t_a: true
   show_current_village: true
   show_current_landmark: true
-  show_cell_phone_number: true
-  show_office_phone_number: true
-  show_home_phone_number: true
-  show_occupation: true
-  show_nationality: true
+  show_cell_phone_number: false
+  show_office_phone_number: false
+  show_home_phone_number: false
+  show_occupation: false
+  show_nationality: false
+  show_country_of_residence: false
   default_gender_female: false
   
 development:
