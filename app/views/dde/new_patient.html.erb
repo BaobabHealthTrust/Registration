@@ -152,6 +152,7 @@
 
 <script type="text/javascript">
   var showDurrentDistrict = '<%= @show_current_district %>';
+  var freeTextHomeVillage = '';
 
 <% if params[:relation] %>
     var tt_cancel_destination = "/patients/relationships?patient_id=<%=h params[:relation] -%>"
@@ -283,13 +284,10 @@
       __$("home_village").value : null
   );
 
-    if (__$("all_district_villages").value != ''){
+    if (!(__$("all_district_villages").value.match(/OTHER/i))){
       json.addresses.home_village = __$("all_district_villages").value;
     }
 
-    if (__$("free_text_home_village").value != ''){
-      json.addresses.home_village = __$("free_text_home_village").value;
-    }
 
     json.addresses.home_ta = (
     __$("ancestral_traditional_authority") ?
@@ -459,6 +457,17 @@
     }
   }
 
+  function processDataForUnknownVillage(){
+    if (showDurrentDistrict == 'false'){
+      $('nextButton').innerHTML = '<span>Finish</span>';
+      $('nextButton').onmousedown = function () {
+        if (inputIsValid($('touchscreenInput' + tstCurrentPage))){
+          __$("home_village").value = $('touchscreenInput' + tstCurrentPage).value;
+          sendToDDE();
+        }
+      }
+    }
+  }
 </script>
 
 <% form_tag "/people/create" do %>
@@ -566,7 +575,7 @@
   <%= text_field_tag "person[addresses][neighborhood_cell]", nil,
     {:id => "free_text_home_village",
     :condition => "__$('all_district_villages').value.match(/OTHER/i);",
-    :tt_onLoad => "processData();",
+    :tt_onLoad => "processDataForUnknownVillage();",
     :optional => "true",
     :helptext => "Specify Home Village"} %>
 
