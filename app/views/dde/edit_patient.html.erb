@@ -278,13 +278,17 @@
                 "value": "<%= ((@person.gender rescue "&nbsp;").to_s.length > 0 ? ((@person.gender rescue nil).to_s.downcase == "m" ? "Male" : "Female") : "") %>"
             }
 
-            <% if @show_nationality or @show_region_of_origin %>
+            <% if @show_nationality  %>
             ,
             {
                 "label": "N<span class='therest'>ATIONALITY</span>",
                 "field": "address2",
                 "value": "<%= @person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Citizenship").id).value rescue "&nbsp;" %>"
-            },
+            }
+            <% end %>
+
+            <% if @show_region_of_origin %>
+            ,
             {
                 "label": "H<span class='therest'>OME DISTRICT</span>",
                 "field": "address2",
@@ -302,13 +306,17 @@
             }
             <% end %>
 
-            <% if @show_current_district %>
+            <% if @show_country_of_residence %>
             ,
             {
                 "label": "C<span class='therest'>OUNTRY OF RESIDENCE</span>",
                 "field": "state_province",
                 "value": "<%= @person.person_attributes.find_by_person_attribute_type_id(PersonAttributeType.find_by_name("Country of Residence").id).value rescue "&nbsp;" %>"
-            },
+            }
+            <% end %>
+
+            <% if  @show_current_district %>
+            ,
             {
                 "label": "C<span class='therest'>URRENT DISTRICT</span>",
                 "field": "state_province",
