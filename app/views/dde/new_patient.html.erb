@@ -207,6 +207,7 @@
 }.to_json %>;
 
   function sendToDDE() {
+    console.log("hello")
     json.names.given_name = __$("first_name").value;
     json.names.family_name = __$("last_name").value;
     json.names.middle_name = (__$("middle_name") ? __$("middle_name").value : null);
@@ -284,7 +285,7 @@
       __$("home_village").value : null
   );
 
-    if (!(__$("all_district_villages").value.match(/OTHER/i)) || (__$("all_district_villages").value != '')){
+    if (!(__$("all_district_villages").value.match(/OTHER/i))){
       json.addresses.home_village = __$("all_district_villages").value;
     }
 
@@ -463,6 +464,7 @@
       $('nextButton').onmousedown = function () {
         if (inputIsValid($('touchscreenInput' + tstCurrentPage))){
           __$("home_village").value = $('touchscreenInput' + tstCurrentPage).value;
+          //alert(__$("home_village").value)
           sendToDDE();
         }
       }
