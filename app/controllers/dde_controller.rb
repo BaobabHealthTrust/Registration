@@ -243,6 +243,9 @@ class DdeController < ApplicationController
     @destination = request.referrer
     @state_province_value = GlobalProperty.find_by_property("state_province").property_value rescue ''
     @city_village_value = GlobalProperty.find_by_property("city_village").property_value rescue ''
+    @current_ta_value = GlobalProperty.find_by_property("current_ta").property_value rescue ''
+    @current_region_value = GlobalProperty.find_by_property("current_region").property_value rescue ''
+    
   end
 
   def edit_patient

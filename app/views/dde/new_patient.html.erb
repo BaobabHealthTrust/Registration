@@ -597,7 +597,7 @@
                         :field_type => 'number',
                         :helptext => "Home Phone Number"} if @show_home_phone_number %>
 
-    <%= select_tag "person[occupation]", options_for_select(@occupations),
+    <%#= select_tag "person[occupation]", options_for_select(@occupations),
                    {:id => "occupation",
                     :tt_pageStyleClass => "tt_controls_occupation",
                     :helptext => "Occupation",
@@ -613,7 +613,7 @@
                         :condition => "__$('country') == null || __$('country').value == 'Malawi'",
                         :tt_pageStyleClass => "azButton",
                         :tt_onLoad => "$('nextButton').style.display = 'block';upNextButton();set_ajaxURL_for_suggestions('/dde/landmark?filter_value='
-                         ,document.getElementById('current_location_or_village').value);"} if @show_current_landmark%>
+                         ,document.getElementById('current_location_or_village').value);"}  %>
                 
 
     <!-- Make sure patient is created -->
@@ -623,6 +623,12 @@
     <input type='hidden' name='user_id' value='<%= params[:user_id] %>'/>
     <input type='hidden' name='location_id' value='<%= params[:location_id] %>'/>
 
+    <% if @show_current_district == false %>
+      <input type="hidden" value="<%= @state_province_value %>" name="person[addresses][state_province]" id="current_district"></input>
+      <input type="hidden" value="<%= @city_village_value %>" name="person[addresses][city_village]" id="current_location_or_village"></input>
+      <input type="hidden" value="<%= @current_ta_value %>" name="CURRENT AREA OR T/A" id="current_area_of_residence"></input>
+    <% end %>
+      
     <%= submit_tag "Create person" %>
 
 <% end %>
