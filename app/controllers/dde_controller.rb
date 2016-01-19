@@ -1340,6 +1340,19 @@ class DdeController < ApplicationController
     render :text => villages.join('') + "<li value='Other'>Other</li>" and return
   end
 
+  def district_villages
+    dde_district_id = DDEDistrict.find_by_name(params[:filter_value]).district_id
+    villages =  DDEVillage.find_by_sql("SELECT v.name FROM dde_village v INNER JOIN dde_traditional_authority ta
+      ON v.traditional_authority_id = ta.traditional_authority_id WHERE ta.district_id = '#{dde_district_id}'
+      AND v.name LIKE '%#{params[:search_string]}%'")
+    
+    villages = villages.map do |v|
+      "<li value=\"#{v.name}\">#{v.name}</li>"
+    end
+
+    render :text => villages.join('') + "<li value='Other'>Other</li>" and return
+  end
+
   # Landmark containing the string given in params[:value]
   def landmark
 
