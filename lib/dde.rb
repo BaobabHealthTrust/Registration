@@ -56,7 +56,7 @@ module DDE
     # Check if this patient exists locally
     result = PatientIdentifier.find_by_identifier((person["national_id"] || person["_id"]))
    
-    if result.blank? && par["person_id"].present? && person.blank?
+    if result.blank?  && person.blank? && par.present? && par["person_id"].present?
       result = PatientIdentifier.find_by_patient_id(par["person_id"])
       person = self.build_person(result,par)
     end
@@ -78,20 +78,20 @@ module DDE
       end
 
       if !result.blank?
-
+       
         current_national_id = self.get_full_identifier("National id", result.patient_id)
         self.set_identifier("National id", (person["national_id"] || person["_id"]), result.patient_id)
         self.set_identifier("Old Identification Number", current_national_id.identifier, result.patient_id)
         current_national_id.void("National ID version change")
         
       elsif person["patient_id"].blank?
-
+        
         self.create_from_form(passed["person"])
 
         result = PatientIdentifier.find_by_identifier((person["national_id"] || person["_id"]))
 
       else
-
+        
         result = Patient.find(person["patient_id"]) rescue nil
 
       end
