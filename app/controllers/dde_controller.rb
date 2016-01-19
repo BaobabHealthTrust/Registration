@@ -44,7 +44,7 @@ class DdeController < ApplicationController
   end
 
   def process_result
-
+  
     json = JSON.parse(params["person"]) rescue {}
 
     if (json["patient"]["identifiers"].class.to_s.downcase == "hash" rescue false)
@@ -62,8 +62,6 @@ class DdeController < ApplicationController
     end
 
     patient_id = DDE.search_and_or_create(json.to_json) # rescue nil
-
-    # raise patient_id.inspect
 
     json = JSON.parse(params["person"]) rescue {}
 
@@ -165,8 +163,6 @@ class DdeController < ApplicationController
 
     end
 
-    # raise json.inspect
-
     json["results"].each do |o|
 
       person = {
@@ -237,7 +233,9 @@ class DdeController < ApplicationController
     @show_occupation = (settings["show_occupation"] == true ? true : false) rescue false
 
     @show_nationality = (settings["show_nationality"] == true ? true : false) rescue false
-
+    
+    @show_country_of_residence = (settings["show_country_of_residence"] == true ? true : false) rescue false
+    
     @occupations = ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
                     'Student','Security guard','Domestic worker', 'Police','Office worker',
                     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
@@ -296,6 +294,8 @@ class DdeController < ApplicationController
     @show_occupation = (settings["show_occupation"] == true ? true : false) rescue false
 
     @show_nationality = (settings["show_nationality"] == true ? true : false) rescue false
+    
+    @show_country_of_residence = (settings["show_country_of_residence"] == true ? true : false) rescue false
 
     @occupations = ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
                     'Student','Security guard','Domestic worker', 'Police','Office worker',
@@ -318,15 +318,66 @@ class DdeController < ApplicationController
     @person = Person.find(person_id)
 
     @patient = @person.patient rescue nil
+    
+    
+    settings = YAML.load_file("#{Rails.root}/config/globals.yml")[Rails.env] rescue {}
+
+    @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
+
+    @show_middle_name = (settings["show_middle_name"] == true ? true : false) rescue false
+
+    @show_maiden_name = (settings["show_maiden_name"] == true ? true : false) rescue false
+
+    @show_birthyear = (settings["show_birthyear"] == true ? true : false) rescue false
+
+    @show_birthmonth = (settings["show_birthmonth"] == true ? true : false) rescue false
+
+    @show_birthdate = (settings["show_birthdate"] == true ? true : false) rescue false
+
+    @show_age = (settings["show_age"] == true ? true : false) rescue false
+
+    @show_region_of_origin = (settings["show_region_of_origin"] == true ? true : false) rescue false
+
+    @show_district_of_origin = (settings["show_district_of_origin"] == true ? true : false) rescue false
+
+    @show_t_a_of_origin = (settings["show_t_a_of_origin"] == true ? true : false) rescue false
+
+    @show_home_village = (settings["show_home_village"] == true ? true : false) rescue false
+
+    @show_current_region = (settings["show_current_region"] == true ? true : false) rescue false
+
+    @show_current_district = (settings["show_current_district"] == true ? true : false) rescue false
+
+    @show_current_t_a = (settings["show_current_t_a"] == true ? true : false) rescue false
+
+    @show_current_village = (settings["show_current_village"] == true ? true : false) rescue false
+
+    @show_current_landmark = (settings["show_current_landmark"] == true ? true : false) rescue false
+
+    @show_cell_phone_number = (settings["show_cell_phone_number"] == true ? true : false) rescue false
+
+    @show_office_phone_number = (settings["show_office_phone_number"] == true ? true : false) rescue false
+
+    @show_home_phone_number = (settings["show_home_phone_number"] == true ? true : false) rescue false
+
+    @show_occupation = (settings["show_occupation"] == true ? true : false) rescue false
+
+    @show_nationality = (settings["show_nationality"] == true ? true : false) rescue false
+    
+    @show_country_of_residence = (settings["show_country_of_residence"] == true ? true : false) rescue false
+
+    @occupations = ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
+                    'Student','Security guard','Domestic worker', 'Police','Office worker',
+                    'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
 
   end
 
   def update_demographics
 
-    # raise params.inspect
+    paramz = params
 
     @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
-
+   
     patient = Person.find(params[:person_id]).patient rescue nil
 
     if patient.blank?
@@ -378,8 +429,6 @@ class DdeController < ApplicationController
       identifiers << {id.type.name => id.identifier} if id.type.name.downcase != "national id"
     }
 
-    # raise identifiers.inspect
-
     person = {
         "national_id" => national_id,
         "application" => "#{@settings["application_name"]}",
@@ -420,13 +469,13 @@ class DdeController < ApplicationController
         },
         "birthdate_estimated" => estimate,
         "addresses" => {
-            "current_residence" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:address1] rescue nil) : (address.address1 rescue nil)),
-            "current_village" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:city_village] rescue nil) : (address.city_village rescue nil)),
-            "current_ta" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:township_division] rescue nil) : (address.township_division rescue nil)),
-            "current_district" => (!(params[:person][:attributes][:country_of_residence] rescue nil).blank? ? (params[:person][:addresses][:state_province] rescue nil) : (address.state_province rescue nil)),
-            "home_village" => (!(params[:person][:attributes][:citizenship] rescue nil).blank? ? (params[:person][:addresses][:neighborhood_cell] rescue nil) : (address.neighborhood_cell rescue nil)),
-            "home_ta" => (!(params[:person][:attributes][:citizenship] rescue nil).blank? ? (params[:person][:addresses][:county_district] rescue nil) : (address.county_district rescue nil)),
-            "home_district" => (!(params[:person][:attributes][:citizenship] rescue nil).blank? ? (params[:person][:addresses][:address2] rescue nil) : (address.address2 rescue nil))
+            "current_residence" => (!(params[:person][:addresses][:address1]  rescue nil).blank? ? (params[:person][:addresses][:address1] rescue nil) : (address.address1 rescue nil)),
+            "current_village" => (!(params[:person][:addresses][:city_village] rescue nil).blank? ? (params[:person][:addresses][:city_village] rescue nil) : (address.city_village rescue nil)),
+            "current_ta" => (!(params[:person][:addresses][:township_division] rescue nil).blank? ? (params[:person][:addresses][:township_division] rescue nil) : (address.township_division rescue nil)),
+            "current_district" => (!(params[:person][:addresses][:state_province] rescue nil).blank? ? (params[:person][:addresses][:state_province] rescue nil) : (address.state_province rescue nil)),
+            "home_village" => (!(params[:person][:addresses][:neighborhood_cell] rescue nil).blank? ? (params[:person][:addresses][:neighborhood_cell] rescue nil) : (address.neighborhood_cell rescue nil)),
+            "home_ta" => (!(params[:person][:addresses][:county_district] rescue nil).blank? ? (params[:person][:addresses][:county_district] rescue nil) : (address.county_district rescue nil)),
+            "home_district" => (!(params[:person][:addresses][:address2] rescue nil).blank? ? (params[:person][:addresses][:address2] rescue nil) : (address.address2 rescue nil))
         }
     }
     
@@ -452,11 +501,9 @@ class DdeController < ApplicationController
       end
 
     end
-
-    patient_id = DDE.search_and_or_create(json.to_json) # rescue nil 
-
-    # raise patient_id.inspect
-
+  
+    patient_id = DDE.search_and_or_create(json.to_json, paramz) # rescue nil 
+    
     patient = Patient.find(patient_id) rescue nil
 
     print_and_redirect("/patients/national_id_label?patient_id=#{patient_id}", "/dde/edit_patient/id=#{patient_id}") and return if !patient.blank? and (json["print_barcode"] rescue false)
@@ -485,19 +532,19 @@ class DdeController < ApplicationController
       end
       
       @results = RestClient.post(url, {:person => @json, :page => params[:page]}, {:accept => :json})
-
+     
     end
 
     @dontstop = false
 
     if JSON.parse(@results).length == 1
-
+      
       result = JSON.parse(JSON.parse(@results)[0])
 
       checked = DDE.compare_people(result, @json) # rescue false
 
       if checked
-
+       
         result["patient_id"] = @json["patient_id"] if !@json["patient_id"].blank?
 
         @results = result.to_json
@@ -515,7 +562,7 @@ class DdeController < ApplicationController
         @dontstop = true
 
       elsif !checked and @json["names"]["given_name"].blank? and @json["names"]["family_name"].blank? and @json["gender"].blank?
-
+        
         # result["patient_id"] = @json["patient_id"] if !@json["patient_id"].blank?
 
         @results = result.to_json
@@ -533,7 +580,7 @@ class DdeController < ApplicationController
         @dontstop = true
 
       else
-
+       
         @results = []
 
         @results << result
@@ -614,7 +661,7 @@ class DdeController < ApplicationController
       end
 
     elsif JSON.parse(@results).length == 0
-
+      
       patient = PatientIdentifier.find_by_identifier(@json["national_id"]).patient rescue nil
 
       if !patient.nil?
@@ -665,9 +712,7 @@ class DdeController < ApplicationController
         @dontstop = true
 
       else
-
         redirect_to "/patient_not_found/#{(@json["national_id"] || @json["_id"])}" and return
-
       end
 
     end
@@ -775,9 +820,62 @@ class DdeController < ApplicationController
   end
 
   def patient_not_found
+  
     @id = params[:id]
+    settings = YAML.load_file("#{Rails.root}/config/globals.yml")[Rails.env] rescue {}
 
+    @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
+
+    @show_middle_name = (settings["show_middle_name"] == true ? true : false) rescue false
+
+    @show_maiden_name = (settings["show_maiden_name"] == true ? true : false) rescue false
+
+    @show_birthyear = (settings["show_birthyear"] == true ? true : false) rescue false
+
+    @show_birthmonth = (settings["show_birthmonth"] == true ? true : false) rescue false
+
+    @show_birthdate = (settings["show_birthdate"] == true ? true : false) rescue false
+
+    @show_age = (settings["show_age"] == true ? true : false) rescue false
+
+    @show_region_of_origin = (settings["show_region_of_origin"] == true ? true : false) rescue false
+
+    @show_district_of_origin = (settings["show_district_of_origin"] == true ? true : false) rescue false
+
+    @show_t_a_of_origin = (settings["show_t_a_of_origin"] == true ? true : false) rescue false
+
+    @show_home_village = (settings["show_home_village"] == true ? true : false) rescue false
+
+    @show_current_region = (settings["show_current_region"] == true ? true : false) rescue false
+
+    @show_current_district = (settings["show_current_district"] == true ? true : false) rescue false
+
+    @show_current_t_a = (settings["show_current_t_a"] == true ? true : false) rescue false
+
+    @show_current_village = (settings["show_current_village"] == true ? true : false) rescue false
+
+    @show_current_landmark = (settings["show_current_landmark"] == true ? true : false) rescue false
+
+    @show_cell_phone_number = (settings["show_cell_phone_number"] == true ? true : false) rescue false
+
+    @show_office_phone_number = (settings["show_office_phone_number"] == true ? true : false) rescue false
+
+    @show_home_phone_number = (settings["show_home_phone_number"] == true ? true : false) rescue false
+
+    @show_occupation = (settings["show_occupation"] == true ? true : false) rescue false
+
+    @show_nationality = (settings["show_nationality"] == true ? true : false) rescue false
+    
+    @show_country_of_residence = (settings["show_country_of_residence"] == true ? true : false) rescue false
+    
+    @occupations = ['','Driver','Housewife','Messenger','Business','Farmer','Salesperson','Teacher',
+                    'Student','Security guard','Domestic worker', 'Police','Office worker',
+                    'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
+
+    @destination = request.referrer
+    
     redirect_to "/" and return if !params[:create].blank? and params[:create] == "false"
+    
   end
 
   def ajax_search
@@ -925,9 +1023,21 @@ class DdeController < ApplicationController
     end
           
     @results = RestClient.post(url, {"person" => params["person"]})
-
-    render :layout => "ts"
-
+    
+    if params["notfound"]
+    
+      json = JSON.parse(JSON.parse(@results)[0])
+      
+      patient_id = DDE.search_and_or_create(json.to_json) # rescue nil 
+      
+    	patient = Patient.find(patient_id) rescue nil
+    	
+    	print_and_redirect("/patients/national_id_label?patient_id=#{patient_id}", "/patients/show/#{patient_id}") and return if !patient.blank? and (json["print_barcode"] rescue false)
+    	
+    else
+      render :layout => "ts"
+    end
+    
   end
   
   def secure?

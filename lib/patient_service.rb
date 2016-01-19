@@ -1077,6 +1077,8 @@ EOF
 	  patient.national_id_with_dashes = get_national_id_with_dashes(person.patient)
     patient.name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
 		patient.first_name = person.names.first.given_name rescue nil
+		patient.middle_name = person.names.first.middle_name rescue nil
+		patient.maiden_name = person.names.first.family_name2 rescue nil
 		patient.last_name = person.names.first.family_name rescue nil
     patient.sex = sex(person)
     patient.age = age(person, current_date)
@@ -1102,6 +1104,9 @@ EOF
     patient.guardian = art_guardian(person.patient) rescue nil
     patient.race = get_attribute(person, 'Race')
     patient.citizenship = get_attribute(person, 'Citizenship')
+    patient.country_of_residence = get_attribute(person, 'Country of Residence')
+    patient.current_ta = person.addresses.first.township_division
+    patient.home_ta = person.addresses.first.county_district
     patient
   end
 
@@ -1487,17 +1492,16 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
   end
 
   def self.birthdate_formatted(person)
-    if person.birthdate_estimated==1
-      if person.birthdate.day == 1 and person.birthdate.month == 7
-        person.birthdate.strftime("??/???/%Y")
-      elsif person.birthdate.day == 15
-        person.birthdate.strftime("??/%b/%Y")
-      elsif person.birthdate.day == 1 and person.birthdate.month == 1
-        person.birthdate.strftime("??/???/%Y")
-      end
-    else
-      person.birthdate.strftime("%d/%b/%Y")
-    end
+        
+    day = person.birthdate_estimated.to_s == '1' ? '?' : (person.birthdate.to_date.strftime("%d") rescue "?")
+    
+    month = (person.birthdate_estimated.to_s == '1' and (person.birthdate.to_date.strftime("%d") rescue 0).to_s.strip == '10') ? '?' :
+                        (person.birthdate.to_date.strftime("%b") rescue "?")
+                        
+    year = person.birthdate.to_date.strftime("%Y")
+    
+    person.birthdate = "#{day}"+"/"+"#{month}"+"/"+"#{year}"
+    
   end
 
   def self.age_in_months(person, today = Date.today)
