@@ -1,0 +1,58 @@
+<script type="text/javascript">
+  
+  function set_ajaxURL_for_suggestions(url, filter_value) {
+    $('touchscreenInput' + tstCurrentPage).setAttribute('ajaxURL', url + filter_value + "&search_string=");
+    listSuggestions(tstCurrentPage);
+  }
+
+</script>
+
+<%
+
+regions = [
+  ["", ""],
+  ["Northern Region", "Northern+Region"],
+  ["Central Region", "Central+Region"],
+  ["Southern Region", "Southern+Region"]
+]
+
+%>
+
+<form action="/clinic/create_location_settings" method="POST">
+
+  <%= select_tag "current_region", options_for_select(regions),
+    {
+    :id => "current_region",
+    :helptext => "Current Region"
+  }
+%>
+
+  <%= text_field_tag "state_province", nil,
+    {
+    :id => "current_district",
+    :ajaxURL => "",
+    :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/district?filter_value=', __$('current_region').value); ",
+    :helptext => "Current District"
+  }%>
+
+  <%= text_field_tag "current_ta", nil,
+    {
+    :id => "current_area_of_residence",
+    :ajaxURL => "",
+    :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/traditional_authority?filter_value=', __$('current_district').value);",
+    :helptext => "Current Area Of Residence"}
+%>
+
+  <%= text_field_tag "city_village", nil,
+    {
+    :id => "current_location_or_village",
+    :ajaxURL => "",
+    :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/village?filter_value=', __$('current_area_of_residence').value);",
+    :helptext => "Current Location Or Village"
+  }
+
+%>
+
+  <%= submit_tag "Finish" %>
+
+</form>
