@@ -9,10 +9,10 @@ default: &default
   show_district_of_origin: true
   show_t_a_of_origin: true
   show_home_village: true
-  show_current_region: true
-  show_current_district: true
-  show_current_t_a: true
-  show_current_village: true
+  show_current_region: false
+  show_current_district: false
+  show_current_t_a: false
+  show_current_village: false
   show_current_landmark: true
   show_cell_phone_number: false
   show_office_phone_number: false
@@ -21,7 +21,7 @@ default: &default
   show_nationality: false
   show_country_of_residence: false
   default_gender_female: false
-  
+
 development:
   <<: *default
 
