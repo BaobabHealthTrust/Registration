@@ -5,15 +5,45 @@
     listSuggestions(tstCurrentPage);
   }
 
-</script>
+  var currentRegionValue = '<%= @current_region_value %>';
+  var stateProvinceValue = '<%= @state_province_value %>';
+  var currentTAValue = '<%= @current_ta_value %>';
+  var cityVillageValue = '<%= @city_village_value %>';
 
+  function updateTriggerText(){
+    html = "<span class='location_data'><span class='key'>Current Region : </span><span class='value'>" + currentRegionValue + "</span> <span class='key'>; Current District : </span><span class='value'>" + stateProvinceValue + "</span> <span class='key'>; Current T/A : </span><span class='value'>" + currentTAValue + "</span> <span class='key'>; Current Village : </span><span class='value'>" + cityVillageValue + '</span></span>';
+    $('trigger1').innerHTML = html;
+  }
+
+  window.setInterval("updateTriggerText();", 250);
+</script>
+<style type="text/css">
+  .inputPage  {
+    padding-top: 50px;
+    height: 620px;
+  }
+
+  .location_data{
+    padding-left: 80px;
+}
+
+.key{
+  font-size: 20pt;
+}
+
+.value{
+  font-size: 20pt;
+  font-style: italic;
+  font-weight: bold;
+}
+</style>
 <%
 
 regions = [
   ["", ""],
-  ["Northern Region", "Northern+Region"],
-  ["Central Region", "Central+Region"],
-  ["Southern Region", "Southern+Region"]
+  ["Northern Region", "Northern Region"],
+  ["Central Region", "Central Region"],
+  ["Southern Region", "Southern Region"]
 ]
 
 %>

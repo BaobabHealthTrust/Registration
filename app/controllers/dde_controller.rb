@@ -243,7 +243,8 @@ class DdeController < ApplicationController
                     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
 
     @destination = request.referrer
-
+    @state_province_value = GlobalProperty.find_by_property("state_province").property_value rescue ''
+    @city_village_value = GlobalProperty.find_by_property("city_village").property_value rescue ''
   end
 
   def edit_patient

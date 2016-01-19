@@ -71,10 +71,10 @@ class GenericClinicController < ApplicationController
 
   def administration
     @reports =  [
-                  ['/clinic/users','User accounts/settings'],
-                  ['/clinic/management','Drug Management'], 
-                  ['/clinic/location_management','Location Management']
-                ]
+      ['/clinic/users','User accounts/settings'],
+      ['/clinic/management','Drug Management'],
+      ['/clinic/location_management','Location Management']
+    ]
     @landing_dashboard = 'clinic_administration'
     render :template => 'clinic/administration', :layout => 'clinic' 
   end
@@ -108,7 +108,7 @@ class GenericClinicController < ApplicationController
     	@types = @types.split(/,/)
 
     	@me = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW()) AND encounter.creator = ?', current_user.user_id])
-   	 @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW())'])
+      @today = Encounter.statistics(@types, :conditions => ['DATE(encounter_datetime) = DATE(NOW())'])
 
     	
       @year = Encounter.statistics(@types, :conditions => ['YEAR(encounter_datetime) = YEAR(NOW())'])
@@ -135,8 +135,8 @@ class GenericClinicController < ApplicationController
 		end
 		
     if simple_overview
-        render :template => 'clinic/overview_simple.rhtml' , :layout => false
-        return
+      render :template => 'clinic/overview_simple.rhtml' , :layout => false
+      return
     end
     render :layout => false
   end
@@ -159,12 +159,12 @@ class GenericClinicController < ApplicationController
 
   def data_cleaning_tab
     @reports = [
-                 ['Missing Prescriptions' , '/cohort_tool/select?report_type=dispensations_without_prescriptions'],
-                 ['Missing Dispensations' , '/cohort_tool/select?report_type=prescriptions_without_dispensations'],
-                 ['Multiple Start Reasons' , '/cohort_tool/select?report_type=patients_with_multiple_start_reasons'],
-                 ['Out of range ARV number' , '/cohort_tool/select?report_type=out_of_range_arv_number'],
-                 ['Data Consistency Check' , '/cohort_tool/select?report_type=data_consistency_check']
-               ] 
+      ['Missing Prescriptions' , '/cohort_tool/select?report_type=dispensations_without_prescriptions'],
+      ['Missing Dispensations' , '/cohort_tool/select?report_type=prescriptions_without_dispensations'],
+      ['Multiple Start Reasons' , '/cohort_tool/select?report_type=patients_with_multiple_start_reasons'],
+      ['Out of range ARV number' , '/cohort_tool/select?report_type=out_of_range_arv_number'],
+      ['Data Consistency Check' , '/cohort_tool/select?report_type=data_consistency_check']
+    ]
     render :layout => false
   end
 
@@ -191,29 +191,74 @@ class GenericClinicController < ApplicationController
 
   def administration_tab
     @reports =  [
-                  ['/clinic/users_tab','User Accounts'],
-                  ['/clinic/location_management_tab','Location Management'],
-                  ['/clinic/current_region_ta_district_village','Set Current Region/TA/District/Village'],
-                ]
+      ['/clinic/users_tab','User Accounts'],
+      ['/clinic/location_management_tab','Location Management'],
+      ['/clinic/current_region_ta_district_village','Set Current Region/TA/District/Village'],
+    ]
     @landing_dashboard = 'clinic_administration'
     render :layout => false
   end
 
   def current_region_ta_district_village
+    @current_region_value = GlobalProperty.find_by_property("current_region").property_value rescue ''
+    @state_province_value = GlobalProperty.find_by_property("state_province").property_value rescue ''
+    @current_ta_value = GlobalProperty.find_by_property("current_ta").property_value rescue ''
+    @city_village_value = GlobalProperty.find_by_property("city_village").property_value rescue ''
     render :layout => "application"
   end
 
   def create_location_settings
+    ActiveRecord::Base.transaction do
+      
+      current_region = params[:current_region]
+      state_province = params[:state_province]
+      current_ta = params[:current_ta]
+      city_village = params[:city_village]
+     
+      current_region_property = GlobalProperty.find_by_property("current_region")
+      if current_region_property.blank?
+        current_region_property = GlobalProperty.new
+        current_region_property.property = "current_region"
+      end
+      current_region_property.property_value = current_region
+      current_region_property.save!
 
+      state_province_property = GlobalProperty.find_by_property("state_province")
+      if state_province_property.blank?
+        state_province_property = GlobalProperty.new
+        state_province_property.property = "state_province"
+      end
+      state_province_property.property_value = state_province
+      state_province_property.save!
+
+      current_ta_property = GlobalProperty.find_by_property("current_ta")
+      if current_ta_property.blank?
+        current_ta_property = GlobalProperty.new
+        current_ta_property.property = "current_ta"
+      end
+      current_ta_property.property_value = current_ta
+      current_ta_property.save!
+
+      city_village_property = GlobalProperty.find_by_property("city_village")
+      if city_village_property.blank?
+        city_village_property = GlobalProperty.new
+        city_village_property.property = "city_village"
+      end
+      city_village_property.property_value = city_village
+      city_village_property.save!
+
+    end
+
+    redirect_to("/") and return
   end
   
   def supervision_tab
     @reports = [
-                 ["Data that was Updated","/cohort_tool/select?report_type=summary_of_records_that_were_updated"],
-                 ["Drug Adherence Level","/cohort_tool/select?report_type=adherence_histogram_for_all_patients_in_the_quarter"],
-                 ["Visits by Day", "/cohort_tool/select?report_type=visits_by_day"],
-                 ["Non-eligible Patients in Cohort", "/cohort_tool/select?report_type=non_eligible_patients_in_cohort"]
-               ]
+      ["Data that was Updated","/cohort_tool/select?report_type=summary_of_records_that_were_updated"],
+      ["Drug Adherence Level","/cohort_tool/select?report_type=adherence_histogram_for_all_patients_in_the_quarter"],
+      ["Visits by Day", "/cohort_tool/select?report_type=visits_by_day"],
+      ["Non-eligible Patients in Cohort", "/cohort_tool/select?report_type=non_eligible_patients_in_cohort"]
+    ]
     @landing_dashboard = 'clinic_supervision'
     render :layout => false
   end
@@ -224,17 +269,17 @@ class GenericClinicController < ApplicationController
 
   def location_management
     @reports =  [
-                  ['/location/new?act=create','Add location'],
-                  ['/location.new?act=delete','Delete location'], 
-                  ['/location/new?act=print','Print location']
-                ]
+      ['/location/new?act=create','Add location'],
+      ['/location.new?act=delete','Delete location'],
+      ['/location/new?act=print','Print location']
+    ]
     render :template => 'clinic/location_management', :layout => 'clinic' 
   end
 
   def location_management_tab
     @reports =  [
-                  ['/location/new?act=print','Print location']
-                ]
+      ['/location/new?act=print','Print location']
+    ]
     if current_user.admin?
       @reports << ['/location/new?act=create','Add location']
       @reports << ['/location/new?act=delete','Delete location']
