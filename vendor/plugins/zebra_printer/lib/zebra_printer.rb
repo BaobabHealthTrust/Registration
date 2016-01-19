@@ -185,13 +185,12 @@ module ZebraPrinter #:nodoc:
     #  +vertical_multiplier+ expand the text vertically (valid values 1-9)
     #  +reverse+ true/false, whether the text should be reversed
     def draw_text(data,x,y,r = 0,font_selection = 1,horizontal_multiplier = 1,vertical_multiplier = 1,reverse = false)
-      data = data.gsub("'", "\\\\'")
-      @output << "A#{x},#{y},#{r},#{font_selection},#{horizontal_multiplier},#{vertical_multiplier},#{reverse ? 'R' : 'N'},\"#{data}\"\n"          
+      @output << %Q{A#{x},#{y},#{r},#{font_selection},#{horizontal_multiplier},#{vertical_multiplier},#{reverse ? 'R' : 'N'},"#{data}"\n}          
     end    
     
     # Word wrapping, column wrapping, label wrapping text code, see draw_text for more information
     def draw_multi_text(data , options = {})
-      data = data.gsub("'", "\\\\'")
+      #data = data.gsub("'", "\\\\'")
       @font_size = options[:font_size] unless options[:font_size].nil?
       @font_horizontal_multiplier = options[:font_horizontal_multiplier] unless options[:font_horizontal_multiplier].nil?
       @font_vertical_multiplier = options[:font_vertical_multiplier] unless options[:font_vertical_multiplier].nil?
@@ -199,7 +198,7 @@ module ZebraPrinter #:nodoc:
       @char_width, @char_height = get_char_sizes(@font_size, @font_horizontal_multiplier, @font_vertical_multiplier)
       @hanging_indent = options[:hanging_indent] || 0
       # Print each line separately
-      data.split("\n").each {|line|
+      %Q{#{data}}.split("\n").each {|line|
         next if line.blank?
         words = line.split("\s")        
         size = 0
