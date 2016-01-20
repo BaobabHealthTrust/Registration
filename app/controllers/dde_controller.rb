@@ -1037,7 +1037,7 @@ class DdeController < ApplicationController
     	patient = Patient.find(patient_id) rescue nil
     	
     	if patient.present?
-    		redirect_to "/patients/show/#{patient_id}") and return 
+    		redirect_to "/patients/show/#{patient_id}" and return 
     	else
     		flash["error"] = "Sorry! Something went wrong. Failed to process properly!"
         redirect_to "/clinic" and return
