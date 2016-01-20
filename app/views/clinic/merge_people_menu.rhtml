@@ -1,11 +1,23 @@
 <html>
   <head>
     <%= javascript_include_tag "prototype" %>
-    <%= javascript_include_tag 'jquery' %>
+    <%= javascript_include_tag "jquery.min" %>
     <!--<link rel="stylesheet" type="text/css" href="/touchscreentoolkit/lib/stylesheets/touch-fancy.css"></link>-->
-    <script src="/touchscreentoolkit/lib/javascripts/standard.js" type="text/javascript"></script>
 
+    <script src="/javascripts/iphone-style-checkboxes.js" type="text/javascript" charset="utf-8"></script>
+
+    <%= stylesheet_link_tag "iphone_like" %>
     <style type="text/css">
+      .checkbox{
+        position: absolute;
+        margin-left: 28%;
+        top: 24px;
+      }
+
+      .css_sized_container .iPhoneCheckContainer {
+        width: 250px; }
+
+
       .messageBar {
         left: 250px;
         width: 450px;
@@ -152,15 +164,29 @@
   <br/>
 
   <div id='primary_patient_div'>
-    Find primary patient <%=  "&nbsp;" * 2 %> <input id="primary_patient" name="primary_patient" type="text" />
-    <a id = "primary_button" onmousedown="showKeyPad('primary_patient')" class ='find_buttons'>Find patients</a>
-    <span style="display:none" id = "disabled_button_left">Find patients</span>
+    Find primary patient <%=  "&nbsp;" * 2 %> <input id="primary_patient" name="primary_patient" type="text" onmousedown="showKeyPad('primary_patient')" />
+    <!--<a id = "primary_button" onmousedown="showKeyPad('primary_patient')" class ='find_buttons'>Find patients</a>
+    <span style="display:none" id = "disabled_button_left">Find patients</span>-->
+    <table class="checkbox">
+      <tr class="on_off">
+        <td>
+          <input type="checkbox" checked="checked" id="on_off" />
+        </td>
+      </tr>
+    </table>
   </div>
 
   <div id='second_patient_div'>
-    Find secondary patient <%=  "&nbsp;" * 2 %> <input id="secondary_patient" name="secondary_patient" type="text" />
-    <a id = "secondary_button" onmousedown="showKeyPad('secondary_patient')" class ='find_buttons'>Find patients</a>
-    <span style="display:none" id = "disabled_button_right">Find patients</span>
+    Find secondary patient <%=  "&nbsp;" * 2 %> <input id="secondary_patient" name="secondary_patient" type="text" onmousedown="showKeyPad('secondary_patient')"/>
+    <!--<a id = "secondary_button" onmousedown="showKeyPad('secondary_patient')" class ='find_buttons'>Find patients</a>
+    <span style="display:none" id = "disabled_button_right">Find patients</span>-->
+    <table class="checkbox">
+      <tr class="on_off">
+        <td>
+          <input type="checkbox" checked="checked" id="on_off" />
+        </td>
+      </tr>
+    </table>
   </div>
 
 
@@ -193,6 +219,27 @@
   </div>
 
   <script type="text/javascript">
+
+    function iPhoneStyle() {
+      $('.on_off :checkbox').iphoneStyle({
+
+        checkedLabel: 'National ID',
+        uncheckedLabel: 'Names'
+      });
+
+      $('.disabled :checkbox').iphoneStyle();
+      $('.css_sized_container :checkbox').iphoneStyle({ resizeContainer: false, resizeHandle: false });
+      $('.long_tiny :checkbox').iphoneStyle({ checkedLabel: 'Very Long Text', uncheckedLabel: 'Tiny' });
+
+      var onchange_checkbox = ($('.onchange :checkbox')).iphoneStyle({
+        onChange: function(elem, value) {
+          $('span#status').html(value.toString());
+        }
+      });
+
+    };
+
+    window.setTimeout("iPhoneStyle();", 150);
 
     keyboard = document.getElementsByClassName("keypad")[0]
     var search = null
@@ -263,27 +310,19 @@
       secondary_button = document.getElementById('secondary_button')
       disabled_button_left = document.getElementById('disabled_button_left')
       disabled_button_right = document.getElementById('disabled_button_right')
-      if (side == 'primary_patient' &&  primary_button.innerHTML == "Hide keypad") {
-        primary_button.innerHTML = "Find patients"
-        disabled_button_right.style.display = 'none'
-        secondary_button.style.display = ''
-      }else if (side == 'secondary_patient' &&  secondary_button.innerHTML == "Hide keypad") {
-        secondary_button.innerHTML = "Find patients"
-        disabled_button_left.style.display = 'none'
-        primary_button.style.display = ''
+  
+      if (side == 'primary_patient') {
+        document.getElementById('keypad').style.left='37%'
+        //secondary_button.style.display = 'none'
+        //disabled_button_right.style.display = ''
+        //primary_button.innerHTML = "Hide keypad"
       } else {
-        if (side == 'primary_patient') {
-          document.getElementById('keypad').style.left='37%'
-          secondary_button.style.display = 'none'
-          disabled_button_right.style.display = ''
-          primary_button.innerHTML = "Hide keypad"
-        } else {
-          document.getElementById('keypad').style.left='14%'
-          primary_button.style.display = 'none'
-          disabled_button_left.style.display = ''
-          secondary_button.innerHTML = "Hide keypad"
-        }
+        document.getElementById('keypad').style.left='14%'
+        //primary_button.style.display = 'none'
+        //disabled_button_left.style.display = ''
+        //secondary_button.innerHTML = "Hide keypad"
       }
+      
 
       if (side == 'primary_patient'){
         current_div='left'
@@ -403,6 +442,15 @@
       }
     }
 
+    function changeButtonAttributes(){
+      finishButton = document.getElementById("finish");
+      finishButton.onclick = function(){
+        window.location = '/';
+      }
+    }
+
+    window.setTimeout("changeButtonAttributes();", 350);
+
   </script>
 
   <style type="text/css">
@@ -467,6 +515,7 @@
       border-width:1px;
     }
   </style>
+
 
   <div id="keypad">
     <span class="keypad">
