@@ -219,21 +219,20 @@
   </div>
 
   <script type="text/javascript">
-
+    var search_by_identifier = true;
     function iPhoneStyle() {
       $('.on_off :checkbox').iphoneStyle({
 
         checkedLabel: 'National ID',
-        uncheckedLabel: 'Names'
-      });
-
-      $('.disabled :checkbox').iphoneStyle();
-      $('.css_sized_container :checkbox').iphoneStyle({ resizeContainer: false, resizeHandle: false });
-      $('.long_tiny :checkbox').iphoneStyle({ checkedLabel: 'Very Long Text', uncheckedLabel: 'Tiny' });
-
-      var onchange_checkbox = ($('.onchange :checkbox')).iphoneStyle({
+        uncheckedLabel: 'Names',
         onChange: function(elem, value) {
-          $('span#status').html(value.toString());
+          search_by_identifier = value
+          entered_text = search.value
+          var url = "/patients/search_all/?search_str=" + entered_text + "&side=" + current_div + "&search_by_identifier=" + search_by_identifier;
+          response = new Ajax.Request(url,{method:'get',onSuccess: function(transport){
+              text = transport.responseText || "";
+              updateDiv(text);
+            }});
         }
       });
 
@@ -307,26 +306,12 @@
     function showKeyPad(side) {
       key = document.getElementById("keypad")
       primary_button = document.getElementById('primary_button')
-      secondary_button = document.getElementById('secondary_button')
-      disabled_button_left = document.getElementById('disabled_button_left')
-      disabled_button_right = document.getElementById('disabled_button_right')
-  
-      if (side == 'primary_patient') {
-        document.getElementById('keypad').style.left='37%'
-        //secondary_button.style.display = 'none'
-        //disabled_button_right.style.display = ''
-        //primary_button.innerHTML = "Hide keypad"
-      } else {
-        document.getElementById('keypad').style.left='14%'
-        //primary_button.style.display = 'none'
-        //disabled_button_left.style.display = ''
-        //secondary_button.innerHTML = "Hide keypad"
-      }
-      
 
       if (side == 'primary_patient'){
+        document.getElementById('keypad').style.left='37%'
         current_div='left'
       } else {
+        document.getElementById('keypad').style.left='14%'
         current_div='right'
       }
       search = document.getElementById(side);
@@ -371,7 +356,7 @@
         div = 'right'
       } else { div = 'left' }*/
 
-      var url = "/patients/search_all/?search_str=" + value + "&side=" + current_div;
+      var url = "/patients/search_all/?search_str=" + value + "&side=" + current_div + "&search_by_identifier=" + search_by_identifier;
       response = new Ajax.Request(url,{method:'get',onSuccess: function(transport){
           text = transport.responseText || "";
           updateDiv(text);

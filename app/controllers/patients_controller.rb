@@ -2,9 +2,8 @@ class PatientsController < GenericPatientsController
   def search_all
     search_str = params[:search_str]
     side = params[:side]
-    search_by_identifier = search_str.match(/[0-9]+/).blank? rescue false
 
-    unless search_by_identifier
+    if params[:search_by_identifier] == "true"
       patients = PatientIdentifier.find(:all, :conditions => ["voided = 0 AND (identifier LIKE ?)",
           "%#{search_str}%"],:limit => 10).map{| p |p.patient}
     else
