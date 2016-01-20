@@ -1032,12 +1032,16 @@ class DdeController < ApplicationController
     
       json = JSON.parse(JSON.parse(@results)[0])
       
-      patient_id = DDE.search_and_or_create(json.to_json) # rescue nil 
+      patient_id = DDE.search_and_or_create(json.to_json)  rescue nil 
       
     	patient = Patient.find(patient_id) rescue nil
     	
-    	print_and_redirect("/patients/national_id_label?patient_id=#{patient_id}", "/patients/show/#{patient_id}") and return if !patient.blank? and (json["print_barcode"] rescue false)
-    	
+    	if patient.present?
+    		redirect_to "/patients/show/#{patient_id}") and return 
+    	else
+    		flash["error"] = "Sorry! Something went wrong. Failed to process properly!"
+        redirect_to "/clinic" and return
+    	end
     else
       render :layout => "ts"
     end
