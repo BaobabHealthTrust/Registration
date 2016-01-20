@@ -285,7 +285,7 @@
       __$("home_village").value : null
   );
 
-    if (!(__$("all_district_villages").value.match(/OTHER/i))){
+    if (!(__$("all_district_villages").value.match(/OTHER/i)) && __$("all_district_villages").value != ''){
       json.addresses.home_village = __$("all_district_villages").value;
     }
 
@@ -437,8 +437,10 @@
     if (showDurrentDistrict == 'false'){
       $('nextButton').innerHTML = '<span>Finish</span>';
       $('nextButton').onmousedown = function () {
-        if (inputIsValid($('touchscreenInput' + tstCurrentPage))){
-            sendToDDE();
+        if (!($('touchscreenInput' + tstCurrentPage).value.match(/OTHER/i))){
+          sendToDDE();
+        }else{
+          gotoNextPage();
         }
       }
     }
@@ -588,6 +590,15 @@
     :condition => "__$('nationality') == null ||__$('nationality').value == 'Malawian'",
     :tt_onLoad => "$('nextButton').style.display = ''; processData(); set_ajaxURL_for_suggestions('/dde/village?filter_value=', __$('ancestral_traditional_authority').value);",
     :helptext => "Home Village"} if @show_region_of_origin %>
+
+  <% #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> %>
+  <%= text_field_tag "person[addresses][neighborhood_cell]", nil,
+    {:id => "free_text_home_village_known_ta",
+    :condition => "__$('home_village').value.match(/OTHER/i);",
+    :tt_onLoad => "processDataForUnknownVillage();",
+    :optional => "true",
+    :helptext => "Specify Home Village"} %>
+  <% #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> %>
 
   <%= text_field_tag "person[country]", nil,
     {:id => "country",
