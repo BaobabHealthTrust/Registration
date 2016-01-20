@@ -227,12 +227,14 @@
         uncheckedLabel: 'Names',
         onChange: function(elem, value) {
           search_by_identifier = value
-          entered_text = search.value
-          var url = "/patients/search_all/?search_str=" + entered_text + "&side=" + current_div + "&search_by_identifier=" + search_by_identifier;
-          response = new Ajax.Request(url,{method:'get',onSuccess: function(transport){
-              text = transport.responseText || "";
-              updateDiv(text);
-            }});
+          if (search){
+            entered_text = search.value
+            var url = "/patients/search_all/?search_str=" + entered_text + "&side=" + current_div + "&search_by_identifier=" + search_by_identifier;
+            response = new Ajax.Request(url,{method:'get',onSuccess: function(transport){
+                text = transport.responseText || "";
+                updateDiv(text);
+              }});
+          }
         }
       });
 
