@@ -194,6 +194,7 @@ class GenericClinicController < ApplicationController
       ['/clinic/users_tab','User Accounts'],
       ['/clinic/location_management_tab','Location Management'],
       ['/clinic/current_region_ta_district_village','Set Current Region/TA/District/Village'],
+      ['/clinic/merge_people_menu','Merge People'],
     ]
     @landing_dashboard = 'clinic_administration'
     render :layout => false
@@ -207,6 +208,10 @@ class GenericClinicController < ApplicationController
     render :layout => "application"
   end
 
+  def merge_people_menu
+    render :layout => "application"
+  end
+  
   def create_location_settings
     ActiveRecord::Base.transaction do
       
