@@ -1,0 +1,39 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <% @title = "#{controller.controller_name.humanize} #{controller.action_name.humanize}" rescue ""  %>
+    <script type="text/javascript" language="javascript" src="/touchscreentoolkit/lib/javascripts/touchScreenToolkit.js" defer="true"></script>
+
+    <script type="text/javascript">
+      tstUserKeyboardPref = "<%=preferred_user_keyboard%>"
+      tstUsername = "<%= current_user.username unless current_user.nil? %>";
+      tstCurrentDate = "<%= Time.now.strftime("%Y-%m-%d") %>";
+    </script>
+    <%= stylesheet_link_tag fancy_or_high_contrast_touch %>
+    <%= stylesheet_link_tag "dashboard" %>
+
+    <style type="text/ccss">
+      #content, #container, #description{
+        overflow-x: hidden;
+      }
+    </style>
+  </head>
+
+  <body id="container" style="overflow-x:hidden;">
+    <div id="content" style = "position : relative; width : 98%; margin-left : -49%;">
+      <div id="description" style="color:#777;position:absolute; margin-top:-70px;">
+
+      </div>
+
+      <%= yield %>
+
+      <div id="footer" class="dark">
+        <div id="buttons" class="buttons" style="top:0px">
+          <button id="logout" class="green left" style="position :relative; float:right;"><span>Finish</span></button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

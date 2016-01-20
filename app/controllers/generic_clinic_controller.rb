@@ -209,7 +209,7 @@ class GenericClinicController < ApplicationController
   end
 
   def merge_people_menu
-    render :layout => "application"
+    render :layout => "merge"
   end
   
   def create_location_settings
