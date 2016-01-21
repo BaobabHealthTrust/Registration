@@ -315,7 +315,7 @@
             }
             <% end %>
 
-            <% if  @show_current_district %>
+    
             ,
             {
                 "label": "C<span class='therest'>URRENT DISTRICT</span>",
@@ -331,13 +331,8 @@
                 "label": "C<span class='therest'>URRENT VILLAGE</span>",
                 "field": "state_province",
                 "value": "<%= @person.addresses.last.city_village rescue "&nbsp;" %>"
-            },
-            {
-                "label": "C<span class='therest'>URRENT RESIDENCE</span>",
-                "field": "state_province",
-                "value": "<%= @person.addresses.last.address1 rescue "&nbsp;" %>"
             }
-            <% end %>
+  
 
             <% if @show_cell_phone_number %>
             ,
