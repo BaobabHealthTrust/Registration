@@ -1488,16 +1488,32 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
 
   def self.birthdate_formatted(person)
         
-    day = person.birthdate_estimated.to_s == '1' ? '??' : (person.birthdate.to_date.strftime("%d") rescue "?")
+    #day = person.birthdate_estimated.to_s == '1' ? '??' : (person.birthdate.to_date.strftime("%d") rescue "?")
     
     #month = (person.birthdate_estimated.to_s == '1' and (person.birthdate.to_date.strftime("%d") rescue 0).to_s.strip == '10') ? '?' :
                         #(person.birthdate.to_date.strftime("%b") rescue "?")
                         
-    month = person.birthdate_estimated.to_s == '1' ? '???' : (person.birthdate.to_date.strftime("%b") rescue "?")                    
+    #month = person.birthdate_estimated.to_s == '1' ? '???' : (person.birthdate.to_date.strftime("%b") rescue "?")                    
                         
-    year = person.birthdate.to_date.strftime("%Y")
+    #year = person.birthdate.to_date.strftime("%Y")
     
-    person.birthdate = "#{day}"+"/"+"#{month}"+"/"+"#{year}"
+   # person.birthdate = "#{day}"+"/"+"#{month}"+"/"+"#{year}"
+    
+    birthdate = person.birthdate
+    
+    if person.birthdate_estimated.to_s == '1'
+      if birthdate.day == 1 and birthdate.month == 7
+        birth_date_string = birthdate.strftime("??/???/%Y")
+      elsif birthdate.day == 15
+        birth_date_string = birthdate.strftime("??/%b/%Y")
+      else
+        birth_date_string = birthdate.strftime("%d/%b/%Y")
+      end
+    else
+      birth_date_string = birthdate.strftime("%d/%b/%Y")
+    end
+    
+    person.birthdate = birth_date_string
     
   end
 
