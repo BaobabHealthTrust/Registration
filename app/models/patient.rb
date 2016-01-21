@@ -116,4 +116,62 @@ EOF
       #ActiveRecord::Base.connection.execute("UPDATE person SET person_id = #{patient_id} WHERE person_id = #{secondary_patient_id}")
     end
   end
+
+  def self.merge_with_dde(patient_id, secondary_patient_id)
+=begin
+    This was introduced coz dde also merges people
+    What dde merge does for now
+        -Merging Patient Identifiers excluding ARVs
+        -Merging Person Addresses
+        -Merging Names
+    But it does not
+        -Merge encounters
+        -Merge observations
+        -Merge patient_programs
+=end
+    patient = Patient.find(patient_id)
+    secondary_patient = Patient.find(secondary_patient_id)
+    sec_pt_arv_numbers = PatientIdentifier.find(:all, :conditions => ["patient_id =? AND identifier_type =?",
+        secondary_patient_id, PatientIdentifierType.find_by_name('ARV NUMBER').id]).map(&:identifier) rescue []
+    
+    ActiveRecord::Base.transaction do
+      (sec_pt_arv_numbers || []).each do |arv_number|
+        ActiveRecord::Base.connection.execute("
+          UPDATE patient_identifier SET voided = 1, date_voided=NOW(),voided_by=#{User.current.user_id},
+          void_reason = 'merged with patient #{patient_id}'
+          WHERE patient_id = #{secondary_patient_id}
+          AND identifier = '#{arv_number}'")
+      end
+
+      secondary_patient.patient_programs.each {|r|
+        if patient.patient_programs.map(&:program_id).include?(r.program_id)
+          ActiveRecord::Base.connection.execute("
+            UPDATE patient_program SET voided = 1, date_voided=NOW(),voided_by=#{User.current.user_id},
+            void_reason = 'merged with patient #{patient_id}'
+            WHERE patient_id = #{secondary_patient_id}
+            AND patient_program_id = #{r.patient_program_id}"
+          )
+        else
+          ActiveRecord::Base.connection.execute("
+            UPDATE patient_program SET patient_id = #{patient_id}
+            WHERE patient_id = #{secondary_patient_id}
+            AND patient_program_id = #{r.patient_program_id}"
+          )
+        end
+      }
+
+      ActiveRecord::Base.connection.execute("
+        UPDATE patient SET voided = 1, date_voided=NOW(),voided_by=#{User.current.user_id},
+        void_reason = 'merged with patient #{patient_id}'
+        WHERE patient_id = #{secondary_patient_id}")
+
+      ActiveRecord::Base.connection.execute("UPDATE person_attribute SET person_id = #{patient_id} WHERE person_id = #{secondary_patient_id}")
+      ActiveRecord::Base.connection.execute("UPDATE person_address SET person_id = #{patient_id} WHERE person_id = #{secondary_patient_id}")
+      ActiveRecord::Base.connection.execute("UPDATE encounter SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
+      ActiveRecord::Base.connection.execute("UPDATE obs SET person_id = #{patient_id} WHERE person_id = #{secondary_patient_id}")
+      ActiveRecord::Base.connection.execute("UPDATE note SET patient_id = #{patient_id} WHERE patient_id = #{secondary_patient_id}")
+      #ActiveRecord::Base.connection.execute("UPDATE person SET person_id = #{patient_id} WHERE person_id = #{secondary_patient_id}")
+
+    end
+  end
 end
