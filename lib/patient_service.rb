@@ -1493,7 +1493,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     #month = (person.birthdate_estimated.to_s == '1' and (person.birthdate.to_date.strftime("%d") rescue 0).to_s.strip == '10') ? '?' :
                         #(person.birthdate.to_date.strftime("%b") rescue "?")
                         
-    day = person.birthdate_estimated.to_s == '1' ? '???' : (person.birthdate.to_date.strftime("%d") rescue "?")                    
+    month = person.birthdate_estimated.to_s == '1' ? '???' : (person.birthdate.to_date.strftime("%b") rescue "?")                    
                         
     year = person.birthdate.to_date.strftime("%Y")
     
