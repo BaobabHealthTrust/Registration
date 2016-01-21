@@ -700,12 +700,7 @@ module PatientService
     return unless patient_bean.national_id
     sex =  patient_bean.sex.match(/F/i) ? "(F)" : "(M)"
     
-    address = patient_bean.current_district rescue ""
-    if address.blank?
-      address = patient_bean.current_residence rescue ""
-    else
-      address += ", " + patient_bean.current_residence unless patient_bean.current_residence.blank?
-    end
+    address = "TA: " + (patient_bean.current_ta rescue "Unknown") + ", " +  patient_bean.current_residence
 
     label = ZebraPrinter::StandardLabel.new
     label.font_size = 2
@@ -1493,10 +1488,12 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
 
   def self.birthdate_formatted(person)
         
-    day = person.birthdate_estimated.to_s == '1' ? '?' : (person.birthdate.to_date.strftime("%d") rescue "?")
+    day = person.birthdate_estimated.to_s == '1' ? '??' : (person.birthdate.to_date.strftime("%d") rescue "?")
     
-    month = (person.birthdate_estimated.to_s == '1' and (person.birthdate.to_date.strftime("%d") rescue 0).to_s.strip == '10') ? '?' :
-                        (person.birthdate.to_date.strftime("%b") rescue "?")
+    #month = (person.birthdate_estimated.to_s == '1' and (person.birthdate.to_date.strftime("%d") rescue 0).to_s.strip == '10') ? '?' :
+                        #(person.birthdate.to_date.strftime("%b") rescue "?")
+                        
+    day = person.birthdate_estimated.to_s == '1' ? '???' : (person.birthdate.to_date.strftime("%d") rescue "?")                    
                         
     year = person.birthdate.to_date.strftime("%Y")
     
