@@ -1239,6 +1239,8 @@ class DdeController < ApplicationController
 
       identifier.patient.person.update_attributes("voided" => 1, "void_reason" => "Merged record") rescue nil
 
+      secondary_patient_id = identifier.patient.patient_id
+
       identifier.update_attributes("voided" => 1, "void_reason" => "Merged record") rescue nil
 
       target = PatientIdentifier.find_by_identifier(data["Identifiers"]["National ID"]) rescue nil
@@ -1355,6 +1357,7 @@ class DdeController < ApplicationController
 
       end
 
+      Patient.merge_with_dde(person_id, secondary_patient_id) #For merging encounters, observations, ARV IDs, Patient Programs
       flash["notice"] = "Merge successful!"
 
     else
@@ -1473,4 +1476,8 @@ class DdeController < ApplicationController
     render :text => "<li>" + @names.map{|n| n } .join("</li><li>") + "</li>"
   end
 
+  def find_by_national_id
+
+  end
+  
 end

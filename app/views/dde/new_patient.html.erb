@@ -623,7 +623,7 @@
     :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/district?filter_value=', __$('current_region').value); ",
     :helptext => "Current District"} if @show_current_district %>
 
-  <%= text_field_tag "CURRENT AREA OR T/A", nil,
+  <%= text_field_tag "person[addresses][township_division]", nil,
     {:id => "current_area_of_residence",
     :tt_requireNextClick => false,
     :ajaxURL => "",
@@ -697,7 +697,7 @@
   <% if @show_current_district == false %>
     <input type="hidden" value="<%= @state_province_value %>" name="person[addresses][state_province]" id="current_district"></input>
     <input type="hidden" value="<%= @city_village_value %>" name="person[addresses][city_village]" id="current_location_or_village"></input>
-    <input type="hidden" value="<%= @current_ta_value %>" name="CURRENT AREA OR T/A" id="current_area_of_residence"></input>
+    <input type="hidden" value="<%= @current_ta_value %>" name="person[addresses][township_division]" id="current_area_of_residence"></input>
     <input type="hidden" value="OTHER" name="OCCUPATION" id="occupation"></input>
   <% end %>
 
