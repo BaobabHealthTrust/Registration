@@ -268,9 +268,9 @@
             {
                 "label": "D<span class='therest'>ATE OF BIRTH</span>",
                 "field": "birthdate",
-                "value": "<%= (@person.birthdate_estimated.to_s == '1' ? '?' : (@person.birthdate.to_date.strftime("%d") rescue "?")) %>/" +
-                        "<%= ((@person.birthdate_estimated.to_s == '1' and (@person.birthdate.to_date.strftime("%d") rescue 0).to_s.strip == '10') ? '?' :
-                        (@person.birthdate.to_date.strftime("%b") rescue "?")) %>/<%= @person.birthdate.to_date.strftime("%Y") rescue "?" %>"
+                "value": "<%= (@person.birthdate_estimated.to_s == '1' ? '??' : (@person.birthdate.to_date.strftime("%d") rescue "?")) %>/" +
+                        "<%= (@person.birthdate_estimated.to_s == '1' ? '???' : (@person.birthdate.to_date.strftime("%b") rescue "?")) %>/" +
+                        "<%= @person.birthdate.to_date.strftime("%Y") rescue "?" %>"
             },
             {
                 "label": "G<span class='therest'>ENDER</span>",
