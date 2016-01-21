@@ -263,14 +263,30 @@
                 "value": "<%= @person.names.first.family_name2 rescue "&nbsp;" %>"
             }
             <% end %>
+            
+            <%
+       
+              birthdate = @person.birthdate
+     
+							if @person.birthdate_estimated.to_s == '1'
+								if birthdate.day == 1 and birthdate.month == 7
+									birth_date_string = birthdate.strftime("??/???/%Y")
+								elsif birthdate.day == 15
+									birth_date_string = birthdate.strftime("??/%b/%Y")
+								else
+									birth_date_string = birthdate.strftime("%d/%b/%Y")
+								end
+							else
+								birth_date_string = birthdate.strftime("%d/%b/%Y")
+							end
+				
+             %>
 
             ,
             {
                 "label": "D<span class='therest'>ATE OF BIRTH</span>",
                 "field": "birthdate",
-                "value": "<%= (@person.birthdate_estimated.to_s == '1' ? '??' : (@person.birthdate.to_date.strftime("%d") rescue "?")) %>/" +
-                        "<%= (@person.birthdate_estimated.to_s == '1' ? '???' : (@person.birthdate.to_date.strftime("%b") rescue "?")) %>/" +
-                        "<%= @person.birthdate.to_date.strftime("%Y") rescue "?" %>"
+                "value": "<%= birth_date_string %>"
             },
             {
                 "label": "G<span class='therest'>ENDER</span>",
