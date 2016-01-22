@@ -399,9 +399,9 @@ class DdeController < ApplicationController
     address = patient.person.addresses.last rescue nil
 
     dob = (patient.person.birthdate.strftime("%Y-%m-%d") rescue nil)
-
-    estimate = false
-
+    estimate = patient.person.birthdate_estimated == 1 ? true : false
+   
+=begin
     if !(params[:person][:birth_month] rescue nil).blank? and (params[:person][:birth_month] rescue nil).to_s.downcase == "unknown"
 
       dob = "#{params[:person][:birth_year]}-07-10"
@@ -421,7 +421,19 @@ class DdeController < ApplicationController
       estimate = false
 
     end
-
+=end    
+    
+    if !(params[:person][:birth_month] rescue nil).blank? and (params[:person][:birth_month] rescue nil).to_s.downcase == "unknown"
+      dob = "#{params[:person][:birth_year]}-07-01"
+      estimate = true
+    end
+    
+    if !(params[:person][:birth_day] rescue nil).blank? and (params[:person][:birth_month] rescue nil).to_s.downcase == "unknown"
+      dob = "#{params[:person][:birth_year]}-#{"%02d" % params[:person][:birth_month].to_i}-15"
+      estimate = true
+    end
+    
+  
     if (params[:person][:attributes]["citizenship"] == "Other" rescue false)
 
       params[:person][:attributes]["citizenship"] = params[:person][:attributes]["race"]
