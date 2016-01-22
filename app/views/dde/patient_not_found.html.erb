@@ -228,7 +228,16 @@
 
         dob_year = __$("year_of_birth").value.trim();
         dob_month = __$("month_of_birth").value.trim();
-        dob_day = __$("date_of_birth").value.trim();
+        
+        if (dob_month != null && String(dob_month).toLowerCase() == "unknown") {
+    
+				  dob_day = "Unknown";
+				 
+				} else {
+				
+				  dob_day = __$("date_of_birth").value.trim();
+				  
+				}
 
         if (dob_year.match(/^$/)) {
             dob_year = null;
@@ -241,7 +250,7 @@
         if (dob_day.match(/^$/)) {
             dob_day = null;
         }
-
+/*
         if (dob_year == null || String(dob_year).toLowerCase() == "unknown") {
             var yr = (new Date()).getFullYear() - parseInt(__$("age_estimate").value);
 
@@ -261,7 +270,34 @@
         }
 
         json.birthdate = dob;
-        
+  */    
+        dob_est = false;
+
+				if (dob_month != null && String(dob_month).toLowerCase() == "unknown"){
+		 
+				   dob_month = '7';
+				   dob_day = '1';
+				   dob_est = true;
+				}
+				
+				if (dob_day != null && String(dob_day).toLowerCase() == "unknown"){
+				   dob_day = '15';
+				   dob_est = true;
+				}
+				
+				if (__$("age_estimate") != null && dob_year != null && String(dob_year).toLowerCase() == "unknown"){
+				 
+				   var patient_estimated_birth_year = (new Date()).getFullYear() - parseInt(__$("age_estimate").value);
+				}
+				
+				if (patient_estimated_birth_year != null && dob_year != null && String(dob_year).toLowerCase() == "unknown" ){ 
+				    dob_year = patient_estimated_birth_year;
+				    dob_month = '7';
+				    dob_day = '1';
+				    dob_est = true;
+				}
+				
+				json.birthdate = dob_year + "/" + dob_month + "/" + padZeros(dob_day, 2);      
 
         json.birthdate_estimated = dob_est;
         
