@@ -1489,7 +1489,7 @@ class DdeController < ApplicationController
   end
 
   def find_by_national_id
-
+    @settings = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env] rescue {}
   end
   
 end

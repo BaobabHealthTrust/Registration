@@ -28,65 +28,59 @@
     var barcode = document.getElementById("touchscreenInput0");
     if (barcode) {
       barcode.focus();
-      //window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
     }
-    //window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
   }
 
-  jQuery(document).ready(function ($) {
+  window.setTimeout("focusForBarcodeInput()", 350);
 
-    $("#barcode").keydown(function (event) {
-      alert("here")
-      if ($.inArray(event.keyCode, [46, 8, 9, 27, 13, 190]) !== -1 ||
-        (event.keyCode == 65 && event.ctrlKey === true) ||
-        (event.keyCode >= 35 && event.keyCode <= 39)) {
-        return;
-      }
-      else {
-        if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
-          event.preventDefault();
-        }
-      }
-    });
-  });
-
-  function loadBarcodePage() {
-    focusForBarcodeInput();
-    moveNext();
-  }
-
-  function moveNext() {
+  function changeDefultSettings() {
     usertext = document.getElementById("touchscreenInput0");
     if (usertext && usertext.value.match(/.+\$$/i) != null) {
       usertext.value = usertext.value.substring(0, usertext.value.length - 1);
-      scannedAccessionNumber = usertext.value
-
-      if (parseInt(requiredAccessionNumber) == parseInt(scannedAccessionNumber)){
-        gotoNextPage();
-      } else{
-        if (requiredAccessionNumber.match(/RESULTS DETECTED/i))
-        {
-          showMessage("Results already captured")
-        }
-        else{
-          showMessage("Invalid Accession Number. Accession Number:  <b>" + requiredAccessionNumber + " </b> is expected")
-        }
-      }
-
+      npid = usertext.value;
+      ajaxRequesti(npid);
     }
-    window.setTimeout("moveNext()", checkForBarcodeTimeout);
+
+    __$('nextButton').innerHTML = "<span>Finish</span>";
+    __$('nextButton').onmousedown = function(){
+      npid = document.getElementById("touchscreenInput0").value;
+      ajaxRequesti(npid);
+    }
+
   }
 
-  window.addEventListener("load", loadBarcodePage, false);
+  window.setTimeout("changeDefultSettings();", 350);
 
-  
+  function ajaxRequesti(id){
 
-  function resetDefaultSettings(){
-    $('nextButton').onmousedown = function(){
-      gotoNextPage();
+    var url = "/process_data/" + id;
+
+    var httpRequest = new XMLHttpRequest();
+    httpRequest.onreadystatechange = function() {
+      handleAjaxRequesti(httpRequest);
+    };
+
+    try {
+      httpRequest.open("GET", url, true);
+      httpRequest.send(null);
+    } catch(e){
     }
   }
 
+  function handleAjaxRequesti(aXMLHttpRequest){
+    if (!aXMLHttpRequest) return;
+
+    if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 ||
+      aXMLHttpRequest.status == 304)) {
+
+      var result = aXMLHttpRequest.responseText;
+
+      __$("person").innerHTML = result;
+
+      document.getElementById("barcodeInput").submit();
+
+    }
+  }
 </script>
 
 <style type="text/css">
@@ -110,10 +104,10 @@
 </style>
 
 
-<form action="#" method='post'>
+<form action="/dde/process_scan_data" method = 'post' enctype = 'multipart/form-data' id = "barcodeInput" >
 
   <%= text_field_tag :national_id, '', {
-    :tt_onLoad => "formatBarcodeSpace(); changeDefultSettings();",
+    :tt_onLoad => "formatBarcodeSpace();",
     :id => 'national_id',
     :class => 'touchscreenTextInput',
     :tt_pageStyleClass => "azButton",
@@ -121,5 +115,5 @@
     :style => 'position:absolute'
   } %>
 
+  <textarea id="person" name="person" style="display: none;" condition="false"></textarea>
 </form
-
