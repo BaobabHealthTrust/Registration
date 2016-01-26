@@ -49,7 +49,7 @@
 
   }
 
-  window.setTimeout("changeDefultSettings();", 350);
+  //window.setTimeout("changeDefultSettings();", 350);
 
   function ajaxRequesti(id){
 
@@ -107,7 +107,7 @@
 <form action="/dde/process_scan_data" method = 'post' enctype = 'multipart/form-data' id = "barcodeInput" >
 
   <%= text_field_tag :national_id, '', {
-    :tt_onLoad => "formatBarcodeSpace();",
+    :tt_onLoad => "formatBarcodeSpace(); changeDefultSettings();",
     :id => 'national_id',
     :class => 'touchscreenTextInput',
     :tt_pageStyleClass => "azButton",
