@@ -899,6 +899,11 @@ class DdeController < ApplicationController
                     'Preschool child','Mechanic','Prisoner','Craftsman','Healthcare Worker','Soldier'].sort.concat(["Other","Unknown"])
 
     @destination = request.referrer
+
+    @state_province_value = GlobalProperty.find_by_property("state_province").property_value rescue ''
+    @city_village_value = GlobalProperty.find_by_property("city_village").property_value rescue ''
+    @current_ta_value = GlobalProperty.find_by_property("current_ta").property_value rescue ''
+    @current_region_value = GlobalProperty.find_by_property("current_region").property_value rescue ''
     
     redirect_to "/" and return if !params[:create].blank? and params[:create] == "false"
     
@@ -1047,11 +1052,9 @@ class DdeController < ApplicationController
     else
       url = "http://#{(@settings["dde_username"])}:#{(@settings["dde_password"])}@#{(@settings["dde_server"])}/ajax_process_data" 
     end
-          
     @results = RestClient.post(url, {"person" => params["person"]})
-    
+
     if params["notfound"]
-    
       json = JSON.parse(JSON.parse(@results)[0])
       
       patient_id = DDE.search_and_or_create(json.to_json)  rescue nil 
