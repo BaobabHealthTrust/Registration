@@ -422,24 +422,27 @@ class DdeController < ApplicationController
 
     end
 =end    
-    raise params.inspect
+
     if !(params[:person][:birth_month] rescue nil).blank? and (params[:person][:birth_month] rescue nil).to_s.downcase == "unknown"
       dob = "#{params[:person][:birth_year]}-07-01"
+      dob = Date.parse(dob).strftime("??/???/%Y")
       estimate = true
     end
     
     if !(params[:person][:birth_day] rescue nil).blank? and (params[:person][:birth_month] rescue nil).to_s.downcase == "unknown"
       dob = "#{params[:person][:birth_year]}-#{"%02d" % params[:person][:birth_month].to_i}-15"
+      dob = Date.parse(dob).strftime("??/%b/%Y")
       estimate = true
     end
     
     if !(params[:person][:birth_month] rescue nil).blank? and (params[:person][:birth_month] rescue nil).to_s.downcase != "unknown" and !(params[:person][:birth_day] rescue nil).blank? and (params[:person][:birth_day] rescue nil).to_s.downcase != "unknown" and !(params[:person][:birth_year] rescue nil).blank? and (params[:person][:birth_year] rescue nil).to_s.downcase != "unknown"
 
       dob = "#{params[:person][:birth_year]}-#{"%02d" % params[:person][:birth_month].to_i}-#{"%02d" % params[:person][:birth_day].to_i}"
-
+      dob = Date.parse(dob).strftime("%d/%b/%Y")
       estimate = false
 
     end
+    
     
     if (params[:person][:attributes]["citizenship"] == "Other" rescue false)
 
