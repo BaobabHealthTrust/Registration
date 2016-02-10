@@ -21,6 +21,7 @@ default: &default
   show_nationality: false
   show_country_of_residence: false
   default_gender_female: false
+  locale: en
 
 development:
   <<: *default
