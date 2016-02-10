@@ -15,6 +15,7 @@ class GenericPatientsController < ApplicationController
 		end
 		
 		@patient_bean = PatientService.get_patient(@patient.person)
+=begin
 		@encounters = @patient.encounters.find_by_date(session_date)
 		@referral_section = get_referral_section(@patient.person, session_date).map{|service| service.value_text}.join(', ')  rescue 'None'
 		@diabetes_number = DiabetesService.diabetes_number(@patient)
@@ -45,6 +46,8 @@ class GenericPatientsController < ApplicationController
 			@arv_number = PatientService.get_patient_identifier(@patient, 'ARV Number')
 			render :template => 'patients/index', :layout => false
 		end
+=end
+			render :layout => false
 	end
 
   def opdcard

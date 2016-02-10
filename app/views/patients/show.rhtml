@@ -1,43 +1,195 @@
-<script type="text/javascript">
-  tt_cancel_destination = "/clinic";
-</script>
-<style type="text/css">
+<style>
 
-  a.button.green {
-    width:220px;
-    -moz-user-select:none;
-    border:0 none;
-    color:white;
-    cursor:pointer;
-    display:block;
-    font-weight:bold;
-    padding:0 8px 0 0;
-    text-align:center;
-    text-decoration:none;
-    background:#00FF00 none repeat scroll 0 0;
-    font-size:1.4em;
-    height:57px;
-    line-height:57px;
-    min-width:48px;
-    margin-top:10px
-  }
+body {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */ 
+}
 
+img {
+  user-drag: none; 
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
+.main-page-container  {
+  display: table;
+  width: 100%;
+  padding: 0px 1px 0px 1px;
+}
+
+.main-page-container-rows  {
+  display: table-row;
+}
+
+.cells {
+  display: table-cell;
+}
+
+
+/* ...................................... */
+.divbtn {
+  height: 265px;
+  display: table;
+  margin-top: 10px;
+  cursor:pointer;
+}
+
+.icons {
+  width: 160px;
+  height: 160px;
+  margin-top: 10%;
+  text-align: middle;
+}
+
+.divbtn p {
+  font-weight: bold;
+}
+
+.btncells {
+  width: 25%;
+  text-align: center;
+}
+
+.small-icons {
+  width: 100px;
+  height: 100px;
+}
+
+.header .cells {
+  vertical-align: middle; 
+  padding-right: 5px;
+}
+
+#scan {
+  background-color: lightgrey;
+  border-style: solid;
+  border-width: 1px;
+  font-size: 80px;
+  margin-bottom: 6px;
+  width: 44%;
+}
+
+.header .icons {
+  width: 100px;
+  height: 100px;
+}
+
+/* ...................................... */
 </style>
 
-<div style="margin:10px;">
-  <div id="details" style="float:left">
-    <%= render :partial => "details" %>
-    <%= render :partial => "current_encounters" %>
+<%= render (:partial => 'patients/evr/header') %>
+
+
+<div class="main-page-container">
+
+<div class="main-page-container-rows">
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #ffff1a;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='#'" >
+        <span class="icons">
+          <img src='/images/icons/group_full-128.png' class='icons'  />
+          <p>Maubale</p>
+        </span>
+    </div>
   </div>
-  <div id="menu" style="float:right">
-    <a class="button green" href='/encounter_types?patient_id=<%= @patient.id -%>'>Encounters</a>
-    <!--
-    <a class="button green" href='/encounters/new/vitals?patient_id=<%= @patient.id -%>'>Weight/Height</a>
-    <a class="button green" href='/encounters/new/outpatient_diagnosis?patient_id=<%= @patient.id -%>'>Diagnosis</a>
-    -->
-    <a class="button green" href='/prescriptions/?patient_id=<%= @patient.id -%>'>Prescriptions</a>
-    <a class="button green" href='/encounters/new/appointment?patient_id=<%= @patient.id -%>'>Next Appointment</a>
-    <a class="button green" href='/patients/print_registration?patient_id=<%= @patient.id -%>'>Print Registration</a>
-    <a class="button green" href='/patients/print_visit?patient_id=<%= @patient.id -%>'>Print Visit</a>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color:#4d8eff ;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='#'" >
+        <span class="icons">
+          <img src='/images/icons/group_full-128.png' class='icons'  />
+          <p style="color: white;">Onjezani Abale</p>
+        </span>
+    </div>
   </div>
-</div>  
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #d2ff4d;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='#'" >
+        <span class="icons">
+          <img src='/images/icons/outcome.png' class='icons'  />
+          <p>Sinthani Zamunthu</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #c51bff;border: 1px solid #2e6da4; width: 99%;" onclick='document.location="/people/demographics?id=<%=@patient_bean.patient_id%>"'>
+        <span class="icons">
+          <img src='/images/icons/edit-demographic.png' class='icons'  />
+          <p>Sinthani Za Wogwiritsa</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  
+</div>
+
+
+<div class="main-page-container-rows">
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color:clear;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/logout'" >
+        <!--span class="icons">
+          <img src='/images/male.png' class='icons'  />
+          <p>Logout</p>
+        </span-->
+    </div>
+  </div>
+  <!-- endloop -->
+
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color:clear;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/logout'" >
+        <!--span class="icons">
+          <img src='/images/male.png' class='icons'  />
+          <p>Logout</p>
+        </span-->
+    </div>
+  </div>
+  <!-- endloop -->
+
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #008080;border: 1px solid #2e6da4; width: 99%;" onclick='document.location="/patients/dashboard_print_national_id?id=<%=@patient_bean.patient_id%>"'>
+        <span class="icons">
+          <img src='/images/icons/barcode.png' class='icons'  />
+          <p style="color: white;">Dindani Chiphatso</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color:#95c900;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
+        <span class="icons">
+          <img src='/images/icons/gohome.png' class='icons'  />
+          <p>Malizani</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+
+
+</div>
+
+
+</div>
+
+<%= render (:partial => "patients/evr/footer") %>
+
+
+
