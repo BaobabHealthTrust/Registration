@@ -15,7 +15,15 @@
       }
 
       window.setTimeout("changeAttributes();", 200);
-      
+
+      tstLocaleWords = {<%=
+["Cancel", "Logout", "Finish", "Clear", "Back", "OK", "Save", "Loading. Please Wait",
+  "Delete", "Space", "cap", "Yes", "No", "Unknown", "Next", "Processing. Please Wait",
+  "Please enter a valid value", "You must enter a value to continue", "Authorise",
+  "Value bigger than maximum", "Value smaller than minimum", "Value out of Range",
+  "Are you sure you want to Cancel"].collect{|e| "\"#{e.downcase}\":\"#{Vocabulary.search(e)}\""}.join(",")
+%>};
+           
     </script>
   </head>
   <body><div id='content'>
@@ -47,23 +55,23 @@
             <div id="user"><%= @user %></div>
 
             <select id="tabs">
-              <option value='/clinic/overview_tab'>Overview</option>
-              <option value='/clinic/reports_tab'>Reports</option>
+              <option value='/clinic/overview_tab'><%= Vocabulary.search("Overview") %></option>
+              <option value='/clinic/reports_tab'><%= Vocabulary.search("Reports") %></option>
               <%if @location == 'Chronic Cough'%>
-                <option value='/clinic/lab_tab'>Laboratory</option>
+                <option value='/clinic/lab_tab'><%= Vocabulary.search("Laboratory") %></option>
               <%end%>
               <% if current_user.admin? %>
-                <option value='/clinic/properties_tab'>Properties</option>
+                <option value='/clinic/properties_tab'><%= Vocabulary.search("Properties") %></option>
               <%end%>
-              <option value='/clinic/administration_tab'>Administration</option>
+              <option value='/clinic/administration_tab'><%= Vocabulary.search("Administration") %></option>
             </select>
             <select id="links">
 
-              <option value='/logout' link='/logout'>Logout</option>
-              <option value='/dde/search' link='/dde/search' ttSize="300px">Find or Register Patient</option>
-              <option value='/dde/find_by_national_id' link='/dde/find_by_national_id' ttSize="250px">Find By National ID</option
+              <option value='/logout' link='/logout'><%= Vocabulary.search("Logout") %></option>
+              <option value='/dde/search' link='/dde/search' ttSize="300px"><%= Vocabulary.search("Find or Register Patient") %></option>
+              <option value='/dde/find_by_national_id' link='/dde/find_by_national_id' ttSize="250px"><%= Vocabulary.search("Find By National ID") %></option
               <% if development_environment? %>
-                <option value='/location?from=clinic' ttSize="150px">Swap Desk</option>
+                <option value='/location?from=clinic' ttSize="150px"><%= Vocabulary.search("Swap Desk") %></option>
               <% end %>
 
               <%
@@ -77,7 +85,7 @@
 
               <option value='<%= ((session_datetime.to_date rescue '') != '' ?
                           "/people/reset_datetime" : "/people/set_datetime") %>'  ttSize="150px">
-                <%= ((session_datetime.to_date rescue '') != '' ? "Reset Date" : "Set Date") %></option>
+                <%= ((session_datetime.to_date rescue '') != '' ? "#{Vocabulary.search("Reset Date")}" : "#{Vocabulary.search("Set Date")}") %></option>
             </select>
             <tr>
               <td align='center'>
@@ -97,17 +105,17 @@
     <% end %>
 
     <script type="text/javascript">
-      <!--
+        <!--
 
-      var helpLinks = {
-        "Find Patient": "<%= @settings["help_base_url"] rescue "" %>find_patient",
-        "Register Patient": "<%= @settings["help_base_url"] rescue "" %>new_patient"/*,
+        var helpLinks = {
+          "Find Patient": "<%= @settings["help_base_url"] rescue "" %>find_patient",
+          "Register Patient": "<%= @settings["help_base_url"] rescue "" %>new_patient"/*,
           "Cancel": "<%= @settings["help_base_url"] rescue "" %>cancel",
           "New Person": "<%= @settings["help_base_url"] rescue "" %>add_patient",
           "Select Person": "<%= @settings["help_base_url"] rescue "" %>select_patient"*/
-      };
+        };
 
-      var json = <%= {
+        var json = <%= {
   "national_id" => nil,
   "application" => "#{@settings["application_name"]}",
   "site_code" => "#{@settings["site_code"]}",
@@ -147,48 +155,48 @@
 
 <% if !@settings["dde_username"].blank? %>
       
-    function barcodeScanAction(){
-      if(__$("barcode")){
+      function barcodeScanAction(){
+        if(__$("barcode")){
       
-        var npid = __$("barcode").value.replace("$", "");
+          var npid = __$("barcode").value.replace("$", "");
               
-        ajaxRequest(npid);
+          ajaxRequest(npid);
             
+        }
       }
-    }
                 
-    function ajaxRequest(id){
-      var url = "/process_data/" + id;
+      function ajaxRequest(id){
+        var url = "/process_data/" + id;
           
-      var httpRequest = new XMLHttpRequest();
-      httpRequest.onreadystatechange = function() {
-        handleAjaxRequest(httpRequest);
-      };
-      try {
-        httpRequest.open("GET", url, true);
-        httpRequest.send(null);
-      } catch(e){
+        var httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+          handleAjaxRequest(httpRequest);
+        };
+        try {
+          httpRequest.open("GET", url, true);
+          httpRequest.send(null);
+        } catch(e){
+        }
       }
-    }
         
-    function handleAjaxRequest(aXMLHttpRequest){
-      if (!aXMLHttpRequest) return;
+      function handleAjaxRequest(aXMLHttpRequest){
+        if (!aXMLHttpRequest) return;
           
-      if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 ||
-        aXMLHttpRequest.status == 304)) {
+        if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 ||
+          aXMLHttpRequest.status == 304)) {
                         
-        var result = aXMLHttpRequest.responseText;
+          var result = aXMLHttpRequest.responseText;
               
-        __$("person").innerHTML = result;
+          __$("person").innerHTML = result;
             
-        document.getElementById("dde-home").submit();
+          document.getElementById("dde-home").submit();
                        
+        }
       }
-    }
 
 <% end %>
       
-  //-->
+    //-->
     </script>
 
     <script src="/javascripts/bht-help.js" defer></script>
