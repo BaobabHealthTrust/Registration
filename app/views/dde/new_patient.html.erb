@@ -463,7 +463,7 @@
   }
 
   function upNextButton() {
-    $('nextButton').innerHTML = '<span>Finish</span>';
+    $('nextButton').innerHTML = '<span><%= Vocabulary.search("Finish") %></span>';
 
     $('nextButton').onmousedown = function () {
 
@@ -474,7 +474,7 @@
 
   function processData(){
     if (showDurrentDistrict == 'false'){
-      $('nextButton').innerHTML = '<span>Finish</span>';
+      $('nextButton').innerHTML = '<span><%= Vocabulary.search("Finish") %></span>';
       $('nextButton').onmousedown = function () {
         if (!($('touchscreenInput' + tstCurrentPage).value.match(/OTHER/i))){
           sendToDDE();
@@ -501,7 +501,7 @@
 
   function processDataForUnknownVillage(){
     if (showDurrentDistrict == 'false'){
-      $('nextButton').innerHTML = '<span>Finish</span>';
+      $('nextButton').innerHTML = '<span><%= Vocabulary.search("Finish") %></span>';
       $('nextButton').onmousedown = function () {
         if (inputIsValid($('touchscreenInput' + tstCurrentPage))){
           __$("home_village").value = $('touchscreenInput' + tstCurrentPage).value;
@@ -519,28 +519,28 @@
   <%= text_field_tag "person[names][given_name]", params[:given_name],
     {:id => "first_name",
     :condition => '"#{params[:given_name]}".trim().length == 0',
-    :helptext => "First Name"} %>
+    :helptext => "#{Vocabulary.search("First Name")}"} %>
 
   <%= text_field_tag "person[names][middle_name]", nil,
     {:id => "middle_name",
     :optional => true,
     :tt_onLoad => 'if("#{params[:given_name]}".trim().length > 0){if(__$("backButton")){__$("backButton").style.display="none";}}',
-    :helptext => "Middle Name"} if @show_middle_name %>
+    :helptext => "#{Vocabulary.search("Middle Name")}"} if @show_middle_name %>
 
   <%= text_field_tag "person[names][family_name]", params[:family_name],
     {:id => "last_name",
     :condition => '"#{params[:family_name]}".trim().length == 0',
-    :helptext => "Last Name"} %>
+    :helptext => "#{Vocabulary.search("Last Name")}"} %>
 
   <%= select_tag "person[gender]", options_for_select([["Male", "M"], ["Female", "F"], ["", ""]], params[:gender]),
     {:id => "gender",
     :condition => "'#{params[:gender]}'.trim().length == 0",
-    :helptext => "Gender"} %>
+    :helptext => "#{Vocabulary.search("Gender")}"} %>
 
   <%= text_field_tag "person[names][family_name2]", nil,
     {:id => "maiden_name",
     :condition => "__$('gender').value == 'Female'",
-    :helptext => "Maiden Name"} if @show_maiden_name %>
+    :helptext => "#{Vocabulary.search("Maiden Name")}"} if @show_maiden_name %>
 
   <%= text_field_tag "person[birth_year]", nil,
     {:id => "year_of_birth",
@@ -549,17 +549,17 @@
     :absoluteMax => Date.today.year,
     :absoluteMin => (Date.today.year - 120),
     :min => (Date.today.year - 80),
-    :helptext => "Year Of Birth"} %>
+    :helptext => "#{Vocabulary.search("Year Of Birth")}"} %>
 
   <%= select_tag "person[birth_month]", month_name_options,
     {:id => "month_of_birth",
-    :helptext => "Month Of Birth",
+    :helptext => "#{Vocabulary.search("Month Of Birth")}",
     :tt_pageStyleClass => "tt_controls_month_of_birth",
     :condition => '__$("year_of_birth").value != "Unknown"'} %>
 
   <%= text_field_tag "person[birth_day]", nil,
     {:id => "date_of_birth",
-    :helptext => "Date Of Birth",
+    :helptext => "#{Vocabulary.search("Date Of Birth")}",
     :tt_onLoad => "getDayOfMonthPicker($('year_of_birth').value, $('month_of_birth').value);$('nextButton').style.display = 'block';",
     :condition => '__$("year_of_birth").value != "Unknown" && __$("month_of_birth").value != "Unknown"'} %>
 
@@ -570,18 +570,18 @@
     :max => 90,
     :condition => '__$("year_of_birth").value.toLowerCase() == "unknown"',
     :absoluteMax => 120,
-    :helptext => "Age"} %>
+    :helptext => "#{Vocabulary.search("Age")}"} %>
 
   <%= text_field_tag "person[citizenship]", nil,
     {:id => "nationality",
     :ajaxURL => "",
     :tt_requireNextClick => false,
     :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/nationality?filter_value=', __$('nationality').value);",
-    :helptext => "Nationality"} if @show_nationality %>
+    :helptext => "#{Vocabulary.search("Nationality")}"} if @show_nationality %>
 
   <%= text_field_tag "person[race]", nil,
     {:id => "race",
-    :helptext => "Specify nationality",
+    :helptext => "#{Vocabulary.search("Specify nationality")}",
     :tt_onLoad => "$('nextButton').style.display = 'block';",
     :condition => '__$("nationality") && __$("nationality").value == "Other"'} if @show_region_of_origin %>
 
@@ -591,7 +591,7 @@
     :tt_requireNextClick => false,
     :condition => "__$('nationality') == null || __$('nationality').value == 'Malawian'",
     :tt_onLoad => "$('nextButton').style.display = 'none';",
-    :helptext => "Region Of Origin"} if @show_region_of_origin %>
+    :helptext => "#{Vocabulary.search("Region Of Origin")}"} if @show_region_of_origin %>
 
   <%= text_field_tag "person[addresses][address2]", nil,
     {:id => "district_of_origin",
@@ -599,7 +599,7 @@
     :ajaxURL => "",
     :condition => "__$('nationality') == null || __$('nationality').value == 'Malawian'",
     :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/district?filter_value=', __$('region_of_origin').value); ",
-    :helptext => "District Of Origin"} if @show_region_of_origin %>
+    :helptext => "#{Vocabulary.search("District Of Origin")}"} if @show_region_of_origin %>
 
   <%= text_field_tag "person[addresses][county_district]", nil,
     {:id => "ancestral_traditional_authority",
@@ -607,28 +607,28 @@
     :ajaxURL => "",
     :condition => "__$('nationality') == null || __$('nationality').value == 'Malawian'",
     :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/traditional_authority?filter_value=', __$('district_of_origin').value);",
-    :helptext => "Ancestral Traditional Authority"} if @show_region_of_origin %>
+    :helptext => "#{Vocabulary.search("Ancestral Traditional Authority")}"} if @show_region_of_origin %>
 
   <%= text_field_tag "person[addresses][neighborhood_cell]", nil,
     {:id => "all_district_villages",
     :ajaxURL => "",
     :condition => "__$('ancestral_traditional_authority').value.match(/OTHER/i);",
     :tt_onLoad => "$('nextButton').style.display = ''; processDataForUnknownTA(); set_ajaxURL_for_suggestions('/dde/district_villages?filter_value=', __$('district_of_origin').value);",
-    :helptext => "Home Village"} %>
+    :helptext => "#{Vocabulary.search("Home Village")}"} %>
 
   <%= text_field_tag "person[addresses][neighborhood_cell]", nil,
     {:id => "free_text_home_village",
     :condition => "__$('all_district_villages').value.match(/OTHER/i);",
     :tt_onLoad => "processDataForUnknownVillage();",
     :optional => "true",
-    :helptext => "Specify Home Village"} %>
+    :helptext => "#{Vocabulary.search("Specify Home Village")}"} %>
 
   <%= text_field_tag "person[addresses][neighborhood_cell]", nil,
     {:id => "home_village",
     :ajaxURL => "",
     :condition => "__$('nationality') == null ||__$('nationality').value == 'Malawian'",
     :tt_onLoad => "$('nextButton').style.display = ''; processData(); set_ajaxURL_for_suggestions('/dde/village?filter_value=', __$('ancestral_traditional_authority').value);",
-    :helptext => "Home Village"} if @show_region_of_origin %>
+    :helptext => "#{Vocabulary.search("Home Village")}"} if @show_region_of_origin %>
 
   <% #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> %>
   <%= text_field_tag "person[addresses][neighborhood_cell]", nil,
@@ -636,7 +636,7 @@
     :condition => "__$('home_village').value.match(/OTHER/i);",
     :tt_onLoad => "processDataForUnknownVillage();",
     :optional => "true",
-    :helptext => "Specify Home Village"} %>
+    :helptext => "#{Vocabulary.search("Specify Home Village")}"} %>
   <% #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> %>
 
   <%= text_field_tag "person[country]", nil,
@@ -644,7 +644,7 @@
     :tt_requireNextClick => false,
     :ajaxURL => "",
     :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/country?filter_value=', __$('country').value); ",
-    :helptext => "Country of Residence"} if @show_country_of_residence %>
+    :helptext => "#{Vocabulary.search("Country of Residence")}"} if @show_country_of_residence %>
 
   <%= select_tag "CURRENT REGION", options_for_select([["Northern Region", "Northern+Region"],
       ["Central Region", "Central+Region"], ["Southern Region", "Southern+Region"], ["", ""]]),
@@ -652,7 +652,7 @@
     :tt_requireNextClick => false,
     :condition => "__$('country') == null || __$('country').value == 'Malawi'",
     :tt_onLoad => "$('nextButton').style.display = 'none';",
-    :helptext => "Current Region"} if @show_current_district %>
+    :helptext => "#{Vocabulary.search("Current Region")}"} if @show_current_district %>
 
   <%= text_field_tag "person[addresses][state_province]", nil,
     {:id => "current_district",
@@ -660,7 +660,7 @@
     :ajaxURL => "",
     :condition => "__$('country') == null || __$('country').value == 'Malawi'",
     :tt_onLoad => "set_ajaxURL_for_suggestions('/dde/district?filter_value=', __$('current_region').value); ",
-    :helptext => "Current District"} if @show_current_district %>
+    :helptext => "#{Vocabulary.search("Current District")}"} if @show_current_district %>
 
   <%= text_field_tag "person[addresses][township_division]", nil,
     {:id => "current_area_of_residence",
@@ -668,7 +668,7 @@
     :ajaxURL => "",
     :condition => "__$('country') == null || __$('country').value == 'Malawi'",
     :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/traditional_authority?filter_value=', __$('current_district').value);",
-    :helptext => "Current Area Of Residence"} if @show_current_t_a %>
+    :helptext => "#{Vocabulary.search("Current Area Of Residence")}"} if @show_current_t_a %>
 
   <%= text_field_tag "person[addresses][city_village]", nil,
     {:id => "current_location_or_village",
@@ -676,7 +676,7 @@
     :ajaxURL => "",
     :condition => "__$('country') == null || __$('country').value == 'Malawi'",
     :tt_onLoad => "$('nextButton').style.display = 'none'; set_ajaxURL_for_suggestions('/dde/village?filter_value=', __$('current_area_of_residence').value);",
-    :helptext => "Current Location Or Village"} if @show_current_village %>
+    :helptext => "#{Vocabulary.search("Current Location Or Village")}"} if @show_current_village %>
 
 
 
@@ -687,7 +687,7 @@
     :tt_pageStyleClass => "NumbersWithUnknown nota",
     :tt_onLoad  => '$("nextButton").style.display = "block" ',
     :field_type => 'number',
-    :helptext => "Cell Phone Number"} if @show_cell_phone_number %>
+    :helptext => "#{Vocabulary.search("Cell Phone Number")}"} if @show_cell_phone_number %>
 
   <%= text_field_tag "person[office_phone_number]", nil,
     {:id => "office_phone_number",
@@ -696,7 +696,7 @@
     :validationMessage => "Not a valid phone number",
     :tt_onLoad  => '$("nextButton").style.display = "block" ',
     :field_type => 'number',
-    :helptext => "Office Phone Number"} if @show_office_phone_number %>
+    :helptext => "#{Vocabulary.search("Office Phone Number")}"} if @show_office_phone_number %>
 
   <%= text_field_tag "person[home_phone_number]", nil,
     {:id => "home_phone_number",
@@ -705,7 +705,7 @@
     :validationMessage => "Not a valid phone number",
     :tt_onLoad  => '$("nextButton").style.display = "block" ',
     :field_type => 'number',
-    :helptext => "Home Phone Number"} if @show_home_phone_number %>
+    :helptext => "#{Vocabulary.search("Home Phone Number")}"} if @show_home_phone_number %>
 
   <%#= select_tag "person[occupation]", options_for_select(@occupations),
   {:id => "occupation",
@@ -715,7 +715,7 @@
 
   <%= text_field_tag "person[addresses][address1]", nil,
     {:id => "closest_landmark_or_plot_number",
-    :helpText => 'Closest Landmark or Plot number<br />' +
+    :helpText => "#{Vocabulary.search("Closest Landmark or Plot number")}<br />" +
       '<div style="font-size:0.7em;font-style:italic; margin-left: 40px;">' +
       '(Please do not enter words like: near, close to, infront of, behind)</div>',
     :allowFreeText => true,
