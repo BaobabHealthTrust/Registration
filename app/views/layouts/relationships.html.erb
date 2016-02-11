@@ -19,6 +19,14 @@
         $('#find').click(function() { window.location = '/people/search?relation=<%= @patient.patient_id -%>' })
         if ($('#staging')) $('#staging').click(function() { window.location = 'http://staging/clinic' })        
       })
+
+      tstLocaleWords = {<%=
+        ["Cancel", "Logout", "Finish", "Clear", "Back", "OK", "Save", "Loading. Please Wait",
+          "Delete", "Space", "cap", "Yes", "No", "Unknown", "Next", "Processing. Please Wait",
+          "Please enter a valid value", "You must enter a value to continue", "Authorise",
+          "Value bigger than maximum", "Value smaller than minimum", "Value out of Range",
+          "Are you sure you want to Cancel"].collect{|e| "\"#{e.downcase}\":\"#{Vocabulary.search(e)}\""}.join(",")
+       %>};
     </script>
     <style type="text/css">
       #barcode {

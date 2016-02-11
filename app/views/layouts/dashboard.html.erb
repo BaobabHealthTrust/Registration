@@ -40,7 +40,14 @@
           setTimeout(function(){ $('#flash').hide() }, 3000);
         }
       }) 
-      
+
+      tstLocaleWords = {<%=
+        ["Cancel", "Logout", "Finish", "Clear", "Back", "OK", "Save", "Loading. Please Wait",
+          "Delete", "Space", "cap", "Yes", "No", "Unknown", "Next", "Processing. Please Wait",
+          "Please enter a valid value", "You must enter a value to continue", "Authorise",
+          "Value bigger than maximum", "Value smaller than minimum", "Value out of Range",
+          "Are you sure you want to Cancel"].collect{|e| "\"#{e.downcase}\":\"#{Vocabulary.search(e)}\""}.join(",")
+       %>};
     </script>
   </head>
   <body id="mateme">  
