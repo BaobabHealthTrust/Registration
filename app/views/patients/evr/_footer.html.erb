@@ -1,0 +1,78 @@
+
+<style>
+
+.footer {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */ 
+}
+
+.footer {
+  padding-left: 5px;
+  text-align: left;
+  color: #999;
+  font-size: 1.2em;
+  font-style: italic;
+  font-weight: bold;
+  position: absolute;
+  bottom: 5px;
+  width: 98.5%;
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+  border-color: #708090;
+  height: 40px;
+}
+
+.x-small-icons {
+  width: 35px;
+  height: 35px;
+}
+
+.x-icons {
+  width: 80px;
+  height: 40px;
+  text-align: middle;
+  padding-right: 5px;
+}
+
+.footer img {
+  bottom: 0px;
+  position: absolute;
+}
+</style>
+
+
+<div class="footer">
+  <span class="x-icons x-small-icons">
+    <img src='/images/icons/b40b4b-2.png' class='x-icons'  />
+  </span>
+  <span style="padding-left: 85px; position: absolute; bottom: 0px;">
+    Mobile registration&nbsp;version:&nbsp;<%= PR_VERSION %>
+  </span>
+  <div id="txt" style="float: right; right: 0px; position: absolute; bottom: 0px;"></div>
+</div>
+
+
+
+<script>
+function startTime() {
+    var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes();
+    var s = today.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+    document.getElementById('txt').innerHTML =
+    h + ":" + m + ":" + s;
+    var t = setTimeout(startTime, 500);
+}
+function checkTime(i) {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
+}
+
+startTime();
+
+</script>
+
