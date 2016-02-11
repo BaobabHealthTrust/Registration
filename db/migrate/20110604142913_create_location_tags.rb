@@ -1,4 +1,5 @@
 class CreateLocationTags < ActiveRecord::Migration
+=begin
   def self.up
     create_table :location_tags do |t|
 
@@ -9,4 +10,5 @@ class CreateLocationTags < ActiveRecord::Migration
   def self.down
     drop_table :location_tags
   end
+=end
 end
