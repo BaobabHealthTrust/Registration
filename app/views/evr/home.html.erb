@@ -1,0 +1,188 @@
+<style>
+
+body {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */ 
+}
+
+img {
+  user-drag: none; 
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
+}
+
+.main-page-container  {
+  display: table;
+  width: 100%;
+  padding: 0px 1px 0px 1px;
+}
+
+.main-page-container-rows  {
+  display: table-row;
+}
+
+.cells {
+  display: table-cell;
+}
+
+
+/* ...................................... */
+.divbtn {
+  height: 265px;
+  display: table;
+  margin-top: 10px;
+  cursor:pointer;
+}
+
+.icons {
+  width: 160px;
+  height: 160px;
+  margin-top: 10%;
+  text-align: middle;
+}
+
+.divbtn p {
+  font-weight: bold;
+}
+
+.btncells {
+  width: 25%;
+  text-align: center;
+}
+
+.header .cells {
+  vertical-align: middle; 
+  padding-right: 5px;
+}
+
+#scan {
+  background-color: lightgrey;
+  border-style: solid;
+  border-width: 1px;
+  font-size: 80px;
+  margin-bottom: 6px;
+  width: 44%;
+}
+
+.btncells .x-icons {
+  width: 160px;
+  height: 160px;
+  margin-top: 10%;
+  text-align: middle;
+}
+
+/* ...................................... */
+</style>
+
+<%= render :partial => 'header' %>
+
+
+<div class="main-page-container">
+
+<div class="main-page-container-rows">
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #008000;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/patient/districts'" >
+        <span>
+          <img src='/images/icons/stats.png' class='x-icons'  />
+          <p style="color: white;">Current patient statistics</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #c51bff;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/report'" >
+        <span>
+          <img src='/images/icons/reports.png' class='x-icons'  />
+          <p>Reports</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color:#4d8eff ;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
+        <span>
+          <img src='/images/icons/barcode.png' class='x-icons'  />
+          <p>Find patient by identifier</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #d2ff4d;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
+        <span>
+          <img src='/images/icons/search.png' class='x-icons'  />
+          <p style="color: black;">Find/Register Patient</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  
+</div>
+
+
+<div class="main-page-container-rows">
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #ffff1a;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/house_keeping'" >
+        <span>
+          <img src='/images/icons/schedule.png' class='x-icons'  />
+          <p>Set date</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #008080;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
+        <span>
+          <img src='/images/icons/config.png' class='x-icons'  />
+          <p style="color: white;">Properties</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color: #95c900;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/admin'" >
+        <span>
+          <img src='/images/icons/Admin.png' class='x-icons'  />
+          <p>Admin</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+  
+  <!-- loop -->
+  <div class="cells btncells">
+    <div class="divbtn" style="background-color:red;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/logout'" >
+        <span>
+          <img src='/images/icons/Logout.png' class='x-icons'  />
+          <p>Logout</p>
+        </span>
+    </div>
+  </div>
+  <!-- endloop -->
+
+
+</div>
+
+
+</div>
+
+<%= render :partial => 'patients/evr/footer' %>

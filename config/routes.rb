@@ -1,9 +1,10 @@
 ActionController::Routing::Routes.draw do |map|
 	map.devise_for :users
   
+  map.clinic  '/clinic', :controller => 'evr', :action => 'home'
   # ------------------------------- INSTALLATION GENERATED ----------------------------------------------------
   map.root :controller => "dde"
-  map.clinic  '/clinic', :controller => 'dde', :action => 'index'
+  #map.clinic  '/clinic', :controller => 'dde', :action => 'index'
   map.duplicates  '/duplicates', :controller => 'dde', :action => 'duplicates'
   map.dde_search_by_name  '/dde_search_by_name', :controller => 'dde', :action => 'search_by_name'
   map.dde_search_by_id  '/dde_search_by_id', :controller => 'dde', :action => 'search_by_id'
