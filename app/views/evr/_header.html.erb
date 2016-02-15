@@ -72,3 +72,37 @@ img {
 </div>
 
 
+
+
+<script language="javascript">
+    doListSuggestions = false; //speeds up keyboard response
+
+    var setFocusTimeout = 1000;
+    var checkForBarcodeTimeout = 1500;
+   
+    function loadBarcodePage() {
+       focusForBarcodeInput();
+       moveNext();
+    }
+
+    function focusForBarcodeInput(){
+      var barcode = document.getElementById("scan");
+      if (barcode) {
+         barcode.focus();
+         window.setTimeout("focusForBarcodeInput()", setFocusTimeout);
+      }
+    }
+    
+   
+    function moveNext(){
+      usertext=document.getElementById("scan");
+      if (usertext.value.match(/.+\$$/i) != null){
+        usertext.value=usertext.value.substring(0,usertext.value.length -1);
+        alert(usertext.value);
+      }
+       window.setTimeout("moveNext()", checkForBarcodeTimeout);
+    }   
+ 
+    window.addEventListener("load", loadBarcodePage, false);
+  </script>
+
