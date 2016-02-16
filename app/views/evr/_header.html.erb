@@ -98,7 +98,7 @@ img {
       usertext=document.getElementById("scan");
       if (usertext.value.match(/.+\$$/i) != null){
         usertext.value=usertext.value.substring(0,usertext.value.length -1);
-        alert(usertext.value);
+        barcodeScanAction(usertext.value)
       }
        window.setTimeout("moveNext()", checkForBarcodeTimeout);
     }   

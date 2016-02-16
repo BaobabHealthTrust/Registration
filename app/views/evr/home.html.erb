@@ -1,83 +1,83 @@
-<style>
+<style type="text/css">
 
-body {
-  -webkit-user-select: none;  /* Chrome all / Safari all */
-  -moz-user-select: none;     /* Firefox all */
-  -ms-user-select: none;      /* IE 10+ */
-  user-select: none;          /* Likely future */ 
-}
+  body {
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    user-select: none;          /* Likely future */
+  }
 
-img {
-  user-drag: none; 
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-drag: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  pointer-events: none;
-}
+  img {
+    user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    pointer-events: none;
+  }
 
-.main-page-container  {
-  display: table;
-  width: 100%;
-  padding: 0px 1px 0px 1px;
-}
+  .main-page-container  {
+    display: table;
+    width: 100%;
+    padding: 0px 1px 0px 1px;
+  }
 
-.main-page-container-rows  {
-  display: table-row;
-}
+  .main-page-container-rows  {
+    display: table-row;
+  }
 
-.cells {
-  display: table-cell;
-}
+  .cells {
+    display: table-cell;
+  }
 
 
-/* ...................................... */
-.divbtn {
-  height: 265px;
-  display: table;
-  margin-top: 10px;
-  cursor:pointer;
-}
+  /* ...................................... */
+  .divbtn {
+    height: 265px;
+    display: table;
+    margin-top: 10px;
+    cursor:pointer;
+  }
 
-.icons {
-  width: 160px;
-  height: 160px;
-  margin-top: 10%;
-  text-align: middle;
-}
+  .icons {
+    width: 160px;
+    height: 160px;
+    margin-top: 10%;
+    text-align: middle;
+  }
 
-.divbtn p {
-  font-weight: bold;
-}
+  .divbtn p {
+    font-weight: bold;
+  }
 
-.btncells {
-  width: 25%;
-  text-align: center;
-}
+  .btncells {
+    width: 25%;
+    text-align: center;
+  }
 
-.header .cells {
-  vertical-align: middle; 
-  padding-right: 5px;
-}
+  .header .cells {
+    vertical-align: middle;
+    padding-right: 5px;
+  }
 
-#scan {
-  background-color: lightgrey;
-  border-style: solid;
-  border-width: 1px;
-  font-size: 80px;
-  margin-bottom: 6px;
-  width: 44%;
-}
+  #scan {
+    background-color: lightgrey;
+    border-style: solid;
+    border-width: 1px;
+    font-size: 80px;
+    margin-bottom: 6px;
+    width: 44%;
+  }
 
-.btncells .x-icons {
-  width: 160px;
-  height: 160px;
-  margin-top: 10%;
-  text-align: middle;
-}
+  .btncells .x-icons {
+    width: 160px;
+    height: 160px;
+    margin-top: 10%;
+    text-align: middle;
+  }
 
-/* ...................................... */
+  /* ...................................... */
 </style>
 
 <%= render :partial => 'header' %>
@@ -85,104 +85,210 @@ img {
 
 <div class="main-page-container">
 
-<div class="main-page-container-rows">
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color: #008000;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/patient/districts'" >
+  <div class="main-page-container-rows">
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color: #008000;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/patient/districts'" >
         <span>
           <img src='/images/icons/stats.png' class='x-icons'  />
           <p style="color: white;">Current patient statistics</p>
         </span>
+      </div>
     </div>
-  </div>
-  <!-- endloop -->
-  
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color: #c51bff;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/report'" >
+    <!-- endloop -->
+
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color: #c51bff;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/report'" >
         <span>
           <img src='/images/icons/reports.png' class='x-icons'  />
           <p>Reports</p>
         </span>
+      </div>
     </div>
-  </div>
-  <!-- endloop -->
-  
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color:#4d8eff ;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
+    <!-- endloop -->
+
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color:#4d8eff ;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
         <span>
           <img src='/images/icons/barcode.png' class='x-icons'  />
           <p>Find patient by identifier</p>
         </span>
+      </div>
     </div>
-  </div>
-  <!-- endloop -->
-  
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color: #d2ff4d;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
+    <!-- endloop -->
+
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color: #d2ff4d;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
         <span>
           <img src='/images/icons/search.png' class='x-icons'  />
           <p style="color: black;">Find/Register Patient</p>
         </span>
+      </div>
     </div>
+    <!-- endloop -->
+
+
   </div>
-  <!-- endloop -->
-  
-  
-</div>
 
 
-<div class="main-page-container-rows">
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color: #ffff1a;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/house_keeping'" >
+  <div class="main-page-container-rows">
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color: #ffff1a;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/house_keeping'" >
         <span>
           <img src='/images/icons/schedule.png' class='x-icons'  />
           <p>Set date</p>
         </span>
+      </div>
     </div>
-  </div>
-  <!-- endloop -->
-  
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color: #008080;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
+    <!-- endloop -->
+
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color: #008080;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/'" >
         <span>
           <img src='/images/icons/config.png' class='x-icons'  />
           <p style="color: white;">Properties</p>
         </span>
+      </div>
     </div>
-  </div>
-  <!-- endloop -->
-  
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color: #95c900;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/admin'" >
+    <!-- endloop -->
+
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color: #95c900;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/admin'" >
         <span>
           <img src='/images/icons/Admin.png' class='x-icons'  />
           <p>Admin</p>
         </span>
+      </div>
     </div>
-  </div>
-  <!-- endloop -->
-  
-  <!-- loop -->
-  <div class="cells btncells">
-    <div class="divbtn" style="background-color:red;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/logout'" >
+    <!-- endloop -->
+
+    <!-- loop -->
+    <div class="cells btncells">
+      <div class="divbtn" style="background-color:red;border: 1px solid #2e6da4; width: 99%;" onclick="document.location='/logout'" >
         <span>
           <img src='/images/icons/Logout.png' class='x-icons'  />
           <p>Logout</p>
         </span>
+      </div>
     </div>
+    <!-- endloop -->
+
+
   </div>
-  <!-- endloop -->
-
-
-</div>
 
 
 </div>
 
 <%= render :partial => 'patients/evr/footer' %>
+
+<% form_tag("/dde/process_scan_data", "method" => 'post', "enctype" => 'multipart/form-data',
+  "id" => 'dde-home', "class" => "form-horizontal", "autocomplete" => "off", "role" => "form", "novalidate" => "novalidate") do %>
+
+  <textarea id="person" name="person" style="display: none;" condition="false"></textarea>
+
+<% end %>
+
+<script type="text/javascript">
+  <!--
+
+  var helpLinks = {
+    "Find Patient": "<%= @settings["help_base_url"] rescue "" %>find_patient",
+    "Register Patient": "<%= @settings["help_base_url"] rescue "" %>new_patient"/*,
+        "Cancel": "<%= @settings["help_base_url"] rescue "" %>cancel",
+        "New Person": "<%= @settings["help_base_url"] rescue "" %>add_patient",
+        "Select Person": "<%= @settings["help_base_url"] rescue "" %>select_patient"*/
+  };
+
+  var json = <%= {
+  "national_id" => nil,
+  "application" => "#{@settings["application_name"]}",
+  "site_code" => "#{@settings["site_code"]}",
+  "return_path" => "http://#{request.host_with_port}/process_result",
+  "names" =>
+    {
+    "family_name" => nil,
+    "given_name" => nil,
+    "middle_name" => nil,
+    "maiden_name" => nil
+  },
+  "gender" => "#{params["gender"]}",
+  "attributes" => {
+    "occupation" => nil,
+    "cell_phone_number" => nil,
+    "home_phone_number" => nil,
+    "office_phone_number" => nil,
+    "citizenship" => nil,
+    "country_of_residence" => nil,
+    "race" => nil
+  },
+  "birthdate" => nil,
+  "patient" => {
+    "identifiers" => []
+  },
+  "birthdate_estimated" => nil,
+  "addresses" => {
+    "current_residence" => nil,
+    "current_village" => nil,
+    "current_ta" => nil,
+    "current_district" => nil,
+    "home_village" => nil,
+    "home_ta" => nil,
+    "home_district" => nil
+  }
+}.to_json %>;
+
+<% if !@settings["dde_username"].blank? %>
+
+    function barcodeScanAction(npid){
+      //if(__$("scan")){
+
+        //var npid = __$("scan").value.replace("$", "");
+
+        ajaxRequest(npid);
+
+      //}
+    }
+
+    function ajaxRequest(id){
+      var url = "/process_data/" + id;
+
+      var httpRequest = new XMLHttpRequest();
+      httpRequest.onreadystatechange = function() {
+        handleAjaxRequest(httpRequest);
+      };
+      try {
+        httpRequest.open("GET", url, true);
+        httpRequest.send(null);
+      } catch(e){
+      }
+    }
+
+    function handleAjaxRequest(aXMLHttpRequest){
+      if (!aXMLHttpRequest) return;
+
+      if (aXMLHttpRequest.readyState == 4 && (aXMLHttpRequest.status == 200 ||
+        aXMLHttpRequest.status == 304)) {
+
+        var result = aXMLHttpRequest.responseText;
+
+        __$("person").innerHTML = result;
+
+        document.getElementById("dde-home").submit();
+
+      }
+    }
+
+<% end %>
+
+  //-->
+
+  function __$(elementID){
+    return document.getElementById(elementID);
+  }
+</script>
