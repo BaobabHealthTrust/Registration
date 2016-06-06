@@ -968,20 +968,46 @@ class ApplicationController < GenericApplicationController
     end
     
     task = Task.first rescue Task.new()
-
-    type = 'REGISTRATION'
-    encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
+    
+    
+    
+    if !is_encounter_available(patient, 'OUTPATIENT RECEPTION', session_date) && (CoreService.get_global_property_value("is_referral_centre").to_s == 'true')
+					task.encounter_type = 'OUTPATIENT RECEPTION'
+					task.url = "/encounters/new/outpatient_reception?patient_id=#{patient.id}"
+		else
+        type = 'REGISTRATION'
+    		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
                                      patient.id,EncounterType.find_by_name(type).id,session_date],
                                      :order =>'encounter_datetime DESC',:limit => 1)
-      task.encounter_type = type 
-      if encounter_available.blank? 
-        task.url = "/encounters/new/registration?patient_id=#{patient.id}"
-      else 
-        task.encounter_type = 'NONE'
-        task.url = "/patients/show/#{patient.id}"
-     end
-     return task
+      	
+      	if encounter_available.blank? 
+      	  task.encounter_type = type 
+        	task.url = "/encounters/new/registration?patient_id=#{patient.id}"
+				else
+        	task.encounter_type = 'NONE'
+        	task.url = "/patients/show/#{patient.id}"
+        end
+    end
+    
+    return task
+    
   end
+  
+  
+  def is_encounter_available(patient, encounter_type, session_date)
+		is_available = false
+
+		encounter_available = Encounter.find(:first,:conditions =>["patient_id = ? AND encounter_type = ? AND DATE(encounter_datetime) = ?",
+        patient.id, EncounterType.find_by_name(encounter_type).id, session_date],
+      :order =>'encounter_datetime DESC', :limit => 1)
+		if encounter_available.blank?
+			is_available = false
+		else
+			is_available = true
+		end
+		
+		return is_available	
+	end
   
   
   def validate_task(patient, task, location, session_date = Date.today)
