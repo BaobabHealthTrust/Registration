@@ -721,13 +721,58 @@ class CohortToolController < GenericCohortToolController
        @report_type = params[:report_type]
   end
   
+  def referral_menu
+  end
+  
+  def referrals
+  raise "hit"
+    @selSelect = params[:selSelect] rescue nil
+    @selYear = params[:selYear] rescue nil
+    @selMonth = params[:selMonth] rescue nil
+    @day = 			params[:day] rescue nil
+    @selQtr = "#{params[:selQtr].gsub(/&/, "_")}" rescue nil
+		@location =  Location.current_health_center.name rescue ''
+
+		case params[:selSelect]
+		  when "day"
+	      @start_date = params[:day]
+	      @end_date = params[:day]
+
+		  when "month"
+		    @start_date = ("#{params[:selYear]}-#{params[:selMonth]}-01").to_date.strftime("%Y-%m-%d")
+		    @end_date = ("#{params[:selYear]}-#{params[:selMonth]}-#{ (params[:selMonth].to_i != 12 ?
+		      ("2010-#{params[:selMonth].to_i + 1}-01".to_date - 1).strftime("%d") : 31) }").to_date.strftime("%Y-%m-%d")
+
+		  when "quarter"
+		    start_date = params[:selQtr].to_s.gsub(/&max=(.+)$/,'')
+		    end_date = params[:selQtr].to_s.gsub(/^min=(.+)&max=/,'')
+
+				@start_date = start_date.gsub(/^min=/,'')
+				@end_date		= end_date
+		  end
+     
+    session[:start_date] = @start_date
+    session[:end_date] = @end_date
+
+    cohort = Cohort.new(@start_date,@end_date)
+    @services = cohort.registration_services
     
+		if @selSelect.include?('month')
+			@report_type =	@start_date.to_date.strftime("%B") + "  " + @selYear
+		elsif @selSelect.include?('day')
+			@report_type = @day.to_date.strftime("%d-%B-%Y") + " report "
+		else
+			@report_type = @start_date.to_date.strftime("%d/%B/%Y") + "  to  " + @end_date.to_date.strftime("%d/%B/%Y")
+		end
+    render :layout => 'cohort'
+  end
+  
   def cohort
     @selSelect = params[:selSelect] rescue nil
     @selYear = params[:selYear] rescue nil
     @selMonth = params[:selMonth] rescue nil
     @day = 			params[:day] rescue nil
-    @selQtr = "#{par      	  raise patient.to_yamlams[:selQtr].gsub(/&/, "_")}" rescue nil
+    @selQtr = "#{pams[:selQtr].gsub(/&/, "_")}" rescue nil
 		@location =  Location.current_health_center.name rescue ''
 
 		case params[:selSelect]
@@ -766,6 +811,8 @@ class CohortToolController < GenericCohortToolController
 
   def cohort_menu
   end
+  
+  
 
   def adherence
     adherences = get_adherence(params[:quarter])
