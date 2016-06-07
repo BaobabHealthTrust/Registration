@@ -278,7 +278,7 @@
   
     <%= image_tag(@logo, :class => "logo")%>
     <br /><b style="margin-left:75px"><%= @current_location_name.capitalize %></b><br />
-    <b style="position:relative; top:0px;margin-left:75px">Patient Registration Report</b><br />
+    <b style="position:relative; top:0px;margin-left:75px">Referred Patients Report</b><br />
     <b style="position:relative; top:0px;margin-left:75px"><%= @report_type%></b><br /><br /><br />
 <!--
 	<h1 align='center'>Kamuzu Central Hospital - Patient Registration Report</h1>
@@ -287,69 +287,24 @@
 	<table id="table_id" width="100%">
             <thead>
 		<tr>
-			<th style="text-align:left">Department Name</th>
+			<th style="text-align:left">Referred Facility</th>
 			<th style="text-align:left">Total Count</th>
 		</tr>
             </thead>
             <tbody>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Casualty</td>
-			<td id="number"><%= @services['SERVICES']['Casualty'] -%></td>
-		</tr>
-		<tr >
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Dental</td>
-			<td id="number"><%= @services['SERVICES']['Dental'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Eye</td>
-			<td id="number"><%= @services['SERVICES']['Eye'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Family Planing</td>
-			<td id="number"><%= @services['SERVICES']['Family Planing'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Medical</td>
-			<td id="number"><%= @services['SERVICES']['Medical'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">OB/Gyn</td>
-			<td id="number"><%= @services['SERVICES']['OB/Gyn'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Orthopedics</td>
-			<td id="number"><%= @services['SERVICES']['Orthopedics'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Pediatrics</td>
-			<td id="number"><%= @services['SERVICES']['Pediatrics'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Skin</td>
-			<td id="number"><%= @services['SERVICES']['Skin'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">STI Clinic</td>
-			<td id="number"><%= @services['SERVICES']['STI Clinic'] -%></td>
-		</tr>
-		<tr>
-			<td style="text-align:left; background-color: #FFF68F; font-size: 14pt">Surgical</td>
-			<td id="number"><%= @services['SERVICES']['Surgical'] -%></td>
-		</tr>
-		<tr style="text-align:left; background-color: #FFF68F; font-size: 14pt">
-			<td style="text-align:left;">Other</td>
-			<td id="number"><%= @services['SERVICES']['Other'] -%></td>
-		</tr>
-		<% 
-			@total_services = @services['SERVICES']['Casualty'] + @services['SERVICES']['Dental'] + @services['SERVICES']['Eye'] +
-												@services['SERVICES']['Other'] + @services['SERVICES']['Surgical'] + @services['SERVICES']['STI Clinic'] +  @services['SERVICES']['Skin'] + @services['SERVICES']['Pediatrics'] + @services['SERVICES']['Orthopedics'] + @services['SERVICES']['OB/Gyn'] + @services['SERVICES']['Medical'] + @services['SERVICES']['Family Planing']
+	<% @total_referred_patients = 0 %>	
+	<% @referrals.each do |referral| %>
+    <td style="text-align:left; background-color: #FFF68F; font-size: 14pt"><%= referral.first.first %></td>
+    <td id="number" ><%= referral.first.second %></td>
+  </tr>
+  <% @total_referred_patients += referral.first.second.to_i %>
+  <% end %>
 		
-		%>
-                </tbody>
+              </tbody>
                 <tfoot>
                   <tr>
-                      <td style="text-align:left; background-color: #BCE154; font-size: 14pt"><b>Total Number of services</b></td>
-                      <td id="total"><b><%= @total_services -%></b></td>
+                      <td style="text-align:left; background-color: #BCE154; font-size: 14pt"><b>Total Number of Referred Patients</b></td>
+                      <td id="total"><b><%= @total_referred_patients -%></b></td>
                   </tr>
                 </tfoot>
             

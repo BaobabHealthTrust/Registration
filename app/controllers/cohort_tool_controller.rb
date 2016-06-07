@@ -725,7 +725,7 @@ class CohortToolController < GenericCohortToolController
   end
   
   def referrals
-  raise "hit"
+
     @selSelect = params[:selSelect] rescue nil
     @selYear = params[:selYear] rescue nil
     @selMonth = params[:selMonth] rescue nil
@@ -755,8 +755,7 @@ class CohortToolController < GenericCohortToolController
     session[:end_date] = @end_date
 
     cohort = Cohort.new(@start_date,@end_date)
-    @services = cohort.registration_services
-    
+    @referrals = cohort.referrals
 		if @selSelect.include?('month')
 			@report_type =	@start_date.to_date.strftime("%B") + "  " + @selYear
 		elsif @selSelect.include?('day')
