@@ -20,7 +20,7 @@
 <%= touch_location_tag 'REFERRAL CLINIC IF REFERRED', @patient, nil,
 	{ :id => 'location_id',
 		:field_type => 'alpha',
-		:helpText => "Referral Facility if Referred",
+		:helpText => "Referral Facility",
 		:condition => "($('select').value == 'YES')",
 		:ajaxURL => '/programs/locations?q=',
 		:allowFreeText => false } %>
