@@ -1100,6 +1100,8 @@ EOF
     patient.office_phone_number = get_attribute(person, 'Office phone number')
     patient.home_phone_number = get_attribute(person, 'Home phone number')
     patient.guardian = art_guardian(person.patient) rescue nil
+    patient.race = get_attribute(person, 'Race')
+    patient.citizenship = get_attribute(person, 'Citizenship')
     patient
   end
 
@@ -1885,6 +1887,11 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       end
     } if person_attribute_params
 
+ create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    if create_from_dde_server
+      patient_bean = get_patient(person)
+      DDEService.update_demographics(patient_bean)
+    end
   end
-
+  
 end

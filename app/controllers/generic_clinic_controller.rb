@@ -207,7 +207,9 @@ class GenericClinicController < ApplicationController
 
   def reports_tab
     @reports = [
-      ["Registry reports","/cohort_tool/cohort_menu"]
+      ["Referral Report","/cohort_tool/referral_menu"],
+      ["Registry Report","/cohort_tool/cohort_menu"]
+     
     ]
 
     @reports = [

@@ -1190,7 +1190,7 @@ class GenericEncountersController < ApplicationController
 		value = observation[:value_coded_or_text]
 		value_coded_name = ConceptName.find_by_name(value)
 
-		if value_coded_name.blank?
+		if value_coded_name.blank? || observation[:concept_name] == "REFERRAL CLINIC IF REFERRED"
 			observation[:value_text] = value
 		else
 			observation[:value_coded_name_id] = value_coded_name.concept_name_id

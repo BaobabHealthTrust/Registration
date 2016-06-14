@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Patient Registration Cohort Report Selection</title>
+    <title>Patient Registration Referral Report Selection</title>
     <script type="text/javascript" language="javascript">
       <!--
 
@@ -13,12 +13,12 @@
       //-->
     </script>
     <style>
-    		.tt_controls_select_month .keyboard{display:none;}
+    	  .tt_controls_select_month .keyboard{display:none;}
 	    	#tt_page_select_month .options{height:550px;}
 		    #tt_page_select_month .options li{font-size:30px;}
 		    #space {display:inline;}
 		    
-		     
+		    
 		    .tt_controls_select_year .keyboard{ display: none;}
 	    	#tt_page_select_year .options{height:550px;}
 		    #tt_page_select_year .options li{font-size:30px;}
@@ -29,10 +29,10 @@
 	    	#tt_page_select_quarter .options{height:550px;}
 		    #tt_page_select_quarter .options li{font-size:30px;}
 		    #space {display:inline;}
+		   
 		    
-		    #Unknown {display: none;}
-		    num {display: none;}
-		    
+      	#Unknown {display: none;}
+      	num {display: none;}
     </style>
   </head>
   <body>
@@ -79,7 +79,7 @@
     # raise qtr.to_yaml
     %>
 
-    <form id="frmReport" action="cohort" method="post">
+    <form id="frmReport" action="referrals" method="post">
       <select id="selSelect" name="selSelect" helpText="Report By">
         <option></option>
         <option value="day">Day</option>
@@ -93,7 +93,7 @@
       <input type="text" field_type="date" id="day" name="day" value="" helpText="Select Day"
              condition="$('selSelect').value == 'day';" />
 
-      <select id="selYear" field_type="number" name="selYear" helpText="Select Year" 
+      <select id="selYear" name="selYear" field_type="number" helpText="Select Year"
               condition="$('selSelect').value == 'month' || $('selSelect').value == 'year' || $('selSelect').value == 'week';">
         <option></option>
         <% array.reverse.each do |y| %>

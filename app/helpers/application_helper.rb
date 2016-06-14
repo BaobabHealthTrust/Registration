@@ -117,7 +117,7 @@ module ApplicationHelper
 
   def version
     style = "style='background-color:red;'" unless session[:datetime].blank?
-    "National EMR:Patient Registartion: #{PR_VERSION} - <span #{style}>#{(session[:datetime].to_date rescue Date.today).strftime('%A, %d-%b-%Y')}</span>"
+    "National EMR:Patient Registration: #{PR_VERSION} - <span #{style}>#{(session[:datetime].to_date rescue Date.today).strftime('%A, %d-%b-%Y')}</span>&nbsp;&nbsp;"
   end
   
   def welcome_message

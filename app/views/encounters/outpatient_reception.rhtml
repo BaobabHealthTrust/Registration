@@ -1,0 +1,46 @@
+<script>
+  var tt_cancel_destination = "/patients/show/<%= @patient.patient_id %>"
+</script>
+<style>
+  #space { display:inline; font-size:1.2em; }
+</style>
+<form id='referral' action="/encounters/create" method='post'>
+
+  <%= hidden_field_tag "encounter[encounter_type_name]", "OUTPATIENT RECEPTION" %>
+  <%= hidden_field_tag "encounter[patient_id]", @patient.id %>
+  <%= hidden_field_tag "encounter[encounter_datetime]", DateTime.now() %>
+  <%= hidden_field_tag "encounter[provider_id]", current_user.user_id %>
+
+  <%#= hidden_field_tag("next_url", "/people") %>
+   
+  <%= touch_yes_no_tag "IS PATIENT REFERRED?", @patient, nil,
+      {:id => "select",
+       	:helpText => "Is the Patient a Referral Case From Another Health Facility?" } %>
+       
+<%= touch_location_tag 'REFERRAL CLINIC IF REFERRED', @patient, nil,
+	{ :id => 'location_id',
+		:field_type => 'alpha',
+		:helpText => "Referral Facility",
+		:condition => "($('select').value == 'YES')",
+		:ajaxURL => '/programs/locations?q=',
+		:allowFreeText => false } %>
+
+  <% if !@patient.patient_programs.current.local.map(&:program).map(&:name).include?('OPD Program') %>
+      <%= hidden_field_tag("programs[][patient_program_id]", nil) %>
+      <%= hidden_field_tag("programs[][program_id]", Program.find_by_name('OPD Program').id)%>
+      <%= hidden_field_tag("programs[][location_id]", Location.current_health_center.id) %>
+      <%= hidden_field_tag("programs[][date_enrolled]", session[:datetime] || Date.today) %>
+      <%= hidden_field_tag("programs[][states][][state]", "Following") %>
+  <%end%>
+  			
+	<% if @retrospective == 'true' %>
+    <p><label for="filter_provider">Staff who provided the information (Provider)</label></br>
+      <%= text_field "filter", 'provider',
+          :helpText => 'Staff who provided the information (Provider)',
+          :ajaxURL => '/user/username?username=' %>
+    </p>
+  <% else %>
+    <%= hidden_field_tag "filter[provider]", nil %>
+  <%end%>
+  
+</form>

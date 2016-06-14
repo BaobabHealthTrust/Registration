@@ -85,4 +85,20 @@ class Cohort
                                   services << [value.patient_id, value.services]
                                 end
 	end
+	
+  def referrals(start_date = @start_date, end_date = @end_date)
+    outpatient_reception_encounter = EncounterType.find_by_name("OUTPATIENT RECEPTION").id
+    referred_from_concept = ConceptName.find_by_name("REFERRED FROM").concept_id
+    
+    Observation.find_by_sql("SELECT l.name lname, COUNT(l.name) lcount FROM obs o INNER JOIN encounter e 
+														ON o.encounter_id = e.encounter_id
+														INNER JOIN location l
+														ON l.location_id = o.value_text
+														WHERE e.encounter_type = #{outpatient_reception_encounter} 
+														AND o.concept_id = #{referred_from_concept} 
+														AND e.date_created BETWEEN '#{start_date}' AND '#{end_date}' 
+														GROUP BY l.name;").map{ | value | {value.lname => value.lcount} }
+		
+  end
+	
 end

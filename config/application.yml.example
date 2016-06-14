@@ -3,12 +3,14 @@ production:
  use.user.selected.activities: false
  use.filing.number: false
  show.patient.confirmation: true
+ is_referral_centre: true
 
 development:
  create_from_remote: no
  use.user.selected.activities: false
  use.filing.number: false
  show.patient.confirmation: true
+ is_referral_centre: true
 
 test: &TEST
  create_from_remote: no

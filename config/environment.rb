@@ -1,6 +1,6 @@
 # Specifies gem version of Rails to use when vendor/rails is not present
 RAILS_GEM_VERSION = '2.3.5' unless defined? RAILS_GEM_VERSION
-PR_VERSION = '2.0 beta'
+PR_VERSION = `git describe`.gsub(/\n/, '')
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
