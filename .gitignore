@@ -18,3 +18,5 @@ Gemfile.lock
 .ruby-version
 dde_connection.yml
 public/touchscreentoolkit
+.idea/
+.rvmrc
