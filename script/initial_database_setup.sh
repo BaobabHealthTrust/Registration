@@ -51,6 +51,7 @@ mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/moh_regi
 #mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/regimen_indexes.sql
 mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/retrospective_station_entries.sql
 mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_dde_server_connection.sql
+mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/create_dde2_server_connection.sql
 mysql --host=$HOST --user=$USERNAME --password=$PASSWORD $DATABASE < db/openmrs_metadata_1_7.sql
 
 
