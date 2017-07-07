@@ -128,7 +128,7 @@ module DDE2Service
     def self.authenticate_user
        #ServerConnection.username
        #ServerConnection.password
-       user_params = {"username" => "Bless", 
+       user_params = {"username" => "peter", 
                       "password" => "blessings"}
                   
        response = RestClient::Request.execute(:method => :post, 
@@ -144,7 +144,7 @@ module DDE2Service
     def self.add_user
         #ServerConnection.username, 
          #ServerConnection.password,
-        user_params = {"username" => "Bless", 
+        user_params = {"username" => "peter", 
                        "password" => "blessings",
                        "application" => ClientConnection.name,
                        "site_code" => ClientConnection.code,
@@ -173,32 +173,33 @@ module DDE2Service
     
     def self.add_new_patient(person)
       
-      attributes = {}
-      identifiers = {}
+      person_params = {
+                       "family_name" => person["family_name"], 
+                       "given_name" => person["given_name"], 
+                       "gender" => person["gender"],
+                       "attributes" => {},
+                       "birthdate" => person["birthdate"].strftime("%Y-%m-%d"),
+                       "identifiers" => {},
+                       "birthdate_estimated" => person["birthdate_estimated"],
+                       "current_residence" => "N/A",
+                       "current_village" => "N/A",
+                       "current_ta" => person["current_ta"].squish,
+                       "current_district" => person["current_district"],
+                       "home_village" => "N/A",
+                       "home_ta" => person["home_ta"],
+                       "home_district" => person["home_district"]
+                      }
+
+      response = JSON.parse(RestClient.put(API.add_new_patient_url, 
+                                           person_params.to_json,
+                                           :content_type => "application/json"))  
+
+      if response && response["status"] == 201
+        return response["data"]["npid"]
+      else
+        return "#{response['status']} : #{response['message']}"
+      end 
       
-      person_params = {"given_name" => person.given_name, 
-                       "family_name" => person.family_name,
-                       "gender" => person.gender,
-                       "birthdate" => person.birthdate,
-                       "birthdate_estimated" => person.birthdate_estimated,
-                       "attributes" => attributes,
-                       "current_residence" => person.current_address,
-                       "current_ta" => person.current_ta,
-                       "current_district" => person.current_district,
-                       "home_village" => person.home_village,
-                       "home_ta" => person.home_ta,
-                       "home_district" => person.home_district,
-                       "identifiers" => identifiers,
-                       "token" => ClientConnection.token}
-
-      response = RestClient::Request.execute(:method => :post, 
-                                              :url => API.add_new_patient_url, 
-                                              :payload => person_params.to_json, 
-                                              :headers => {:accept => :json,
-                                                          :content_type => :json}
-                                              )
-      return response   
-
     end 
 
     def self.search_by_identifier(identifier)
@@ -382,6 +383,7 @@ module DDE2Service
       def self.address
         if basic_http_auth?
           server_ip = GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
+          return "http://peter:blessings@#{server_ip}"
           return "http://#{username}:#{password}@#{server_ip}"
         else
            return GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
@@ -398,7 +400,7 @@ module DDE2Service
       end
       
       def self.basic_http_auth?
-         return GlobalProperty.find_by_property("basic_http_auth").property_value rescue false
+         return GlobalProperty.find_by_property("basic_http_auth").property_value rescue true
       end  
 
     end
@@ -417,7 +419,7 @@ module DDE2Service
       end
 
       def self.token
-        return "c98NtYoucP3X" #oKcWTbjZIyLu
+        return "c98NtYoucP3X" #oKcWTbjZIyLu #WWXhSDO6J1BU
       end
     end  
 

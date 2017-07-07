@@ -83,8 +83,8 @@ class PatientIdentifier < ActiveRecord::Base
 
   def after_save
     create_from_dde_server = CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
-    
-    if !create_from_dde_server
+    create_from_dde2_server = CoreService.get_global_property_value('create.from.dde2.server').to_s == "true" rescue false
+    if !create_from_dde_server ||!create_from_dde2_server
       if self.identifier_type == PatientIdentifierType.find_by_name("National ID").id
         person = self.patient.person
         patient_bin = PatientService.get_patient(person)
