@@ -1,16 +1,11 @@
-This is a Patient Registration Baobab EMR written in Ruby on Rails
-and is intended as a web front end for OpenMRS.
+Requirements
 
-OpenMRS® is a community-developed, open-source, enterprise electronic medical
-record system framework. We've come together to specifically respond to those
-actively building and managing health systems in the developing world, where
-AIDS, tuberculosis, and malaria afflict the lives of millions. Our mission is
-to foster self-sustaining health information technology implementations in
-these environments through peer mentorship, proactive collaboration, and a code
-base that equals or surpasses proprietary equivalents. You are welcome to come
-participate in the community, whether by implementing our software, or
-contributing your efforts to our mission!
+Ruby 1.8.7
+Rails 2.3.5
+MySQL 5
 
-This Patient Registration was built by Baobab Health in Malawi, Africa. It is licensed under the Mozilla Public License.
+Instructions
 
-
+1.configure database and app settings(*.yml.example) files
+2.run script/initial_database_setup.sh [env][site_code]
+3.query dde2 properties in global_property and edit them to match your dde2_server 
