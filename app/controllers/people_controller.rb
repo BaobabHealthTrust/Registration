@@ -21,8 +21,8 @@ class PeopleController < GenericPeopleController
             return
           end
         elsif create_from_dde2_server
-            person =  JSON.parse(DDE2Service.search_by_identifier(params[:identifier]))  
-            if person["data"]["matches"] > 1
+            person =  JSON.parse(DDE2Service.search_by_identifier(params[:identifier])) rescue nil
+            if person && person["data"]["matches"] > 1
                 redirect_to :action => 'duplicates' ,:search_params => params
                 return
             end  

@@ -184,11 +184,12 @@ module DDE2Service
   end
 
 
-    def self.create_patient_from_dde(params, dont_recreate_local=false)
+    def self.create_patient_from_dde2(params, dont_recreate_local=false)
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
 		patient_params = params["person"]["patient"]
     birthday_params = params["person"]
+    old_identifier = params["person"]["patient"]["identifiers"]["old_identification_number"]
 		params_to_process = params.reject{|key,value|
       key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/)
     }
