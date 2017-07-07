@@ -126,59 +126,306 @@ module DDE2Service
   end
 
     def self.authenticate_user
-
+       server_url = "#{ServerConnection.address}/v1/authenticate"
+       user_params = {"username" => ServerConnection.username, 
+                      "password" => ServerConnection.password}
+                  
+       response = RestClient::Request.execute(:method => :post, 
+                                              :url => server_url, 
+                                              :payload => user_params.to_json, 
+                                              :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+       return response                                       
+                                                        
     end
 
     def self.add_user
 
+        server_url = "#{ServerConnection.address}/v1/add_user"
+
+        user_params = {"username" => ServerConnection.username, 
+                       "password" => ServerConnection.password,
+                       "application" => ClientConnection.name,
+                       "site_code" => ClientConnection.code,
+                       "token" => ClientConnection.token,
+                       "description" => ClientConnection.description }
+
+        response = RestClient::Request.execute(:method => :post, 
+                                              :url => server_url, 
+                                              :payload => user_params.to_json, 
+                                              :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+        return response   
     end
 
     def self.check_if_token_authenticated
+
+       server_url = "#{ServerConnection.address}/v1/authenticated/#{ClientConnection.token}"
+
+       response = RestClient::Request.execute(:method => :get, 
+                                              :url => server_url,  
+                                              :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+        return response   
     
     end  
     
-    def self.add_new_patient
+    def self.add_new_patient(person)
+      
+      attributes = {}
+      identifiers = {}
+      server_url = "#{ServerConnection.address}/v1/add_patient"
+      
+      person_params = {"given_name" => person.given_name, 
+                       "family_name" => person.family_name,
+                       "gender" => person.gender,
+                       "birthdate" => person.birthdate,
+                       "birthdate_estimated" => person.birthdate_estimated,
+                       "attributes" => attributes,
+                       "current_residence" => person.current_address,
+                       "current_ta" => person.current_ta,
+                       "current_district" => person.current_district,
+                       "home_village" => person.home_village,
+                       "home_ta" => person.home_ta,
+                       "home_district" => person.home_district,
+                       "identifiers" => identifiers,
+                       "token" => ClientConnection.token}
+
+      response = RestClient::Request.execute(:method => :post, 
+                                              :url => server_url, 
+                                              :payload => person_params.to_json, 
+                                              :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+      return response   
 
     end 
 
-    def self.search_by_identifier
+    def self.search_by_identifier(identifier)
+        if identifier.blank? && identifier.length != 6 
+          raise "Invalid NPID"
+        end  
 
+        server_url = "#{ServerConnection.address}/v1/search_by_identifier/#{identifier}/#{ClientConnection.token}"
+
+        response = RestClient::Request.execute(:method => :get, 
+                                                :url => server_url,  
+                                                :headers => {:accept => :json,
+                                                            :content_type => :json}
+                                                )
+        return response   
     end
     
-    def self.search_by_name_and_gender
+    def self.search_by_name_and_gender(give_name, family_name, gender)
+
+      if given_name.blank?
+         raise "Invalid  Given Name" 
+      end 
+
+      if family_name.blank?
+        raise "Invalid Family Name"
+      end
+
+      if gender.blank? || gender.length < 2
+        raise "Invalid Gender"
+      end    
+       
+      server_url = "#{ServerConnection.address}/v1/search_by_name_and_gender"
+
+      person_params = {"given_name" => give_name, 
+                       "family_name" => family_name,
+                       "gender" => gender,
+                       "token" => ClientConnection.token}
+
+      response = RestClient::Request.execute(:method => :post, 
+                                              :url => server_url, 
+                                              :payload => person_params.to_json, 
+                                              :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+      return response   
 
     end
 
-    def self.advanced_search
+    def self.advanced_patient_search(given_name, family_name, gender,birthdate, home_district)
 
+      if given_name.blank?
+         raise "Invalid  Given Name" 
+      end 
+
+      if family_name.blank?
+        raise "Invalid Family Name"
+      end
+
+      if gender.blank? || gender.length < 2
+        raise "Invalid Gender"
+      end
+
+      if birthdate.blank? || !Date.strptime(birthdate, "%Y/%m/%d")
+        raise "Invalid Birthdate"
+      end
+
+      if home_district.blank? || home_district.length < 3
+        raise "Invalid Home District"
+      end     
+       
+      server_url = "#{ServerConnection.address}/v1/advanced_patient_search"
+
+      person_params = {"given_name" => give_name, 
+                       "family_name" => family_name,
+                       "gender" => gender,
+                       "birthdate" => birthdate,
+                       "home_district" => home_district,
+                       "token" => ClientConnection.token}
+
+      response = RestClient::Request.execute(:method => :post, 
+                                              :url => server_url, 
+                                              :payload => person_params.to_json, 
+                                              :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+      return response   
     end     
 
-    def self.update_existing_patient     
+    def self.update_existing_patient(patient)     
 
-    end
-
-    def self.merge_patients
-
-    end
-
-    def self.connection
-      dde_server = GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
-      dde_server_username = GlobalProperty.find_by_property("dde2_server_username").property_value rescue ""
-      dde_server_password = GlobalProperty.find_by_property("dde2_server_password").property_value rescue ""
-      server_url = "http://#{dde_server}/v1/authenticate"
-
-      user_params = {"username" => dde_server_username, "password" => dde_server_password}
+      attributes = {}
+      identifiers = {}
+      server_url = "#{ServerConnection.address}/v1/update_patient"
+      
+      person_params = {"npid" => person.npid, 
+                       "given_name" => person.given_name, 
+                       "family_name" => person.family_name,
+                       "gender" => person.gender,
+                       "birthdate" => person.birthdate,
+                       "birthdate_estimated" => person.birthdate_estimated,
+                       "attributes" => attributes,
+                       "current_residence" => person.current_address,
+                       "current_ta" => person.current_ta,
+                       "current_district" => person.current_district,
+                       "home_village" => person.home_village,
+                       "home_ta" => person.home_ta,
+                       "home_district" => person.home_district,
+                       "identifiers" => identifiers,
+                       "token" => ClientConnection.token}
 
       response = RestClient::Request.execute(:method => :post, 
                                              :url => server_url, 
-                                             :payload => user_params.to_json, 
+                                             :payload => person_params.to_json, 
                                              :headers => {:accept => :json,
-                                                          :content_type => :json
-                                                          })
-      
-      raise response.inspect
+                                                          :content_type => :json}
+                                              )
+      return response   
 
-    end    
+    end
+
+    def self.merge_patients(primary, secondary)
+      attributes = {}
+      identifiers = {}
+      server_url = "#{ServerConnection.address}/v1/merge_records"
+      
+      person_params = {"primary_record" =>{ "npid" => primary.npid, 
+                                            "given_name" => primary.given_name, 
+                                            "family_name" => primary.family_name,
+                                            "gender" => primary.gender,
+                                            "birthdate" => primary.birthdate,
+                                            "birthdate_estimated" => primary.birthdate_estimated,
+                                            "attributes" => attributes,
+                                            "current_residence" => primary.current_address,
+                                            "current_ta" => primary.current_ta,
+                                            "current_district" => primary.current_district,
+                                            "home_village" => primary.home_village,
+                                            "home_ta" => primary.home_ta,
+                                            "home_district" => primary.home_district,
+                                            "identifiers" => identifiers,
+                                            "token" => ClientConnection.token}}
+        
+
+        attributes = {}
+        identifiers = {}
+
+        secondary_params = {"secondary_record" =>{ "npid" => secondary.npid, 
+                                                    "given_name" => secondary.given_name, 
+                                                    "family_name" => secondary.family_name,
+                                                    "gender" => secondary.gender,
+                                                    "birthdate" => secondary.birthdate,
+                                                    "birthdate_estimated" => secondary.birthdate_estimated,
+                                                    "attributes" => attributes,
+                                                    "current_residence" => secondary.current_address,
+                                                    "current_ta" => secondary.current_ta,
+                                                    "current_district" => secondary.current_district,
+                                                    "home_village" => secondary.home_village,
+                                                    "home_ta" => secondary.home_ta,
+                                                    "home_district" => secondary.home_district,
+                                                    "identifiers" => identifiers,
+                                                    "token" => ClientConnection.token}}
+         person_params.merge! secondary_params                                           
+
+         response = RestClient::Request.execute(:method => :post, 
+                                             :url => server_url, 
+                                             :payload => person_params.to_json, 
+                                             :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+      return response 
+
+    end
+
+    def self.mark_record_as_duplicate(identifier)
+
+      if identifier.blank? && identifier.length != 6 
+          raise "Invalid NPID"
+      end  
+
+      server_url = "#{ServerConnection.address}/v1/void_patient/#{identifier}/#{ClientConnection.token}"
+
+      response = RestClient::Request.execute(:method => :delete, 
+                                              :url => server_url,  
+                                              :headers => {:accept => :json,
+                                                          :content_type => :json}
+                                              )
+      return response
+
+    end  
+    
+    class ServerConnection
+      def self.address
+        return GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
+      end
+
+      def self.username
+        return GlobalProperty.find_by_property("dde2_server_username").property_value rescue ""
+      end    
+
+      def self.password
+        return GlobalProperty.find_by_property("dde2_server_password").property_value rescue ""
+      end 
+    end
+
+    class ClientConnection
+      def self.name
+        return "Registration"
+      end
+      
+      def self.code
+        return "KCH"
+      end
+      
+      def self.description
+        return "Patient Registration application at Kamuzu Central Hospital"
+      end
+
+      def self.token
+        return "token"
+      end
+    end  
+
+    class API
+
+    end         
 
  end
 
