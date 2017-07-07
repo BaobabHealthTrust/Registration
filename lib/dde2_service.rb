@@ -126,12 +126,13 @@ module DDE2Service
   end
 
     def self.authenticate_user
-       server_url = "#{ServerConnection.address}/v1/authenticate"
-       user_params = {"username" => ServerConnection.username, 
-                      "password" => ServerConnection.password}
+       #ServerConnection.username
+       #ServerConnection.password
+       user_params = {"username" => "Bless", 
+                      "password" => "blessings"}
                   
        response = RestClient::Request.execute(:method => :post, 
-                                              :url => server_url, 
+                                              :url => API.authenticate_user_url, 
                                               :payload => user_params.to_json, 
                                               :headers => {:accept => :json,
                                                           :content_type => :json}
@@ -141,18 +142,17 @@ module DDE2Service
     end
 
     def self.add_user
-
-        server_url = "#{ServerConnection.address}/v1/add_user"
-
-        user_params = {"username" => ServerConnection.username, 
-                       "password" => ServerConnection.password,
+        #ServerConnection.username, 
+         #ServerConnection.password,
+        user_params = {"username" => "Bless", 
+                       "password" => "blessings",
                        "application" => ClientConnection.name,
                        "site_code" => ClientConnection.code,
                        "token" => ClientConnection.token,
-                       "description" => ClientConnection.description }
+                       "description" => ClientConnection.description}
 
-        response = RestClient::Request.execute(:method => :post, 
-                                              :url => server_url, 
+        response = RestClient::Request.execute(:method => :put, 
+                                              :url => API.add_user_url, 
                                               :payload => user_params.to_json, 
                                               :headers => {:accept => :json,
                                                           :content_type => :json}
@@ -162,10 +162,8 @@ module DDE2Service
 
     def self.check_if_token_authenticated
 
-       server_url = "#{ServerConnection.address}/v1/authenticated/#{ClientConnection.token}"
-
        response = RestClient::Request.execute(:method => :get, 
-                                              :url => server_url,  
+                                              :url => API.check_if_token_authenticated_url,  
                                               :headers => {:accept => :json,
                                                           :content_type => :json}
                                               )
@@ -177,7 +175,6 @@ module DDE2Service
       
       attributes = {}
       identifiers = {}
-      server_url = "#{ServerConnection.address}/v1/add_patient"
       
       person_params = {"given_name" => person.given_name, 
                        "family_name" => person.family_name,
@@ -195,7 +192,7 @@ module DDE2Service
                        "token" => ClientConnection.token}
 
       response = RestClient::Request.execute(:method => :post, 
-                                              :url => server_url, 
+                                              :url => API.add_new_patient_url, 
                                               :payload => person_params.to_json, 
                                               :headers => {:accept => :json,
                                                           :content_type => :json}
@@ -209,10 +206,8 @@ module DDE2Service
           raise "Invalid NPID"
         end  
 
-        server_url = "#{ServerConnection.address}/v1/search_by_identifier/#{identifier}/#{ClientConnection.token}"
-
         response = RestClient::Request.execute(:method => :get, 
-                                                :url => server_url,  
+                                                :url => API.search_by_identifier_url(identifier),  
                                                 :headers => {:accept => :json,
                                                             :content_type => :json}
                                                 )
@@ -233,15 +228,13 @@ module DDE2Service
         raise "Invalid Gender"
       end    
        
-      server_url = "#{ServerConnection.address}/v1/search_by_name_and_gender"
-
       person_params = {"given_name" => give_name, 
                        "family_name" => family_name,
                        "gender" => gender,
                        "token" => ClientConnection.token}
 
       response = RestClient::Request.execute(:method => :post, 
-                                              :url => server_url, 
+                                              :url => API.search_by_name_and_gender_url, 
                                               :payload => person_params.to_json, 
                                               :headers => {:accept => :json,
                                                           :content_type => :json}
@@ -272,8 +265,6 @@ module DDE2Service
         raise "Invalid Home District"
       end     
        
-      server_url = "#{ServerConnection.address}/v1/advanced_patient_search"
-
       person_params = {"given_name" => give_name, 
                        "family_name" => family_name,
                        "gender" => gender,
@@ -282,7 +273,7 @@ module DDE2Service
                        "token" => ClientConnection.token}
 
       response = RestClient::Request.execute(:method => :post, 
-                                              :url => server_url, 
+                                              :url => API.advanced_patient_search_url, 
                                               :payload => person_params.to_json, 
                                               :headers => {:accept => :json,
                                                           :content_type => :json}
@@ -294,8 +285,7 @@ module DDE2Service
 
       attributes = {}
       identifiers = {}
-      server_url = "#{ServerConnection.address}/v1/update_patient"
-      
+
       person_params = {"npid" => person.npid, 
                        "given_name" => person.given_name, 
                        "family_name" => person.family_name,
@@ -313,7 +303,7 @@ module DDE2Service
                        "token" => ClientConnection.token}
 
       response = RestClient::Request.execute(:method => :post, 
-                                             :url => server_url, 
+                                             :url => API.update_existing_patient_url, 
                                              :payload => person_params.to_json, 
                                              :headers => {:accept => :json,
                                                           :content_type => :json}
@@ -325,8 +315,7 @@ module DDE2Service
     def self.merge_patients(primary, secondary)
       attributes = {}
       identifiers = {}
-      server_url = "#{ServerConnection.address}/v1/merge_records"
-      
+    
       person_params = {"primary_record" =>{ "npid" => primary.npid, 
                                             "given_name" => primary.given_name, 
                                             "family_name" => primary.family_name,
@@ -365,10 +354,10 @@ module DDE2Service
          person_params.merge! secondary_params                                           
 
          response = RestClient::Request.execute(:method => :post, 
-                                             :url => server_url, 
-                                             :payload => person_params.to_json, 
-                                             :headers => {:accept => :json,
-                                                          :content_type => :json}
+                                                :url => API.merge_patients_url, 
+                                                :payload => person_params.to_json, 
+                                                :headers => {:accept => :json,
+                                                             :content_type => :json}
                                               )
       return response 
 
@@ -380,10 +369,8 @@ module DDE2Service
           raise "Invalid NPID"
       end  
 
-      server_url = "#{ServerConnection.address}/v1/void_patient/#{identifier}/#{ClientConnection.token}"
-
       response = RestClient::Request.execute(:method => :delete, 
-                                              :url => server_url,  
+                                              :url => API.mark_record_as_duplicate_url(identifier),  
                                               :headers => {:accept => :json,
                                                           :content_type => :json}
                                               )
@@ -393,7 +380,13 @@ module DDE2Service
     
     class ServerConnection
       def self.address
-        return GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
+        if basic_http_auth?
+          server_ip = GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
+          return "http://#{username}:#{password}@#{server_ip}"
+        else
+           return GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
+        end  
+        
       end
 
       def self.username
@@ -402,7 +395,12 @@ module DDE2Service
 
       def self.password
         return GlobalProperty.find_by_property("dde2_server_password").property_value rescue ""
-      end 
+      end
+      
+      def self.basic_http_auth?
+         return GlobalProperty.find_by_property("basic_http_auth").property_value rescue false
+      end  
+
     end
 
     class ClientConnection
@@ -419,12 +417,57 @@ module DDE2Service
       end
 
       def self.token
-        return "token"
+        return "c98NtYoucP3X" #oKcWTbjZIyLu
       end
     end  
 
     class API
 
+      @version = "v1"
+
+      def self.authenticate_user_url
+        return "#{ServerConnection.address}/#{@version}/authenticate"
+      end
+      
+      def self.add_user_url
+        return "#{ServerConnection.address}/#{@version}/add_user"
+      end
+      
+      def self.check_if_token_authenticated_url
+        return "#{ServerConnection.address}/#{@version}/authenticated/#{ClientConnection.token}"
+      end
+
+      def self.search_by_identifier_url(identifier)
+        return "#{ServerConnection.address}/#{@version}/search_by_identifier/#{identifier}/#{ClientConnection.token}"
+      end
+
+      def self.search_by_name_and_gender_url
+        return "#{ServerConnection.address}/#{@version}/search_by_name_and_gender"
+      end
+
+      def self.advanced_patient_search_url
+        return "#{ServerConnection.address}/#{@version}/advanced_patient_search"
+      end
+
+      def self.mark_record_as_duplicate_url(identifier)
+        return "#{ServerConnection.address}/#{@version}/void_patient/#{identifier}/#{ClientConnection.token}"
+      end  
+
+      def self.add_new_patient_url
+         return "#{ServerConnection.address}/#{@version}/add_patient"
+      end
+
+      def self.update_existing_patient_url
+         return "#{ServerConnection.address}/#{@version}/update_patient"
+      end
+
+      def self.merge_patients_url
+         return "#{ServerConnection.address}/#{@version}/merge_records"
+      end  
+
+      def self.headers
+        return {:accept => :json, :content_type => :json}
+      end
     end         
 
  end
