@@ -408,6 +408,32 @@ class GenericPeopleController < ApplicationController
      end if create_from_dde_server
      #............................................................................
 
+     (PatientService.search_demographics_from_remote_dde2(params) || []).each do |data|            
+       national_id = data["person"]["data"]["patient"]["identifiers"]["National id"] rescue nil
+       national_id = data["person"]["value"] if national_id.blank? rescue nil    
+       national_id = data["npid"]["value"] if national_id.blank? rescue nil      
+       national_id = data["person"]["data"]["patient"]["identifiers"]["old_identification_number"] if national_id.blank? rescue nil
+                                                                                
+       next if national_id.blank?                                                
+       results = PersonSearch.new(national_id)                                   
+       results.national_id = national_id                                         
+       results.current_residence = data["person"]["data"]["addresses"]["city_village"]
+       results.person_id = 0                                                     
+       results.home_district = data["person"]["data"]["addresses"]["address2"]   
+       results.neighborhood_cell = data["person"]["data"]["addresses"]["neighborhood_cell"]   
+       results.traditional_authority =  data["person"]["data"]["addresses"]["county_district"]
+       results.name = data["person"]["data"]["names"]["given_name"] + " " + data["person"]["data"]["names"]["family_name"]
+       gender = data["person"]["data"]["gender"]                                 
+       results.occupation = data["person"]["data"]["occupation"]                 
+       results.sex = (gender == 'M' ? 'Male' : 'Female')                         
+       results.birthdate_estimated = (data["person"]["data"]["birthdate_estimated"]).to_i
+       results.birth_date = birthdate_formatted((data["person"]["data"]["birthdate"]).to_date , results.birthdate_estimated)
+       results.birthdate = (data["person"]["data"]["birthdate"]).to_date         
+       results.age = cul_age(results.birthdate.to_date , results.birthdate_estimated)
+       @dde_search_results[results.national_id] = results                            
+       break
+     end if create_from_dde2_server
+
      if not people_ids.blank? or not @dde_search_results.blank?
        redirect_to :action => :create_confirm , :people_ids => people_ids , 
         :user_entered_params => @parameters and return
@@ -448,7 +474,7 @@ class GenericPeopleController < ApplicationController
 
      person = PatientService.create_patient_from_dde2(params)
      success = true
-     
+
     elsif create_from_remote
       person_from_remote = PatientService.create_remote_person(params)
       person = PatientService.create_from_form(person_from_remote["person"]) unless person_from_remote.blank?
@@ -831,6 +857,8 @@ class GenericPeopleController < ApplicationController
       PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
         @remote_duplicates << PatientService.get_dde_person(person)
       end
+    elsif create_from_dde_server
+       return []
     end
 
     @selected_identifier = params[:search_params][:identifier]
