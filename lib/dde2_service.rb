@@ -338,10 +338,8 @@ module DDE2Service
   end
 
   def self.authenticate_user
-      #ServerConnection.username
-      #ServerConnection.password
-      user_params = {"username" => "peter", 
-                    "password" => "blessings"}
+      user_params = {"username" => ServerConnection.username, 
+                    "password" => ServerConnection.password}
                 
       response = RestClient::Request.execute(:method => :post, 
                                             :url => API.authenticate_user_url, 
@@ -354,10 +352,9 @@ module DDE2Service
   end
 
   def self.add_user
-      #ServerConnection.username, 
-        #ServerConnection.password,
-      user_params = {"username" => "peter", 
-                      "password" => "blessings",
+
+      user_params = {"username" => ServerConnection.username, 
+                      "password" => ServerConnection.password,
                       "application" => ClientConnection.name,
                       "site_code" => ClientConnection.code,
                       "token" => ClientConnection.token,
@@ -592,7 +589,6 @@ module DDE2Service
     def self.address
       if basic_http_auth?
         server_ip = GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
-        return "http://peter:blessings@#{server_ip}"
         return "http://#{username}:#{password}@#{server_ip}"
       else
           return GlobalProperty.find_by_property("dde2_server_ip").property_value rescue ""
@@ -609,7 +605,7 @@ module DDE2Service
     end
     
     def self.basic_http_auth?
-        return GlobalProperty.find_by_property("basic_http_auth").property_value rescue true
+        return GlobalProperty.find_by_property("dde2_basic_http_auth").property_value rescue true
     end  
 
   end
@@ -628,7 +624,7 @@ module DDE2Service
     end
 
     def self.token
-      return "c98NtYoucP3X" #oKcWTbjZIyLu #WWXhSDO6J1BU
+      return "c98NtYoucP3X"
     end
   end  
 
