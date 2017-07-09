@@ -1462,9 +1462,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
       return [self.create_from_form(passed["person"])]
     elsif create_from_dde2_server
-
-        
-
+      
         person = JSON.parse(DDE2Service.search_by_identifier(identifier)) rescue nil
         return [] if data.blank?
 
