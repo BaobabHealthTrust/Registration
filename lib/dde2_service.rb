@@ -1,3 +1,4 @@
+include CoreService
 =begin
   Things to watch out for:
 

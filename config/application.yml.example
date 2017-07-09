@@ -4,6 +4,14 @@ production:
  use.filing.number: false
  show.patient.confirmation: true
  is_referral_centre: true
+ dde2_basic_http_auth: true
+ dde2_server_ip: localhost:3009
+ dde2_server_password: regadmin
+ dde2_server_username: regadmin
+ app.name: Patient Registration
+ app.site: KCH
+ app.description: Patient Registration application at KCH
+ app.token:
 
 development:
  create_from_remote: no
@@ -11,6 +19,14 @@ development:
  use.filing.number: false
  show.patient.confirmation: true
  is_referral_centre: true
+ dde2_basic_http_auth: true
+ dde2_server_ip: 192.168.12.70:3009
+ dde2_server_password: blessings
+ dde2_server_username: peter
+ app.name: Patient Registration
+ app.site: KCH
+ app.description: Patient Registration application at KCH
+ app.token:
 
 test: &TEST
  create_from_remote: no
