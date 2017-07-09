@@ -10,7 +10,7 @@ VALUES ("create.from.dde2.server", "true", "Demographics Data Exchange 2 connect
 (SELECT uuid()));
 
 INSERT INTO global_property (property, property_value, description, uuid) 
-VALUES ("dde2_server_ip", "local_host:3009", "Demographics Data Exchange 2 server ip and port", 
+VALUES ("dde2_server_ip", "localhost:3009", "Demographics Data Exchange 2 server ip and port", 
 (SELECT uuid()));
 
 INSERT INTO global_property (property, property_value, description, uuid) 
