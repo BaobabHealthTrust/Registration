@@ -1079,6 +1079,7 @@ EOF
     patient.name = person.names.first.given_name + ' ' + person.names.first.family_name rescue nil
 		patient.first_name = person.names.first.given_name rescue nil
 		patient.last_name = person.names.first.family_name rescue nil
+    patient.middle_name = person.names.first.middle_name rescue nil
     patient.sex = sex(person)
     patient.age = age(person, current_date)
     patient.age_in_months = age_in_months(person, current_date)
@@ -1087,6 +1088,7 @@ EOF
     patient.birthdate_estimated = person.birthdate_estimated
     patient.current_district = person.addresses.first.state_province
     patient.home_district = person.addresses.first.address2
+    patient.current_ta = person.addresses.first.address1
     patient.traditional_authority = person.addresses.first.county_district
     patient.current_residence = person.addresses.first.city_village
     patient.landmark = person.addresses.first.address1
@@ -1104,6 +1106,14 @@ EOF
     patient.race = get_attribute(person, 'Race')
     patient.citizenship = get_attribute(person, 'Citizenship')
     patient
+    
+                     
+                     
+                     
+                     
+                     
+                      
+
   end
 
   def self.art_guardian(patient)

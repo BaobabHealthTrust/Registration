@@ -230,42 +230,50 @@ def self.create_patient_from_dde2(params, dont_recreate_local=false)
     else
       birthdate_estimated = 0
 		end
+      
+      attributes = {}
+      identifiers = {}
+      passed_params = { "given_name" => names_params["given_name"], 
+                        "family_name" => names_params["family_name"],
+                        "middle_name" => (names_params["middle_name"] || "N/A"),
+                        "gender" => (person_params["gender"] == 'M' ? 'Male' : 'Female'),
+                        "birthdate" => birthdate,
+                        "birthdate_estimated" => (birthdate_estimated == 0 ? false : true),
+                        "current_residence" => address_params["closest_landmark"],
+                        "current_ta" =>  (address_params["address1"] || "N/A").squish,
+                        "current_village" => (address_params["city_village"] || "N/A").squish,
+                        "current_district" => address_params["state_province"],
+                        "home_village" => (address_params["neighborhood_cell"] || "N/A").squish,
+                        "home_ta" => address_params["county_district"],
+                        "home_district" => address_params["address2"]}
+      
+      if params["person"]["cell_phone_number"].present?
+        attributes["cell_phone_number"] = params["person"]["cell_phone_number"]
+      end 
 
-        passed_params = { "given_name" => names_params["given_name"], 
-                          "family_name" => names_params["family_name"],
-                          "middle_name" => (names_params["middle_name"] || "N/A"),
-                          "gender" => (person_params["gender"] == 'M' ? 'Male' : 'Female'),
-                          "birthdate" => birthdate,
-                          "birthdate_estimated" => (birthdate_estimated == 0 ? false : true),
-                          "current_residence" => address_params["closest_landmark"],
-                          "current_ta" =>  params["filter"]["t_a"],
-                          "current_village" => address_params["city_village"],
-                          "current_district" => address_params["state_province"],
-                          "home_village" => (address_params["neighborhood_cell"] || "N/A").squish,
-                          "home_ta" => address_params["county_district"],
-                          "home_district" => address_params["address2"],
-                          "identifiers" => {"old_identification_number"=> old_identifier}}
-    
-        if params["person"]["cell_phone_number"].present?
-          attributes["cell_phone_number"] = params["person"]["cell_phone_number"]
-        end 
+      if params["person"]["home_phone_number"].present?
+        attributes["home_phone_number"] = params["person"]["home_phone_number"] 
+      end 
 
-        if params["person"]["home_phone_number"].present?
-          attributes["home_phone_number"] = params["person"]["home_phone_number"] 
-        end 
+      if params["person"]["office_phone_number"].present?
+        attributes["office_phone_number"] = params["person"]["office_phone_number"]
+      end   
 
-        if params["person"]["office_phone_number"].present?
-          attributes["office_phone_number"] = params["person"]["office_phone_number"]
-        end   
+      if params["person"]["occupation"].present?
+        attributes["occupation"] = params["person"]["occupation"]
+      end  
+      
+      if old_identifier.present?
+        identifiers["old_identification_number"] = old_identifier
+      end
 
-        if params["person"]["occupation"].present?
-          attributes["occupation"] = params["person"]["occupation"]
-        end  
+      if attributes.present?
+        passed_params.merge! ({"attributes" => attributes})
+      end  
 
-        if attributes.present?
-          passed_params.merge! ({"attributes" => attributes })
-        end  
-
+      if identifiers.present?
+        passed_params.merge! ({"identifiers" => identifiers})
+      end  
     unless params["remote"]
       national_id = DDE2Service.add_new_patient(passed_params)
     else
@@ -520,24 +528,18 @@ def self.create_patient_from_dde2(params, dont_recreate_local=false)
   end     
 
   def self.update_existing_patient(person)     
-  
     person_params = { "npid" => person.national_id, 
                       "given_name" => person.first_name, 
                       "family_name" => person.last_name,
                       "gender" => person.sex,
-                      "birthdate" => person.birthdate,
-                      "birthdate_estimated" => person.birthdate_estimated,
-                      "attributes" => {"occupation"=> (person.occupation rescue ""),
-                                       "cell_phone_number" => (person.cell_phone_number rescue ""),
-                                       "citizenship" => (person.citizenship rescue ""),
-                                       "race" => (person.race rescue "")},
-                      "current_residence" => person.current_residence,
-                      "current_ta" => (person.current_ta rescue "N/A"),
+                      "birthdate" => (person.birth_date).to_date.strftime("%Y-%m-%d"),
+                      "birthdate_estimated" => (person.birthdate_estimated == 0 ? false : true),
+                      "current_village" => person.current_residence,
+                      "current_ta" => (person.current_ta || "N/A"),
                       "current_district" => person.current_district,
                       "home_village" => person.home_village,
-                      "home_ta" => (person.home_ta rescue "N/A"),
-                      "home_district" => person.home_district,
-                      "identifiers" => {"identifiers"=> {"national_id" => person.national_id}}}
+                      "home_ta" => person.traditional_authority,
+                      "home_district" => person.home_district}
     
     response = RestClient::Request.execute(:method => :post, 
                                             :url => API.update_existing_patient_url, 
