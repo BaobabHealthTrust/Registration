@@ -184,8 +184,7 @@ module DDE2Service
     end
   end
 
-
-    def self.create_patient_from_dde2(params, dont_recreate_local=false)
+def self.create_patient_from_dde2(params, dont_recreate_local=false)
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
 		patient_params = params["person"]["patient"]
@@ -234,18 +233,38 @@ module DDE2Service
 
         passed_params = { "given_name" => names_params["given_name"], 
                           "family_name" => names_params["family_name"],
+                          "middle_name" => (names_params["middle_name"] || "N/A"),
                           "gender" => (person_params["gender"] == 'M' ? 'Male' : 'Female'),
                           "birthdate" => birthdate,
                           "birthdate_estimated" => (birthdate_estimated == 0 ? false : true),
-                          "attributes" => {"occupation"=> params["person"]["occupation"],
-                                          "cell_phone_number" => params["person"]["cell_phone_number"]},
-                          "current_residence" => address_params["neighborhood_cell"],
-                          "current_ta" => address_params["city_village"],
-                          "current_district" => address_params["county_district"],
-                          "home_village" => address_params["address1"],
-                          "home_ta" => address_params["address2"],
-                          "home_district" => address_params["state_province"],
+                          "current_residence" => address_params["closest_landmark"],
+                          "current_ta" =>  params["filter"]["t_a"],
+                          "current_village" => address_params["city_village"],
+                          "current_district" => address_params["state_province"],
+                          "home_village" => (address_params["neighborhood_cell"] || "N/A").squish,
+                          "home_ta" => address_params["county_district"],
+                          "home_district" => address_params["address2"],
                           "identifiers" => {"old_identification_number"=> old_identifier}}
+    
+        if params["person"]["cell_phone_number"].present?
+          attributes["cell_phone_number"] = params["person"]["cell_phone_number"]
+        end 
+
+        if params["person"]["home_phone_number"].present?
+          attributes["home_phone_number"] = params["person"]["home_phone_number"] 
+        end 
+
+        if params["person"]["office_phone_number"].present?
+          attributes["office_phone_number"] = params["person"]["office_phone_number"]
+        end   
+
+        if params["person"]["occupation"].present?
+          attributes["occupation"] = params["person"]["occupation"]
+        end  
+
+        if attributes.present?
+          passed_params.merge! ({"attributes" => attributes })
+        end  
 
     unless params["remote"]
       national_id = DDE2Service.add_new_patient(passed_params)
@@ -383,24 +402,32 @@ module DDE2Service
   end  
     
   def self.add_new_patient(person)
-    
+  
     person_params = {
                       "family_name" => person["family_name"], 
                       "given_name" => person["given_name"], 
                       "gender" => person["gender"],
-                      "attributes" => {},
                       "birthdate" => person["birthdate"].strftime("%Y-%m-%d"),
-                      "identifiers" => {},
                       "birthdate_estimated" => person["birthdate_estimated"],
-                      "current_residence" => "N/A",
-                      "current_village" => "N/A",
-                      "current_ta" => person["current_ta"].squish,
+                      "current_village" => person["current_village"],
+                      "current_ta" => person["current_ta"],
                       "current_district" => person["current_district"],
-                      "home_village" => "N/A",
+                      "home_village" =>  person["home_village"],
                       "home_ta" => person["home_ta"],
                       "home_district" => person["home_district"]
                     }
+  
+    if person["closest_landmark"].present?
+       person_params["current_residence"] = person["closest_landmark"]
+    end
+    if person["attributes"].present?
+       person_params["attributes"] = person["attributes"]
+    end  
 
+    if person["identifiers"].present? 
+      person_params["identifiers"] = person["identifiers"]
+    end
+    
     response = JSON.parse(RestClient.put(API.add_new_patient_url, 
                                           person_params.to_json,
                                           :content_type => "application/json"))  
@@ -493,7 +520,7 @@ module DDE2Service
   end     
 
   def self.update_existing_patient(person)     
-    #raise person.inspect
+  
     person_params = { "npid" => person.national_id, 
                       "given_name" => person.first_name, 
                       "family_name" => person.last_name,
@@ -501,9 +528,9 @@ module DDE2Service
                       "birthdate" => person.birthdate,
                       "birthdate_estimated" => person.birthdate_estimated,
                       "attributes" => {"occupation"=> (person.occupation rescue ""),
-                                        "cell_phone_number" => (person.cell_phone_number rescue ""),
-                                        "citizenship" => (person.citizenship rescue ""),
-                                        "race" => (person.race rescue "")},
+                                       "cell_phone_number" => (person.cell_phone_number rescue ""),
+                                       "citizenship" => (person.citizenship rescue ""),
+                                       "race" => (person.race rescue "")},
                       "current_residence" => person.current_residence,
                       "current_ta" => (person.current_ta rescue "N/A"),
                       "current_district" => person.current_district,
@@ -677,6 +704,83 @@ module DDE2Service
     def self.headers
       return {:accept => :json, :content_type => :json}
     end
+    
+   def self.format_params(params, date)
+    gender = (params['person']['gender'].match(/F/i)) ? "Female" : "Male"
+
+    birthdate = nil
+    if params['person']['age_estimate'].present?
+      birthdate = Date.new(Date.today.year - params['person']['age_estimate'].to_i, 7, 1).strftime("%Y-%m-%d")
+    else
+      params['person']['birth_month'] = params['person']['birth_month'].rjust(2, '0')
+      params['person']['birth_day'] = params['person']['birth_day'].rjust(2, '0')
+      birthdate = "#{params['person']['birth_year']}-#{params['person']['birth_month']}-#{params['person']['birth_day']}"
+    end
+
+    citizenship = [
+                    params['person']['citizenship'],
+                    params['person']['race']
+                  ].delete_if{|d| d.blank?}.first
+    country_of_residence = District.find_by_name(params['person']['addresses']['state_province']).blank? ?
+        params['person']['addresses']['state_province'] : nil
+
+    result = {
+        "family_name"=> params['person']['names']['family_name'],
+        "given_name"=> params['person']['names']['given_name'],
+        "middle_name"=> (params['person']['names']['middle_name'] || "N/A"),
+        "gender"=> gender,
+        "attributes"=> {
+          "occupation"=> params['person']['occupation'],
+          "cell_phone_number"=> params['person']['cell_phone_number'],
+          "citizenship" => citizenship,
+          "country_of_residence" => country_of_residence
+        },
+        "birthdate"=> birthdate,
+        "birthdate_estimated" => (params['person']['age_estimate'].blank? ? false : true),
+        "identifiers"=> {
+        },
+        "current_residence"=> params['person']['addresses']['address1'],
+        "current_village"=> params['person']['addresses']['city_village'],
+        "current_ta"=> params['person']['addresses']['neighborhood_cell'],
+        "current_district"=> params['person']['addresses']['state_province'],
+        "home_village"=> params['person']['addresses']['neighborhood_cell'],
+        "home_ta"=> params['person']['addresses']['county_district'],
+        "home_district"=> params['person']['addresses']['address2']
+    }
+    result['attributes'].each do |k, v|
+      if v.blank? || v.match(/^N\/A$|^null$|^undefined$|^nil$/i)
+        result['attributes'].delete(k)
+      end
+    end
+
+    result['identifiers'].each do |k, v|
+      if v.blank? || v.match(/^N\/A$|^null$|^undefined$|^nil$/i)
+        result['identifiers'].delete(k)
+      end
+    end
+
+    result.each do |k, v|
+      if v.blank? || v.to_s.match(/^null$|^undefined$|^nil$/i)
+        result.delete(k)
+      end
+    end
+
+    if !result['attributes']['country_of_residence'].blank? && !result['attributes']['country_of_residence'].match(/Malawi/i)
+      result['current_district'] = 'Other'
+      result['current_ta'] = 'Other'
+      result['current_village'] = 'Other'
+    end
+
+    if !result['attributes']['citizenship'].blank? && !result['attributes']['citizenship'].match(/Malawi/i)
+      result['home_district'] = 'Other'
+      result['home_ta'] = 'Other'
+      result['home_village'] = 'Other'
+    end
+
+    return result
+  end
+
+
   end         
 
  end

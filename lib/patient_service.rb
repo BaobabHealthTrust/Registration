@@ -1997,21 +1997,51 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     else
       birthdate_estimated = 0
 		end
+    
+    attributes = {}
+    identifiers = {}
 
     passed_params = { "given_name" => names_params["given_name"], 
                       "family_name" => names_params["family_name"],
+                      "middle_name" => (names_params["middle_name"] || "N/A"),
                       "gender" => (person_params["gender"] == 'M' ? 'Male' : 'Female'),
                       "birthdate" => birthdate,
                       "birthdate_estimated" => (birthdate_estimated == 0 ? false : true),
-                      "attributes" => {"occupation"=> params["person"]["occupation"],
-                                       "cell_phone_number" => params["person"]["cell_phone_number"]},
-                      "current_residence" => address_params["neighborhood_cell"],
-                      "current_ta" => address_params["city_village"],
-                      "current_district" => address_params["county_district"],
-                      "home_village" => address_params["address1"],
-                      "home_ta" => address_params["address2"],
-                      "home_district" => address_params["state_province"],
-                      "identifiers" => {"old_identification_number"=> old_identifier}}
+                      "current_residence" => address_params["closest_landmark"],
+                      "current_ta" =>  params["filter"]["t_a"],
+                      "current_village" => address_params["city_village"],
+                      "current_district" => address_params["state_province"],
+                      "home_village" => (address_params["neighborhood_cell"] || "N/A").squish,
+                      "home_ta" => address_params["county_district"],
+                      "home_district" => address_params["address2"]}
+    
+    if params["person"]["cell_phone_number"].present?
+       attributes["cell_phone_number"] = params["person"]["cell_phone_number"]
+    end 
+
+    if params["person"]["home_phone_number"].present?
+       attributes["home_phone_number"] = params["person"]["home_phone_number"] 
+    end 
+
+    if params["person"]["office_phone_number"].present?
+       attributes["office_phone_number"] = params["person"]["office_phone_number"]
+    end   
+
+    if params["person"]["occupation"].present?
+       attributes["occupation"] = params["person"]["occupation"]
+    end  
+    
+    if old_identifier.present?
+      identifiers["old_identification_number"] = old_identifier
+    end
+
+    if attributes.present?
+       passed_params.merge! ({"attributes" => attributes})
+    end  
+
+    if identifiers.present?
+       passed_params.merge! ({"identifiers" => identifiers})
+    end  
 
     unless params["remote"]
       national_id = DDE2Service.add_new_patient(passed_params)
@@ -2038,8 +2068,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     given_name = params[:person][:names]['given_name']
     family_name = params[:person][:names]['family_name']
     gender = params[:person]['gender']   
-    raise params[:person].inspect            
-
+    
     people = JSON.parse(DDE2Service.search_by_name_and_gender(give_name, family_name, gender))
                                                                                                              
   end
