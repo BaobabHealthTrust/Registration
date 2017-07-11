@@ -476,7 +476,11 @@ class GenericPeopleController < ApplicationController
     elsif create_from_dde2_server 
 
      person = PatientService.create_patient_from_dde2(params)
-     success = true
+     if person["return_path"].present? && person['status'] == 409
+          redirect_to :action => 'conflicts', :response => person and return
+     else
+        success = true
+     end   
 
     elsif create_from_remote
       person_from_remote = PatientService.create_remote_person(params)
@@ -524,6 +528,17 @@ class GenericPeopleController < ApplicationController
     else
       # Does this ever get hit?
       redirect_to :action => "index"
+    end
+  end
+  
+  def conflicts
+    response = params[:response]
+    @return_path = response[:return_path]
+    @local_duplicates = [params[:local_data]]
+    @remote_duplicates = response['data']
+
+    @local_duplicates.each do |r|
+      r['return_path'] = response['return_path']
     end
   end
 

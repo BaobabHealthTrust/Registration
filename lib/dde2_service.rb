@@ -435,17 +435,21 @@ def self.create_patient_from_dde2(params, dont_recreate_local=false)
     if person["identifiers"].present? 
       person_params["identifiers"] = person["identifiers"]
     end
-    
-    response = JSON.parse(RestClient.put(API.add_new_patient_url, 
-                                          person_params.to_json,
-                                          :content_type => "application/json"))  
 
-    if response && response["status"] == 201
-      return response["data"]["npid"]
-    else
-      return "#{response['status']} : #{response['message']}"
-    end 
-    
+    data =  {}
+
+    RestClient.put(API.add_new_patient_url, 
+                   person_params.to_json,
+                   :content_type => "application/json"){|response, request, result|
+                   response = JSON.parse(response) rescue response
+
+                   if response['status'] == 201
+                      data = response['data']
+                   elsif response['status'] == 409
+                      data = response
+                   end
+                  }
+    return data
   end 
 
   def self.search_by_identifier(identifier)
