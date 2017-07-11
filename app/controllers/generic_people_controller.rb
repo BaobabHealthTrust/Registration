@@ -477,7 +477,7 @@ class GenericPeopleController < ApplicationController
 
      person = PatientService.create_patient_from_dde2(params)
      if person["return_path"].present? && person['status'] == 409
-          redirect_to :action => 'conflicts', :response => person and return
+          redirect_to :action => 'conflicts', :response => person, :local_data => params and return
      else
         success = true
      end   
@@ -537,7 +537,7 @@ class GenericPeopleController < ApplicationController
     @local_duplicates = [params[:local_data]]
     @remote_duplicates = response['data']
 
-    @local_duplicates.each do |r|
+    (@local_duplicates || []).each do |r|
       r['return_path'] = response['return_path']
     end
   end
