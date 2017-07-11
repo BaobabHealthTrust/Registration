@@ -402,10 +402,10 @@ def self.create_patient_from_dde2(params, dont_recreate_local=false)
   end  
     
   def self.add_new_patient(person)
-  
     person_params = {
                       "family_name" => person["family_name"], 
                       "given_name" => person["given_name"], 
+                      "middle_name" => person["middle_name"], 
                       "gender" => person["gender"],
                       "birthdate" => person["birthdate"].strftime("%Y-%m-%d"),
                       "birthdate_estimated" => person["birthdate_estimated"],

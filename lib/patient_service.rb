@@ -2000,7 +2000,6 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
     
     attributes = {}
     identifiers = {}
-
     passed_params = { "given_name" => names_params["given_name"], 
                       "family_name" => names_params["family_name"],
                       "middle_name" => (names_params["middle_name"] || "N/A"),
@@ -2009,7 +2008,7 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
                       "birthdate_estimated" => (birthdate_estimated == 0 ? false : true),
                       "current_residence" => address_params["closest_landmark"],
                       "current_ta" =>  params["filter"]["t_a"],
-                      "current_village" => address_params["city_village"],
+                      "current_village" => (address_params["city_village"] || "N/A").squish,
                       "current_district" => address_params["state_province"],
                       "home_village" => (address_params["neighborhood_cell"] || "N/A").squish,
                       "home_ta" => address_params["county_district"],
