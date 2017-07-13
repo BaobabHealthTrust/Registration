@@ -120,12 +120,6 @@ module DDE2Service
         "given_name"=> params['person']['names']['given_name'],
         "middle_name"=> (params['person']['names']['middle_name'] || "N/A"),
         "gender"=> gender,
-        "attributes"=> {
-          "occupation"=> params['person']['occupation'],
-          "cell_phone_number"=> params['person']['cell_phone_number'],
-          "citizenship" => citizenship,
-          "country_of_residence" => country_of_residence
-        },
         "birthdate"=> birthdate,
         "birthdate_estimated" => (params['person']['age_estimate'].blank? ? false : true),
         "identifiers"=> ids,
@@ -137,6 +131,10 @@ module DDE2Service
         "home_ta"=> params['person']['addresses']['county_district'],
         "home_district"=> params['person']['addresses']['address2']
     }
+    
+    
+
+
 
     result['attributes'].each do |k, v|
       if v.blank? || v.match(/^N\/A$|^null$|^undefined$|^nil$/i)
