@@ -139,19 +139,7 @@ module DDE2Service
       end
     end
 
-    if !result['attributes']['country_of_residence'].blank? && !result['attributes']['country_of_residence'].match(/Malawi/i)
-      result['current_district'] = 'Other'
-      result['current_ta'] = 'Other'
-      result['current_village'] = 'Other'
-    end
-
-    if !result['attributes']['citizenship'].blank? && !result['attributes']['citizenship'].match(/Malawi/i)
-      result['home_district'] = 'Other'
-      result['home_ta'] = 'Other'
-      result['home_village'] = 'Other'
-    end
-
-    result
+    return result
   end
 
   def self.is_valid?(params)

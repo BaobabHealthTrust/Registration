@@ -406,124 +406,20 @@ class GenericPeopleController < ApplicationController
   end
 
 
-   def create
+def create
 
-    if confirm_before_creating and not params[:force_create] == 'true' and params[:relation].blank?
-     @parameters = params
-     birthday_params = params.reject{|key,value| key.match(/gender/) }
-     unless birthday_params.empty?                                               
-       if params[:person]['birth_year'] == "Unknown"   
-         birthdate = Date.new(Date.today.year - params[:person]["age_estimate"].to_i, 7, 1)
-       else                                                                      
-         year = params[:person]["birth_year"].to_i 
-         month = params[:person]["birth_month"] 
-         day = params[:person]["birth_day"].to_i
+    if District.find_by_name(params['person']['addresses']['state_province']).blank?
+      params['person']['country_of_residence'] = params['person']['addresses']['state_province']
+      params['person']['addresses']['state_province'] = ''
+      params['person']['addresses']['city_village'] = ''
+    end
 
-         month_i = (month || 0).to_i                                                 
-         month_i = Date::MONTHNAMES.index(month) if month_i == 0 || month_i.blank?   
-         month_i = Date::ABBR_MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
-                                                     
-         if month_i == 0 || month == "Unknown"                                       
-           birthdate = Date.new(year.to_i,7,1)                                
-         elsif day.blank? || day == "Unknown" || day == 0                            
-           birthdate = Date.new(year.to_i,month_i,15)                         
-         else                                                                        
-           birthdate = Date.new(year.to_i,month_i,day.to_i)                   
-         end
-       end                                                                       
-     end                                                                         
-     
-     start_birthdate = (birthdate - 5.year)
-     end_birthdate   = (birthdate + 5.year)                                                                   
+    if !params['person']['race'].blank?
+      params['person']['address2'] = ''
+      params['person']['county_district'] = ''
+      params['person']['neighborhood_cell'] = ''
+    end
 
-     given_name_code = @parameters[:person][:names]['given_name'].soundex
-     family_name_code = @parameters[:person][:names]['family_name'].soundex
-     gender = @parameters[:person]['gender']
-     ta = @parameters[:person][:addresses]['county_district']
-     home_district = @parameters[:person][:addresses]['address2']       
-     home_village = @parameters[:person][:addresses]['neighborhood_cell']
-
-     people = Person.find(:all,:joins =>"INNER JOIN person_name pn 
-       ON person.person_id = pn.person_id
-       INNER JOIN person_name_code pnc ON pnc.person_name_id = pn.person_name_id
-       INNER JOIN person_address pad ON pad.person_id = person.person_id",
-       :conditions =>["(pad.address2 LIKE (?) OR pad.county_district LIKE (?)
-       OR pad.neighborhood_cell LIKE (?)) AND pnc.given_name_code LIKE (?)
-       AND pnc.family_name_code LIKE (?) AND person.gender = '#{gender}'
-       AND (person.birthdate >= ? AND person.birthdate <= ?)","%#{home_district}%",
-       "%#{ta}%","%#{home_village}%","%#{given_name_code}%","%#{family_name_code}%",
-       start_birthdate,end_birthdate],:group => "person.person_id")
-
-     if people
-       people_ids = []
-       (people).each do |person|
-         people_ids << person.id
-       end
-     end
-
-    
-     #............................................................................
-     @dde_search_results = {}
-     (PatientService.search_demographics_from_remote(params) || []).each do |data|            
-       national_id = data["person"]["data"]["patient"]["identifiers"]["National id"] rescue nil
-       national_id = data["person"]["value"] if national_id.blank? rescue nil    
-       national_id = data["npid"]["value"] if national_id.blank? rescue nil      
-       national_id = data["person"]["data"]["patient"]["identifiers"]["old_identification_number"] if national_id.blank? rescue nil
-                                                                                
-       next if national_id.blank?                                                
-       results = PersonSearch.new(national_id)                                   
-       results.national_id = national_id                                         
-       results.current_residence = data["person"]["data"]["addresses"]["city_village"]
-       results.person_id = 0                                                     
-       results.home_district = data["person"]["data"]["addresses"]["address2"]   
-       results.neighborhood_cell = data["person"]["data"]["addresses"]["neighborhood_cell"]   
-       results.traditional_authority =  data["person"]["data"]["addresses"]["county_district"]
-       results.name = data["person"]["data"]["names"]["given_name"] + " " + data["person"]["data"]["names"]["family_name"]
-       gender = data["person"]["data"]["gender"]                                 
-       results.occupation = data["person"]["data"]["occupation"]                 
-       results.sex = (gender == 'M' ? 'Male' : 'Female')                         
-       results.birthdate_estimated = (data["person"]["data"]["birthdate_estimated"]).to_i
-       results.birth_date = birthdate_formatted((data["person"]["data"]["birthdate"]).to_date , results.birthdate_estimated)
-       results.birthdate = (data["person"]["data"]["birthdate"]).to_date         
-       results.age = cul_age(results.birthdate.to_date , results.birthdate_estimated)
-       @dde_search_results[results.national_id] = results                            
-       break
-     end if create_from_dde_server
-     #............................................................................
-
-     (PatientService.search_demographics_from_remote_dde2(params) || []).each do |data|            
-       national_id = data["person"]["data"]["patient"]["identifiers"]["National id"] rescue nil
-       national_id = data["person"]["value"] if national_id.blank? rescue nil    
-       national_id = data["npid"]["value"] if national_id.blank? rescue nil      
-       national_id = data["person"]["data"]["patient"]["identifiers"]["old_identification_number"] if national_id.blank? rescue nil
-                                                                                
-       next if national_id.blank?                                                
-       results = PersonSearch.new(national_id)                                   
-       results.national_id = national_id                                         
-       results.current_residence = data["person"]["data"]["addresses"]["city_village"]
-       results.person_id = 0                                                     
-       results.home_district = data["person"]["data"]["addresses"]["address2"]   
-       results.neighborhood_cell = data["person"]["data"]["addresses"]["neighborhood_cell"]   
-       results.traditional_authority =  data["person"]["data"]["addresses"]["county_district"]
-       results.name = data["person"]["data"]["names"]["given_name"] + " " + data["person"]["data"]["names"]["family_name"]
-       gender = data["person"]["data"]["gender"]                                 
-       results.occupation = data["person"]["data"]["occupation"]                 
-       results.sex = (gender == 'M' ? 'Male' : 'Female')                         
-       results.birthdate_estimated = (data["person"]["data"]["birthdate_estimated"]).to_i
-       results.birth_date = birthdate_formatted((data["person"]["data"]["birthdate"]).to_date , results.birthdate_estimated)
-       results.birthdate = (data["person"]["data"]["birthdate"]).to_date         
-       results.age = cul_age(results.birthdate.to_date , results.birthdate_estimated)
-       @dde_search_results[results.national_id] = results                            
-       break
-     end if create_from_dde2_server
-
-     if not people_ids.blank? or not @dde_search_results.blank?
-       redirect_to :action => :create_confirm , :people_ids => people_ids , 
-        :user_entered_params => @parameters and return
-     end
-   end
-
-    success = false
     Person.session_datetime = session[:datetime].to_date rescue Date.today
     identifier = params[:identifier] rescue nil
     if identifier.blank?
@@ -531,36 +427,29 @@ class GenericPeopleController < ApplicationController
     end rescue nil
 
     if create_from_dde_server
-      unless identifier.blank?
-        params[:person].merge!({"identifiers" => {"National id" => identifier}})
-        success = true
-        person = PatientService.create_from_form(params[:person])
+      formatted_demographics = DDE2Service.format_params(params, Person.session_datetime)
 
-        if identifier.length != 6
-           patient = DDEService::Patient.new(person.patient)
-           national_id_replaced = patient.check_old_national_id(identifier)
+     if DDE2Service.is_valid?(formatted_demographics)
+        response = DDE2Service.create_from_dde2(formatted_demographics)
+        if !response.blank? && !response['status'].blank? && !response['return_path'].blank? && response['status'] == 409
+          redirect_to :action => 'conflicts', :local_data => formatted_demographics and return
         end
 
+        if !response.blank? && response['npid']
+          person = PatientService.create_from_form(params[:person])
+          PatientIdentifier.create(:identifier =>  response['npid'],
+                                   :patient_id => person.person_id,
+                                   :creator => User.current.id,
+                                   :location_id => session[:location_id],
+                                   :identifier_type => PatientIdentifierType.find_by_name("National id").id
+          )
+        end
+
+       success = true
       else
-        success = true
+        flash[:error] = "Invalid demographics format"
+        redirect_to "/" and return
       end
-
-    #If we are creating from DDE then we must create a footprint of the 
-    #just created patient to enable future                                                              
-    DDEService.create_footprint(PatientService.get_patient(person).national_id, 'Registration')
-
-    #for now BART2 will use BART1 for patient/person creation until we upgrade BART1 to 2
-    #if GlobalProperty.find_by_property('create.from.remote') and property_value == 'yes'
-    #then we create person from remote machine
-    
-    elsif create_from_dde2_server 
-
-     person = PatientService.create_patient_from_dde2(params)
-     if person["return_path"].present? && person['status'] == 409
-          redirect_to :action => 'conflicts', :response => person, :local_data => format_person_params(params) and return
-     else
-        success = true
-     end   
 
     elsif create_from_remote
       person_from_remote = PatientService.create_remote_person(params)
@@ -568,8 +457,20 @@ class GenericPeopleController < ApplicationController
 
       if !person.blank?
         success = true
-        #person.patient.remote_national_id
-        PatientService.get_remote_national_id(person.patient)
+
+        if person_from_remote
+
+            remote_id = person_from_remote["person"]["patient"]["identifiers"]["National id"] rescue nil
+            PatientIdentifier.create(:identifier => remote_id,
+                                     :patient_id => person.person_id,
+                                     :creator => User.current.id,
+                                     :location_id => session[:location_id],
+                                     :identifier_type => PatientIdentifierType.find_by_name("National id").id
+            ) if !id.blank?
+        else
+            PatientService.get_remote_national_id(person.patient)
+        end
+
       end
     else
       success = true
@@ -578,18 +479,26 @@ class GenericPeopleController < ApplicationController
     end
 
     if params[:person][:patient] && success
+
+      if params[:encounter]
+        encounter = Encounter.new(params[:encounter])
+	   		encounter.patient_id = person.id
+        encounter.encounter_datetime = session[:datetime] unless session[:datetime].blank?
+        encounter.save
+      end rescue nil
+
       PatientService.patient_national_id_label(person.patient)
       unless (params[:relation].blank?)
         redirect_to search_complete_url(person.id, params[:relation]) and return
       else
 
-       tb_session = false
-       if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
-        current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
-         current_user.activities.include?('Manage TB Reception Visits') or current_user.activities.include?('Manage TB Registration Visits') or
-          current_user.activities.include?('Manage HIV Status Visits')
-         tb_session = true
-       end
+        tb_session = false
+        if current_user.activities.include?('Manage Lab Orders') or current_user.activities.include?('Manage Lab Results') or
+            current_user.activities.include?('Manage Sputum Submissions') or current_user.activities.include?('Manage TB Clinic Visits') or
+            current_user.activities.include?('Manage TB Reception Visits') or current_user.activities.include?('Manage TB Registration Visits') or
+            current_user.activities.include?('Manage HIV Status Visits')
+          tb_session = true
+        end
 
         #raise use_filing_number.to_yaml
         if use_filing_number and not tb_session
