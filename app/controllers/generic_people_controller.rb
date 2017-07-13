@@ -291,40 +291,34 @@ class GenericPeopleController < ApplicationController
 
 	# This method is just to allow the select box to submit, we could probably do this better
 	def select
+
     if !params[:person][:patient][:identifiers]['National id'].blank? &&
         !params[:person][:names][:given_name].blank? &&
-          !params[:person][:names][:family_name].blank?
+        !params[:person][:names][:family_name].blank?
       redirect_to :action => :search, :identifier => params[:person][:patient][:identifiers]['National id']
       return
     end rescue nil
 
-    if !params[:identifier].blank? && !params[:given_name].blank? && !params[:family_name].blank?
-      redirect_to :action => :search, :identifier => params[:identifier]
-    elsif params[:person][:id] != '0' && Person.find(params[:person][:id]).dead == 1
-      redirect_to :controller => :patients, :action => :show, :id => params[:person][:id]
-    else
-      if params[:person][:id] != '0'
-        person = Person.find(params[:person][:id])
-        patient = DDEService::Patient.new(person.patient)
-        patient_id = PatientService.get_patient_identifier(person.patient, "National id")
-        if patient_id.length != 6 and create_from_dde_server
-          patient.check_old_national_id(patient_id)
-          #creating patient's footprint so that we can track them later when they visit other sites
-          DDEService.create_footprint(PatientService.get_patient(person).national_id, 'Registration')
-          print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
-        elsif patient_id.length != 6 and create_from_dde2_server
-          patient = DDE2Service::Patient.new(person.patient)
-          national_id_replaced = patient.check_old_national_id(patient_id)
-          print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient)) and return
-        end
-        
-      end
-      
-      redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless params[:person][:id].blank? || params[:person][:id] == '0'
-
-      redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
+    if !params[:identifier].blank?
+      person = DDE2Service.search_all_by_identifier(params[:identifier]).patient rescue nil
     end
-	end
+
+    if params[:person][:id] != '0'
+      person = Person.find(params[:person][:id]) if person.blank?
+      patient = person.patient
+      patient_bean = PatientService.get_patient(person)
+      old_npid = patient_bean.national_id
+      
+      result = DDE2Service.push_to_dde2(patient_bean)
+
+      if !result.blank? && !result['npid'].blank? && result['npid'].strip != old_npid.strip
+        print_and_redirect("/patients/national_id_label?patient_id=#{patient.id}", next_task(patient)) and return
+      end
+    end
+    redirect_to search_complete_url(params[:person][:id], params[:relation]) and return unless patient.blank?
+
+    redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
+  end
    
   def force_create
 =begin
@@ -1026,31 +1020,24 @@ def create
 private
   
 	def search_complete_url(found_person_id, primary_person_id)
-		unless (primary_person_id.blank?)
-			# Notice this swaps them!
-			new_relationship_url(:patient_id => primary_person_id, :relation => found_person_id)
-		else
-			#
-			# Hack reversed to continue testing overnight
-			#
-			# TODO: This needs to be redesigned!!!!!!!!!!!
-			#
-			#url_for(:controller => :encounters, :action => :new, :patient_id => found_person_id)
-			patient = Person.find(found_person_id).patient
-      if create_from_dde_server
-        p = DDEService::Patient.new(patient)
-        identifier_type = PatientIdentifierType.find_by_name("National id")
-        patient_national_id = patient.patient_identifiers.find_by_identifier_type(identifier_type.id).identifier rescue nil
-        national_id_replaced = p.check_old_national_id(patient_national_id) unless patient_national_id.blank?
+    unless (primary_person_id.blank?)
+      # Notice this swaps them!
+      new_relationship_url(:patient_id => primary_person_id, :relation => found_person_id)
+    else
+      #
+      # Hack reversed to continue testing overnight
+      #
+      # TODO: This needs to be redesigned!!!!!!!!!!!
+      #
+      #url_for(:controller => :encounters, :action => :new, :patient_id => found_person_id)
+      patient = Person.find(found_person_id).patient
+      show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
+      if show_confirmation
+        url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
+      else
+        next_task(patient)
       end
-
-			show_confirmation = CoreService.get_global_property_value('show.patient.confirmation').to_s == "true" rescue false
-			if show_confirmation
-				url_for(:controller => :people, :action => :confirm , :found_person_id =>found_person_id)
-			else
-				next_task(patient)
-			end
-		end
-	end
+    end
+  end
 end
  
