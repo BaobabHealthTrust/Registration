@@ -401,7 +401,7 @@ class GenericPeopleController < ApplicationController
 
 
 def create
-
+     
     if District.find_by_name(params['person']['addresses']['state_province']).blank?
       params['person']['country_of_residence'] = params['person']['addresses']['state_province']
       params['person']['addresses']['state_province'] = ''
