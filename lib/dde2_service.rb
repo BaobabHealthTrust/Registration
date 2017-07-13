@@ -1,3 +1,18 @@
+=begin
+	By Kenneth Kapundi
+	13-Jun-2016
+
+	DESC:
+		This service acts as a wrapper for all DDE2 interactions 
+		between the application and the DDE2 proxy at a site
+		This include:	
+			A. User creation and authentication
+			B. Creating new patient to DDE
+			C. Updating already existing patient to DDE2
+			D. Handling duplicates in DDE2
+			E. Any other DDE2 related functionality to arise
+=end
+
 require 'rest-client'
 
 module DDE2Service
@@ -56,7 +71,7 @@ module DDE2Service
     response = RestClient.put(url,{
                   "username" => dde2_configs["dde_username"],  "password" => dde2_configs["dde_password"],
                   "application" => dde2_configs["application_name"], "site_code" => dde2_configs["site_code"],
-                  "description" => dde2_configs["description"]
+                  "description" => "AnteNatal Clinic"
               }.to_json, :content_type => 'application/json')
 
     if response['status'] == 201
@@ -96,6 +111,9 @@ module DDE2Service
 
     citizenship = params['person']['race']
     country_of_residence = params['person']['country_of_residence']
+    ids = params['identifier'].present?  ? {
+        'National id' => params['identifier']
+    } : {}
 
     result = {
         "family_name"=> params['person']['names']['family_name'],
@@ -110,8 +128,7 @@ module DDE2Service
         },
         "birthdate"=> birthdate,
         "birthdate_estimated" => (params['person']['age_estimate'].blank? ? false : true),
-        "identifiers"=> {
-        },
+        "identifiers"=> ids,
         "current_residence"=> params['person']['addresses']['address1'],
         "current_village" => params['person']['addresses']['city_village'],
         "current_ta"=> (params['filter']['t_a']),
@@ -138,8 +155,8 @@ module DDE2Service
         result.delete(k) unless [true, false].include?(v)
       end
     end
-
-    return result
+    
+    result
   end
 
   def self.is_valid?(params)
@@ -197,12 +214,33 @@ module DDE2Service
     data
   end
 
+  def self.strip(hash)
+    result = hash
+    result['birthdate'] = result['birthdate'].to_date.strftime("%Y-%m-%d") rescue  result['birthdate']
+    (result['attributes'] || {}).each do |k, v|
+      if v.blank? || v.match(/^N\/A$|^null$|^undefined$|^nil$/i)
+        result['attributes'].delete(k)  unless [true, false].include?(v)
+      end
+    end
+
+    (result['identifiers'] || {}).each do |k, v|
+      if v.blank? || v.match(/^N\/A$|^null$|^undefined$|^nil$/i)
+        result['identifiers'].delete(k)  unless [true, false].include?(v)
+      end
+    end
+
+    result.each do |k, v|
+      if v.blank? || v.to_s.match(/^null$|^undefined$|^nil$/i)
+        result.delete(k) unless [true, false].include?(v)
+      end
+    end
+    result
+  end
+
 
   def self.force_create_from_dde2(params, path)
     url = "#{self.dde2_url}#{path}"
     params['token'] = self.token
-    params['identifiers'] = {}
-
     params.delete_if{|k,v| ['npid', 'return_path'].include?(k)}
 
     data = {}
@@ -288,15 +326,15 @@ module DDE2Service
   end
 
   def self.update_local_demographics(data)
-
+    data
   end
 
   def self.push_to_dde2(patient_bean)
 
     from_dde2 = self.search_by_identifier(patient_bean.national_id)
 
-    if from_dde2.length > 0
-      self.update_local_demographics(from_dde2[0])
+    if from_dde2.length > 0 && !patient_bean.national_id.strip.match(/^P\d+$/)
+      return self.update_local_demographics(from_dde2[0])
     else
       result = {
           "family_name"=> patient_bean.last_name,
@@ -342,10 +380,14 @@ module DDE2Service
 
       data = self.create_from_dde2(result)
 
+      if data.present? && data['return_path']
+        data = self.force_create_from_dde2(result, data['return_path'])
+      end
+
       if !data.blank?
         npid_type = PatientIdentifierType.find_by_name('National id').id
-        npid = PatientIdentifier.find_by_identifier_and_identifier_type(patient_bean.national_id,
-                npid_type)
+        npid = PatientIdentifier.find_by_identifier_and_identifier_type_and_patient_id(patient_bean.national_id,
+                npid_type, patient_bean.patient_id)
 
         npid.update_attributes(
             :voided => true,
@@ -353,7 +395,6 @@ module DDE2Service
             :void_reason => 'Reassigned NPID',
             :date_voided => Time.now
         )
-
         PatientIdentifier.create(
             :patient_id => npid.patient_id,
             :creator => User.current.id,
