@@ -25,25 +25,17 @@ class PeopleController < GenericPeopleController
 
 				found_person = local_results.first
 
-        if (found_person.gender rescue "") == "M"
-          redirect_to "/clinic/no_males" and return
-        end
-
 			else
 				# TODO - figure out how to write a test for this
 				# This is sloppy - creating something as the result of a GET
 				if create_from_remote        
-					found_person_ = ANCService.search_by_identifier(params[:identifier]).first rescue nil
-
-					#found_person = ANCService.create_from_form(found_person_data['person']) unless found_person_data.nil?
+					found_person_data = PatientService.find_remote_person_by_identifier(params[:identifier])
+          found_person = PatientService.create_from_form(found_person_data['person']) unless found_person_data.blank?
 				end 
 			end
 
       found_person = local_results.first if !found_person.blank?
 
-      if (found_person.gender rescue "") == "M"
-        redirect_to "/clinic/no_males" and return
-      end
       if found_person
         if create_from_dde_server
           patient = found_person.patient
@@ -128,33 +120,47 @@ class PeopleController < GenericPeopleController
 
   def conflicts
 
-    response = DDE2Service.create_from_dde2(params[:local_data])
+    response = DDE2Service.create_from_dde2(params[:local_data]) if params[:local_data].present?
 
-    @return_path = response[:return_path]
-    @local_duplicates = [params[:local_data]]
-    @remote_duplicates = response['data']
+    if params[:identifier].present?
+      response = DDE2Service.search_by_identifier(params['identifier'])
+    end
 
-    @local_duplicates.each do |r|
+    @return_path = response[:return_path] rescue nil
+    @local_duplicates = ([params[:local_data]] rescue []).compact
+    @remote_duplicates = response['data'] rescue []
+
+    (@local_duplicates || []).each do |r|
       r['return_path'] = response['return_path']
     end
 
     d = params[:local_data]
+    if d.blank?
+      @local_found = PatientIdentifier.find_by_sql("SELECT *, patient_id AS person_id FROM patient_identifier
+                      WHERE identifier = '#{params[:identifier]}' AND identifier_type = 3 AND voided = 0")
+
+    else
     gender = d['gender'].match('F') ? 'F' : 'M'
-    @local_found = (Person.find_by_sql("SELECT * from Person p
-                                   INNER JOIN person_name pn on pn.person_id = p.person_id pn.voided != 1
-                                   INNER JOIN person_address pd ON p.person_id = pd.person_id pd.voided != 1
+    @local_found = Person.find_by_sql("SELECT * from person p
+                                   INNER JOIN person_name pn on pn.person_id = p.person_id AND pn.voided != 1
+                                   INNER JOIN person_address pd ON p.person_id = pd.person_id AND pd.voided != 1
                                    WHERE p.voided != 1 AND pn.given_name = '#{d['given_name']}' AND pn.family_name = '#{d['family_name']}'
                                     AND pd.address2 = '#{d['home_district']}'
-                                    AND p.gender = '#{gender}' AND p.birthdate = #{d['birthdate'].to_date.strftime('%Y-%m-%d')}
+                                    AND p.gender = '#{gender}' AND p.birthdate = '#{d['birthdate'].to_date.strftime('%Y-%m-%d')}'
 
-                                      ") || []).each do |p|
+                                      ")
+
+    end
+
+    (@local_found || []).each do |p|
       p = Person.find(p.person_id) rescue next
       patient_bean = PatientService.get_patient(p)
-      remote_check = DDE2Service.search_by_identifier(patient_bean.national_id)
-      h = {
+
+      @local_duplicates << {
           "family_name"=> patient_bean.last_name,
           "given_name"=> patient_bean.first_name,
           "npid" => patient_bean.national_id,
+          "patient_id" => patient_bean.patient_id,
           "gender"=> patient_bean.sex,
           "attributes"=> {
               "occupation"=> (patient_bean.occupation rescue ""),
@@ -171,13 +177,8 @@ class PeopleController < GenericPeopleController
           "home_ta"=> patient_bean.traditional_authority,
           "home_district"=> patient_bean.home_district
       }
-
-      if remote_check.length > 0
-        h['npid'] = remote_check[0]['npid']
-      end
-
-      @local_duplicates << h
     end
+
   end
 
   def force_create

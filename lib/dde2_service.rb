@@ -514,21 +514,24 @@ module DDE2Service
 
     person.names.create(names_params)
     person.addresses.create(address_params) unless address_params.empty? rescue nil
-
-    params['attributes'].each do |type, value|
-      person.person_attributes.create(
-          :person_attribute_type_id => PersonAttributeType.find_by_name(type.humanize).person_attribute_type_id,
-          :value => value) unless value.blank? rescue nil
+    
+    if params['attributes'].present?
+      params['attributes'].each do |type, value|
+        person.person_attributes.create(
+            :person_attribute_type_id => PersonAttributeType.find_by_name(type.humanize).person_attribute_type_id,
+            :value => value) unless value.blank? rescue nil
+      end
     end
 
     patient = person.create_patient
-    params["identifiers"].each{|identifier_type_name, identifier|
+    if params['identifiers'].present?
+      params["identifiers"].each{|identifier_type_name, identifier|
 
-      next if identifier.blank?
-      identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
-      patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
-    } if params["identifiers"]
-
+        next if identifier.blank?
+        identifier_type = PatientIdentifierType.find_by_name(identifier_type_name) || PatientIdentifierType.find_by_name("Unknown id")
+        patient.patient_identifiers.create("identifier" => identifier, "identifier_type" => identifier_type.patient_identifier_type_id)
+      } if params["identifiers"]
+    end
     return person
   end
 end
