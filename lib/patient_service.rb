@@ -2057,8 +2057,9 @@ people = Person.find(:all, :include => [{:names => [:person_name_code]}, :patien
       response = DDE2Service.add_new_patient(passed_params)
       if response.present? && response['return_path'].present? && response['status'] == 409
           return response
+      else 
+         national_id = response['data']['npid']
       end
-      national_id = response['data']['npid']
     else
       national_id = params["person"]["patient"]["identifiers"]["National id"]
       national_id = params["person"]["value"] if national_id.blank? rescue nil

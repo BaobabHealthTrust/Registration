@@ -184,6 +184,23 @@ module DDE2Service
     end
   end
 
+def self.force_create_from_dde2(params, path)
+  
+    params['token'] = ClientConnection.token
+    params['identifiers'] = {}
+
+    params.delete_if{|k,v| ['npid', 'return_path'].include?(k)}
+
+    data = {}
+    RestClient.put(API.force_add_new_patient_url(path), params.to_json, :content_type => 'application/json'){|response, request, result|
+      response = JSON.parse(response) rescue response
+      if response['status'] == 201
+        data = response['data']
+      end
+    }
+    data
+end  
+
 def self.create_patient_from_dde2(params, dont_recreate_local=false)
 	  address_params = params["person"]["addresses"]
 		names_params = params["person"]["names"]
@@ -435,6 +452,8 @@ def self.create_patient_from_dde2(params, dont_recreate_local=false)
     if person["identifiers"].present? 
       person_params["identifiers"] = person["identifiers"]
     end
+    
+    person_params["token"] == ClientConnection.token
 
     data =  {}
 
@@ -705,7 +724,11 @@ def self.create_patient_from_dde2(params, dont_recreate_local=false)
 
     def self.merge_patients_url
         return "#{ServerConnection.address}/#{@version}/merge_records"
-    end  
+    end 
+
+    def self.force_add_new_patient_url(path)
+      return "#{ServerConnection.address}#{path}"
+    end 
 
     def self.headers
       return {:accept => :json, :content_type => :json}

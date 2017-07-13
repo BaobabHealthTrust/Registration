@@ -20,10 +20,12 @@
 
     .color_white {
         background-color:white;
+        cursor: pointer,
     }
 
     .color_darkslatedgray {
         background-color:#d3d3d3;
+        cursor: pointer,
     }
 
     td {
@@ -66,6 +68,13 @@
     .col2{
         padding-left: 30px;
     }
+    .row td{
+        padding: 5px;
+        padding-top: 13px;
+        padding-bottom: 13px;
+        cursor: pointer,
+    }
+
 </style>
 <body>
 <div>
@@ -79,12 +88,11 @@
         <td style="width: 57%;">
           <div style="max-height: 600px; height: 600px; overflow: auto;width: 100%;">
   <table style="width: 100%">
-    <tr class="header" style="background: darkslategray;color: white;font-weight: bold">
-      <td width="50">ID</td>
-      <td width='170'>Name(Gender)</td>
-      <td width='50' style="text-align:center;">DOB</td>
-      <td width='50' style="text-align:center;">Residence</td>
-      <td width='50'>&nbsp;</td>
+    <tr select_with="lightblue" class="header" style="background: darkslategray;color: white;font-weight: bold">
+      <td width='170'>Name (Gender)</td>
+      <td width="50">Home TA</td>
+      <td width='50' style="text-align:center;">Home Village</td>
+      <td width='50' style="text-align:center;">Phone Number</td>
     </tr>
     <%color = 'white'
       row_number = 0
@@ -100,25 +108,25 @@
         middle_name = patient['given_name'] rescue ''
         middle_name = '' if (middle_name.match(/^N\/A$|^undefined$|^null$/i) rescue true)
         name =  ("#{patient['given_name']} + ' #{middle_name} ' + #{patient['family_name']}")
+        phone = patient['attributes']['cell_phone_number'] rescue nil
 
     %>
 
-        <tr>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%= patient['npid'] || '<span style="color: #3b5998">New</span>' %></td>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%= (patient['given_name'] + ' ' +  patient['family_name']) + " (#{gender})" || '&nbsp;' %></td>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= birthdate || '&nbsp;' %> </td>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= patient['current_village'] || '&nbsp;' %></td>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>">
-            <a href="#" id = '<%=patient['npid']%>' class ='merge button_row_<%=row_number%>' data = '<%= patient.to_json%>' onmousedown="view(this, true);">View</a>
-          </td>
+        <tr class='row' data = '<%= patient.to_json%>' onmousedown="view(this, true);">
+          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%= (patient['given_name'] + ' ' +  patient['family_name']) + " (#{gender}) (<span style='color: green'>New</span>)" || '&nbsp;' %></td>
+          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%= patient['home_ta'] %></td>
+          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= patient['home_village'] || '&nbsp;' %></td>
+          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= phone || '&nbsp;' %> </td>
         </tr>
     <%end%>
 
     <%
 
        ( @remote_duplicates || {} ).each do | patient |
-         row_number+=1
-       npid = patient['patient']['identifiers']['Old Identification Number'] rescue patient['npid']
+
+
+     row_number+=1
+       npid = patient['npid']
        birthdate = patient['birthdate'].to_date.strftime("%d/%b/%Y")
        gender = patient['gender'].match(/F/) ? "F" : "M"
 
@@ -129,16 +137,14 @@
        middle_name = '' if (middle_name.match(/^N\/A$|^undefined$|^null$/i) rescue true)
 
        name =  ("#{patient['names']['given_name']} + ' #{middle_name} ' + #{patient['names']['family_name']}")
-     %>
+       phone = patient['attributes']['cell_phone_number'] rescue nil
+    %>
 
-        <tr>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%= npid || '&nbsp;' %></td>
+        <tr class='row' data = '<%= patient.to_json%>' onmousedown="view(this, false);">
           <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%= (patient['names']['given_name'] + ' ' + patient['names']['family_name']) + " (#{gender})"  || '&nbsp;' %></td>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= birthdate || '&nbsp;' %> </td>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= patient['addresses']['current_village'] || '&nbsp;' %></td>
-          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>">
-            <a href="#" id = '<%=patient['npid']%>' class ='merge button_row_<%=row_number%>' data = '<%= patient.to_json%>' onmousedown="view(this, false);">View</a>
-          </td>
+          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%=  patient['addresses']['home_ta'] || '&nbsp;' %></td>
+          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= patient['addresses']['home_village'] || '&nbsp;' %></td>
+          <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= phone || '&nbsp;' %> </td>
         </tr>
     <%end%>
 
@@ -149,7 +155,7 @@
         <td>
           <div style="max-height: 600px; height: 600px; overflow: auto; width: 100%;">
             <table style="width: 100%;">
-               <%['given_name', 'middle_name', 'family_name', 'gender', 'birthdate', 'home_district', 'home_ta',
+               <%['patient_number', 'given_name', 'middle_name', 'family_name', 'gender', 'birthdate', 'home_district', 'home_ta',
                   'home_village', 'current_district', 'current_village', 'landmark'].each do |key|%>
                 <tr>
                   <td class="col1"><%= key.humanize%></td>
@@ -170,7 +176,27 @@
 
 </body>
 <script>
+  function highlight(node){
+      var nodes = document.getElementsByClassName('color_white')
+      for(var i=0; i < nodes.length; i++){
+            nodes[i].style.background = "white";
+      }
+
+      var nodes = document.getElementsByClassName('color_darkslatedgray')
+      for(var i=0; i < nodes.length; i++){
+          nodes[i].style.background = "#d3d3d3";
+      }
+
+      var nodes  = node.getElementsByTagName('td');
+
+      for(var i=0; i < nodes.length; i++){
+          nodes[i].style.background = "lightblue";
+      }
+
+  }
+
   function view(node, local) {
+      highlight(node);
       var valNodes = document.getElementsByClassName('col2');
       for (var i = 0; i < valNodes.length; i++) {
           valNodes[i].innerHTML = '&nbsp;';
@@ -179,6 +205,7 @@
       var gender = {'F': 'Female', 'M': 'Male'}
       setTimeout(function () {
           if (local == true) {
+              __$("patient_number").innerHTML = data['npid'];
               __$("given_name").innerHTML = data['given_name'];
               __$("middle_name").innerHTML = data['middle_name'];
               __$("family_name").innerHTML = data['family_name'];
@@ -193,6 +220,7 @@
               __$("nextButton").innerHTML = "<span>Create</span>"
 
           } else if (local == false) {
+              __$("patient_number").innerHTML = data['npid'];
               __$("given_name").innerHTML = data['names']['given_name'];
               __$("middle_name").innerHTML = data['names']['middle_name'];
               __$("family_name").innerHTML = data['names']['family_name'];

@@ -325,7 +325,87 @@ class GenericPeopleController < ApplicationController
       redirect_to :action => :new, :gender => params[:gender], :given_name => params[:given_name], :family_name => params[:family_name], :family_name2 => params[:family_name2], :address2 => params[:address2], :identifier => params[:identifier], :relation => params[:relation]
     end
 	end
- 
+   
+  def force_create
+=begin
+  When params is local, data['return_path'] is available
+=end 
+    
+    data = JSON.parse(params['data'])
+    data['gender'] = data['gender'].match(/F/i) ? "Female" : "Male"
+    data['birthdate'] = data['birthdate'].to_date.strftime("%Y-%m-%d")
+    data['birthdate_estimated'] = ({'false' => 0, 'true' => 1}[data['birthdate_estimated']])
+    data['birthdate_estimated'] = params['data']['birthdate_estimated'] if data['birthdate_estimated'].to_s.blank?
+    person = {}, npid = nil
+    p = nil
+    if !data['return_path'].blank?
+      person = {
+          "person"  =>{
+              "birthdate_estimated" => data['birthdate_estimated'],
+              "attributes"         => data["attributes"],
+              "birthdate"          => data['birthdate'],
+              "addresses"          =>{"address1"=>data["current_residence"],
+                                     'township_division' => data['current_ta'],
+                                     "address2"=>data["home_district"],
+                                     "city_village"=>data["current_village"],
+                                     "state_province"=>data["current_district"],
+                                     "neighborhood_cell"=>data["home_village"],
+                                     "county_district"=>data["home_ta"]},
+              "gender"            => data['gender'],
+              "identifiers"           => (data["identifiers"].blank? ? {} : data["identifiers"]),
+              "names"             =>{"family_name"=>  data["family_name"],
+                                     "given_name"=>   data["given_name"],
+                                     "middle_name"=> (data["middle_name"] || "")}
+          }
+      }
+
+      response = DDE2Service.force_create_from_dde2(data, data['return_path'])
+      npid = response['npid']
+      raise npid.inspect
+      person['person']['identifiers']['National id'] = npid
+      #p = DDE2Service.create_from_form(person)
+    else
+      #search from dde in case you want to replace the identifier
+      npid = data['npid']
+
+      person = {
+          "person"  =>{
+              "birthdate_estimated"      => data['birthdate_estimated'],
+              "attributes"        =>data["attributes"],
+              "birthdate"       => data['birthdate'],
+              "addresses"       => {"address1"=>data['addresses']["current_residence"],
+                                     'township_division' => data['addresses']['current_ta'],
+                                     "address2"=>data['addresses']["home_district"],
+                                     "city_village"=>data['addresses']["current_village"],
+                                     "state_province"=>data['addresses']["current_district"],
+                                     "neighborhood_cell"=>data['addresses']["home_village"],
+                                     "county_district"=>data['addresses']["home_ta"]},
+              "gender"            => data['gender'],
+              "identifiers"           => (data["identifiers"].blank? ? {} : data["identifiers"]),
+              "names"             => {"family_name"=>data['names']["family_name"],
+                                     "given_name"=>data['names']["given_name"],
+                                     "middle_name"=> (data['names']["middle_name"] || "")}
+            }
+        }
+
+       if npid.present?
+         person['person']['identifiers']['National id'] = npid
+         p = DDE2Service.create_from_form(person)
+
+         response = DDE2Service.search_by_identifier(npid)
+         if response.present?
+
+           if response.first['npid'] != npid
+             print_and_redirect("/patients/national_id_label?patient_id=#{p.id}", next_task(p.patient)) and return
+           end
+         end
+       end
+    end
+
+    redirect_to next_task(p.patient)
+  end
+
+
    def create
 
     if confirm_before_creating and not params[:force_create] == 'true' and params[:relation].blank?
@@ -477,7 +557,7 @@ class GenericPeopleController < ApplicationController
 
      person = PatientService.create_patient_from_dde2(params)
      if person["return_path"].present? && person['status'] == 409
-          redirect_to :action => 'conflicts', :response => person, :local_data => params and return
+          redirect_to :action => 'conflicts', :response => person, :local_data => format_person_params(params) and return
      else
         success = true
      end   
@@ -531,6 +611,99 @@ class GenericPeopleController < ApplicationController
     end
   end
   
+  def format_person_params(params)
+	  address_params = params["person"]["addresses"]
+		names_params = params["person"]["names"]
+		patient_params = params["person"]["patient"]
+    birthday_params = params["person"]
+    old_identifier = params["person"]["identifier"]
+		params_to_process = params.reject{|key,value|
+      key.match(/identifiers|addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/)
+    }
+		birthday_params = params_to_process["person"].reject{|key,value| key.match(/gender/) }
+		person_params = params_to_process["person"].reject{|key,value| key.match(/birth_|age_estimate|occupation/) }
+
+
+		if person_params["gender"].to_s == "Female"
+      person_params["gender"] = 'F'
+		elsif person_params["gender"].to_s == "Male"
+      person_params["gender"] = 'M'
+		end
+
+		unless birthday_params.empty?
+		  if birthday_params["birth_year"] == "Unknown"
+			  birthdate = Date.new(Date.today.year - birthday_params["age_estimate"].to_i, 7, 1)
+        birthdate_estimated = 1
+		  else
+			  year = birthday_params["birth_year"]
+        month = birthday_params["birth_month"]
+        day = birthday_params["birth_day"]
+
+        month_i = (month || 0).to_i
+        month_i = Date::MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+        month_i = Date::ABBR_MONTHNAMES.index(month) if month_i == 0 || month_i.blank?
+
+        if month_i == 0 || month == "Unknown"
+          birthdate = Date.new(year.to_i,7,1)
+          birthdate_estimated = 1
+        elsif day.blank? || day == "Unknown" || day == 0
+          birthdate = Date.new(year.to_i,month_i,15)
+          birthdate_estimated = 1
+        else
+          birthdate = Date.new(year.to_i,month_i,day.to_i)
+          birthdate_estimated = 0
+        end
+		  end
+    else
+      birthdate_estimated = 0
+		end
+      
+      attributes = {}
+      identifiers = {}
+      passed_params = { "given_name" => names_params["given_name"], 
+                        "family_name" => names_params["family_name"],
+                        "middle_name" => (names_params["middle_name"] || "N/A"),
+                        "gender" => (person_params["gender"] == 'M' ? 'Male' : 'Female'),
+                        "birthdate" => birthdate,
+                        "birthdate_estimated" => (birthdate_estimated == 0 ? false : true),
+                        "current_residence" => address_params["closest_landmark"],
+                        "current_ta" =>  (address_params["address1"] || "N/A").squish,
+                        "current_village" => (address_params["city_village"] || "N/A").squish,
+                        "current_district" => address_params["state_province"],
+                        "home_village" => (address_params["neighborhood_cell"] || "N/A").squish,
+                        "home_ta" => address_params["county_district"],
+                        "home_district" => address_params["address2"]}
+      
+      if params["person"]["cell_phone_number"].present?
+        attributes["cell_phone_number"] = params["person"]["cell_phone_number"]
+      end 
+
+      if params["person"]["home_phone_number"].present?
+        attributes["home_phone_number"] = params["person"]["home_phone_number"] 
+      end 
+
+      if params["person"]["office_phone_number"].present?
+        attributes["office_phone_number"] = params["person"]["office_phone_number"]
+      end   
+
+      if params["person"]["occupation"].present?
+        attributes["occupation"] = params["person"]["occupation"]
+      end  
+      
+      if old_identifier.present?
+        identifiers["old_identification_number"] = old_identifier
+      end
+
+      if attributes.present?
+        passed_params.merge! ({"attributes" => attributes})
+      end  
+
+      if identifiers.present?
+        passed_params.merge! ({"identifiers" => identifiers})
+      end  
+    return passed_params
+  end
+
   def conflicts
     response = params[:response]
     @return_path = response[:return_path]
@@ -541,6 +714,8 @@ class GenericPeopleController < ApplicationController
       r['return_path'] = response['return_path']
     end
   end
+
+
 
   def set_datetime
     if request.post?
