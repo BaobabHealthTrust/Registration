@@ -132,6 +132,7 @@ module DDE2Service
         "birthdate"=> birthdate,
         "birthdate_estimated" => age_estimate,
         "identifiers"=> ids,
+        "attributes" => {},
         "current_residence"=> params['person']['addresses']['address1'],
         "current_village" => params['person']['addresses']['city_village'],
         "current_ta"=> (params['filter']['t_a']),
@@ -141,28 +142,28 @@ module DDE2Service
         "home_district"=> params['person']['addresses']['address2']
     }
     
-    if params['person']['attributes'].present? && params['person']['attributes']["occupation"].present?
-      result.merge!({"attributes" => {"occupation" => params['person']['attributes']["occupation"] }})
+    if params['person']["occupation"].present?
+      result["attributes"].merge!({"occupation" => params['person']["occupation"]})
     end
 
-    if params['person']['attributes'].present? && params['person']['attributes']["cell_phone_number"].present?
-      result.merge!({"attributes" => {"cell_phone_number" => params['person']['attributes']["cell_phone_number"] }})
+    if params['person']["cell_phone_number"].present?
+      result["attributes"].merge!({"cell_phone_number" => params['person']["cell_phone_number"]})
     end
 
-    if params['person']['attributes'].present? && params['person']['attributes']["office_phone_number"].present?
-      result.merge!({"attributes" => {"office_phone_number" => params['person']['attributes']["office_phone_number"] }})
+    if params['person']["office_phone_number"].present?
+      result["attributes"].merge!({"office_phone_number" => params['person']["office_phone_number"]})
     end
 
-    if params['person']['attributes'].present? && params['person']['attributes']["home_phone_number"].present?
-      result.merge!({"attributes" => {"home_phone_number" => params['person']['attributes']["home_phone_number"] }})
+    if params['person']["home_phone_number"].present?
+      result["attributes"].merge!({"home_phone_number" => params['person']["home_phone_number"]})
     end
 
-    if params['person']['attributes'].present? && params['person']["citizenship"].present?
-      result.merge!({"attributes" => {"citizenship" => params['person']["citizenship"] }})
+    if params['person']["citizenship"].present?
+      result["attributes"].merge!({"citizenship" => params['person']["citizenship"]})
     end
 
-    if params['person']['attributes'].present? && params['person']["country_of_residence"].present?
-      result.merge!({"attributes" => {"country_of_residence" => params['person']["country_of_residence"] }})
+    if params['person']["country_of_residence"].present?
+     result["attributes"].merge!({"country_of_residence" => params['person']["country_of_residence"]})
     end
       
     if result['attributes'].present?
