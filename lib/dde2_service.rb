@@ -330,15 +330,15 @@ module DDE2Service
     
     passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
     
-    if p['attributes'].present && p['attributes']["occupation"].present?
+    if p['attributes'].present? && p['attributes']["occupation"].present?
       passed["person"].merge!("attributes" => {"occupation" => p['attributes']["occupation"]})
     end   
 
-    if p['attributes'].present && p['attributes']["cell_phone_number"].present?
+    if p['attributes'].present? && p['attributes']["cell_phone_number"].present?
       passed["person"].merge!("attributes" => {"cell_phone_number" => p['attributes']["cell_phone_number"]})
     end   
     
-    if p['attributes'].present && p['attributes']["citizenship"].present?
+    if p['attributes'].present? && p['attributes']["citizenship"].present?
       passed["person"].merge!("attributes" => {"citizenship" => p['attributes']["citizenship"]})
     end   
 
