@@ -280,19 +280,25 @@ module DDE2Service
 
     return people unless people.blank?
 
-    p = DDE2Service.search_by_identifier(identifier)
-    return [] if p.blank?
-    return "found duplicate identifiers" if p.count > 1
+    remote = DDE2Service.search_by_identifier(identifier)
+    return [] if remote.blank?
+    return "found duplicate identifiers" if remote.count > 1
 
-    p = p.first
+    p = nil
+
+    p = remote.first if p.blank?
+
+    return [] if p.blank?
+
     passed_national_id = p["npid"]
 
     unless passed_national_id.blank?
       patient = PatientIdentifier.find(:first,
-                                       :conditions =>["voided = 0 AND identifier = ? AND identifier_type = 3",passed_national_id]).patient rescue nil
+                                       :conditions =>["voided = 0 AND identifier = ? AND identifier_type = 3",
+                                       passed_national_id]).patient rescue nil
       return [patient.person] unless patient.blank?
     end
-
+    
     birthdate_year = p["birthdate"].to_date.year
     birthdate_month = p["birthdate"].to_date.month
     birthdate_day = p["birthdate"].to_date.day
