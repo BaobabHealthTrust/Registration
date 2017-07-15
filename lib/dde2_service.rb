@@ -357,9 +357,17 @@ module DDE2Service
       passed["person"].merge!("attributes" => {"occupation" => p['attributes']["occupation"]})
     end   
 
+    if p['attributes'].present? && p['attributes']["home_phone_number"].present?
+      passed["person"].merge!("attributes" => {"home_phone_number" => p['attributes']["home_phone_number"]})
+    end 
+    
+    if p['attributes'].present? && p['attributes']["office_phone_number"].present?
+      passed["person"].merge!("attributes" => {"office_phone_number" => p['attributes']["office_phone_number"]})
+    end  
+
     if p['attributes'].present? && p['attributes']["cell_phone_number"].present?
       passed["person"].merge!("attributes" => {"cell_phone_number" => p['attributes']["cell_phone_number"]})
-    end   
+    end  
     
     if p['attributes'].present? && p['attributes']["citizenship"].present?
       passed["person"].merge!("attributes" => {"citizenship" => p['attributes']["citizenship"]})
