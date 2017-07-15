@@ -328,8 +328,6 @@ module DDE2Service
         "relation"=>""
     }
     
-    passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
-    
     if p['attributes'].present? && p['attributes']["occupation"].present?
       passed["person"].merge!("attributes" => {"occupation" => p['attributes']["occupation"]})
     end   
@@ -341,6 +339,8 @@ module DDE2Service
     if p['attributes'].present? && p['attributes']["citizenship"].present?
       passed["person"].merge!("attributes" => {"citizenship" => p['attributes']["citizenship"]})
     end   
+    
+    passed["person"].merge!("identifiers" => {"National id" => passed_national_id})
 
     return [PatientService.create_from_form(passed["person"])]
     return people
@@ -400,7 +400,6 @@ module DDE2Service
       end
 
       data = self.create_from_dde2(result)
-
       if data.present? && data['return_path']
         data = self.force_create_from_dde2(result, data['return_path'])
       end
@@ -410,12 +409,6 @@ module DDE2Service
         npid = PatientIdentifier.find_by_identifier_and_identifier_type_and_patient_id(patient_bean.national_id,
                 npid_type, patient_bean.patient_id)
 
-        npid.update_attributes(
-            :voided => true,
-            :voided_by => User.current.id,
-            :void_reason => 'Reassigned NPID',
-            :date_voided => Time.now
-        )
         PatientIdentifier.create(
             :patient_id => npid.patient_id,
             :creator => User.current.id,
@@ -430,6 +423,13 @@ module DDE2Service
             :identifier_type => npid_type
         )
       end
+
+      npid.update_attributes(
+            :voided => true,
+            :voided_by => User.current.id,
+            :void_reason => 'Reassigned NPID',
+            :date_voided => Time.now
+        )
 
       data
     end
