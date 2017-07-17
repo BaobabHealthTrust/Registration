@@ -1248,7 +1248,7 @@ EOF
 		patient_params = params["patient"]
 		params_to_process = params.reject{|key,value| key.match(/addresses|patient|names|relation|cell_phone_number|home_phone_number|office_phone_number|agrees_to_be_visited_for_TB_therapy|agrees_phone_text_for_TB_therapy/) }
 		birthday_params = params_to_process.reject{|key,value| key.match(/gender/) }
-		person_params = params_to_process.reject{|key,value| key.match(/birth_|citizenship|country_of_residence|race|age_estimate|occupation|identifiers/) }
+		person_params = params_to_process.reject{|key,value| key.match(/birth_|citizenship|country_of_residence|race|age_estimate|occupation|identifiers|attributes/) }
 
 		if person_params["gender"].to_s == "Female"
       person_params["gender"] = 'F'

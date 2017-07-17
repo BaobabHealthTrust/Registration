@@ -531,6 +531,10 @@ module DDE2Service
      result.merge!({"current_residence" => patient_bean.landmark })
    end
 
+   if patient_bean.current_ta.present?
+     result.merge!({"current_ta" => patient_bean.current_ta })
+   end 
+
    if patient_bean.current_residence.present?
      result.merge!({"current_village" => patient_bean.current_residence })
    end
