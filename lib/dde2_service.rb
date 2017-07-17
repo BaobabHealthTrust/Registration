@@ -302,15 +302,15 @@ module DDE2Service
     people = PatientIdentifier.find_all_by_identifier_and_identifier_type(identifier, 3).map{|id|
       id.patient.person
     } unless identifier.blank?
-
+  
     return people unless people.blank?
-
+   
     remote = DDE2Service.search_by_identifier(identifier)
     return [] if remote.blank?
     return "found duplicate identifiers" if remote.count > 1
-
+  
     p = nil
-
+    
     p = remote.first if p.blank?
 
     return [] if p.blank?
@@ -381,15 +381,43 @@ module DDE2Service
 
   def self.update_local_demographics(data)
     data
-  end
+  end 
+  
+  def self.update_national_id(patient_bean, new_id)
+        npid_type = PatientIdentifierType.find_by_name('National id').id
+        npid = PatientIdentifier.find_by_identifier_and_identifier_type_and_patient_id(patient_bean.national_id,
+                npid_type, patient_bean.patient_id)
+
+        PatientIdentifier.create(
+            :patient_id => npid.patient_id,
+            :creator => User.current.id,
+            :identifier => npid.identifier,
+            :identifier_type => PatientIdentifierType.find_by_name('Old Identification Number').id
+        )
+
+        PatientIdentifier.create(
+            :patient_id => npid.patient_id,
+            :creator => User.current.id,
+            :identifier =>  new_id,
+            :identifier_type => npid_type
+        )
+  
+        npid.update_attributes(
+            :voided => true,
+            :voided_by => User.current.id,
+            :void_reason => 'Reassigned NPID',
+            :date_voided => Time.now
+        )
+  end  
 
   def self.push_to_dde2(patient_bean)
 
     from_dde2 = self.search_by_identifier(patient_bean.national_id)
-
+    
     if from_dde2.length > 0 && !patient_bean.national_id.strip.match(/^P\d+$/)
       return self.update_local_demographics(from_dde2[0])
     else
+      return "hit2"
       result = {
           "family_name"=> patient_bean.last_name,
           "given_name"=> patient_bean.first_name,
@@ -455,7 +483,7 @@ module DDE2Service
             :identifier =>  data['npid'],
             :identifier_type => npid_type
         )
-      end
+      
 
       npid.update_attributes(
             :voided => true,
@@ -463,7 +491,7 @@ module DDE2Service
             :void_reason => 'Reassigned NPID',
             :date_voided => Time.now
         )
-
+       end
       data
     end
   end
@@ -482,7 +510,6 @@ module DDE2Service
         birthdate_estimated = true               
       else
         birthdate = patient_bean.birth_date.to_date.strftime("%Y-%m-%d")
-        raise birth_date.inspect
       end  
     else   
       birthdate = patient_bean.birth_date.to_date.strftime("%Y-%m-%d")
