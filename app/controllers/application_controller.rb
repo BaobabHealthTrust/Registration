@@ -967,7 +967,7 @@ class ApplicationController < GenericApplicationController
       return next_form(location , patient , session_date)
     end
     
-    task = Task.first rescue Task.new()
+    task = (Task.first || Task.new()) rescue Task.new()
     
     
     
