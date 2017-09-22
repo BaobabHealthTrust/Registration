@@ -333,7 +333,7 @@ module DDE2Service
         "person"  =>{"age_estimate"      => birthdate_estimated,
                    "birth_month"       => birthdate_month ,
                    "addresses"         =>{"address1"=> (p['addresses']["current_residence"] || ""),
-                                         'township_division' =>( p['current_ta'] || ""),
+                                         'township_division' =>( p['addresses']['current_ta'] || ""),
                                          "address2"=> (p['addresses']["home_district"] || ""),
                                          "city_village"=> (p['addresses']["current_village"] || ""),
                                          "state_province"=> (p['addresses']["current_district"] || ""),
@@ -458,7 +458,7 @@ module DDE2Service
     if from_dde2.length > 0 && !patient_bean.national_id.strip.match(/^P\d+$/)
       return self.update_local_demographics(from_dde2[0])
     else
-      return "hit2"
+
       result = {
           "family_name"=> patient_bean.last_name,
           "given_name"=> patient_bean.first_name,
