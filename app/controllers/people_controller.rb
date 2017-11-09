@@ -6,15 +6,15 @@ class PeopleController < GenericPeopleController
 		if params[:identifier]
       params[:identifier] = params[:identifier].strip
 			local_results = DDE2Service.search_all_by_identifier(params[:identifier])
-			if local_results.length > 1
-				redirect_to :action => 'duplicates' ,:search_params => params
+      if local_results.length > 1 
+				redirect_to :action => 'conflicts' ,:identifier => params['identifier']
         return
 			elsif local_results.length <= 1
 
         if create_from_dde_server
           p = DDE2Service.search_by_identifier(params[:identifier])
-          if p.count > 1
-						redirect_to :action => 'duplicates' ,:search_params => params
+          if p.count > 1 
+						redirect_to :action => 'conflicts' ,:identifier => params['identifier']
             return
           elsif (p.present? && p.length == 1) && local_results.length == 1
 						DDE2Service.update_local_from_dde2(p.first, local_results.first)      
@@ -187,6 +187,25 @@ class PeopleController < GenericPeopleController
       }
     end
 
+  end
+
+  def duplicates
+    @duplicates = []
+    people = PatientService.person_search(params[:search_params])
+    people.each do |person|
+      @duplicates << PatientService.get_patient(person)
+      
+    end unless people == "found duplicate identifiers"
+
+    if create_from_dde_server
+      @remote_duplicates = []
+      PatientService.search_from_dde_by_identifier(params[:search_params][:identifier]).each do |person|
+        @remote_duplicates << PatientService.get_dde_person(person)
+      end
+    end
+
+    @selected_identifier = params[:search_params][:identifier]
+    render :layout => 'menu'
   end
 
   def force_create
