@@ -160,32 +160,40 @@ class PeopleController < GenericPeopleController
 
     end
 
-    (@local_found || []).each do |p|
-      p = Person.find(p.person_id) rescue next
-      patient_bean = PatientService.get_patient(p)
+    
 
-      @local_duplicates << {
-          "family_name"=> patient_bean.last_name,
-          "given_name"=> patient_bean.first_name,
-          "npid" => patient_bean.national_id,
-          "patient_id" => patient_bean.patient_id,
-          "gender"=> patient_bean.sex,
-          "attributes"=> {
-              "occupation"=> (patient_bean.occupation rescue ""),
-              "cell_phone_number"=> (patient_bean.cell_phone_number rescue ""),
-              "citizenship" => (patient_bean.citizenship rescue "")
-          },
-          "birthdate" => (Person.find(patient_bean.person_id).birthdate.to_date.strftime('%Y-%m-%d') rescue nil),
-          "birthdate_estimated" => (patient_bean.birthdate_estimated.to_s == '0' ? false : true),
-          "identifiers" => {},
-          "current_residence"=> patient_bean.landmark,
-          "current_village"=> patient_bean.current_residence,
-          "current_district"=>  patient_bean.current_district,
-          "home_village"=> patient_bean.home_village,
-          "home_ta"=> patient_bean.traditional_authority,
-          "home_district"=> patient_bean.home_district
-      }
-    end
+    if @remote_duplicates.present?
+      @local_duplicates = []
+    else 
+      
+      (@local_found || []).each do |p|
+        p = Person.find(p.person_id) rescue next
+        patient_bean = PatientService.get_patient(p)
+  
+        @local_duplicates << {
+            "family_name"=> patient_bean.last_name,
+            "given_name"=> patient_bean.first_name,
+            "npid" => patient_bean.national_id,
+            "patient_id" => patient_bean.patient_id,
+            "gender"=> patient_bean.sex,
+            "attributes"=> {
+                "occupation"=> (patient_bean.occupation rescue ""),
+                "cell_phone_number"=> (patient_bean.cell_phone_number rescue ""),
+                "citizenship" => (patient_bean.citizenship rescue "")
+            },
+            "birthdate" => (Person.find(patient_bean.person_id).birthdate.to_date.strftime('%Y-%m-%d') rescue nil),
+            "birthdate_estimated" => (patient_bean.birthdate_estimated.to_s == '0' ? false : true),
+            "identifiers" => {},
+            "current_residence"=> patient_bean.landmark,
+            "current_village"=> patient_bean.current_residence,
+            "current_district"=>  patient_bean.current_district,
+            "home_village"=> patient_bean.home_village,
+            "home_ta"=> patient_bean.traditional_authority,
+            "home_district"=> patient_bean.home_district
+        }
+      end
+
+    end   
 
   end
 
