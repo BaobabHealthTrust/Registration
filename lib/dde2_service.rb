@@ -82,7 +82,7 @@ module DDE2Service
   end
 
   def self.token
-    self.validate_token(File.read("#{Rails.root}/tmp/token"))
+    self.validate_token(File.read("#{Rails.root}/tmp/token")) rescue nil
   end
 
   def self.validate_token(token)
@@ -306,6 +306,7 @@ module DDE2Service
     return people unless people.blank?
    
     remote = DDE2Service.search_by_identifier(identifier)
+
     return [] if remote.blank?
     return "found duplicate identifiers" if remote.count > 1
   
@@ -323,7 +324,13 @@ module DDE2Service
                                        passed_national_id]).patient rescue nil
       return [patient.person] unless patient.blank?
     end
-    
+
+    anomalies = {'error_id' => passed_national_id}
+    anomalies['gender'] = true if p['gender'].blank?
+    anomalies['birthdate'] = true if p['birthdate'].blank?
+    anomalies['home_address'] = true if p['addresses']["home_district"].blank?
+    return anomalies if anomalies.keys.length > 1
+
     birthdate_year = p["birthdate"].to_date.year
     birthdate_month = p["birthdate"].to_date.month
     birthdate_day = p["birthdate"].to_date.day

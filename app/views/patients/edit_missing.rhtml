@@ -1,0 +1,49 @@
+<style>
+#inputFrame2, #inputFrame2 #viewport{
+    height: 585px !important;
+}
+#page2{
+    height: 645px !important;
+}
+
+</style>
+
+<script>
+
+  var tt_cancel_destination = "/"  
+
+</script>
+
+ <form action="/patients/edit_missing" method="POST">
+
+   <% if session['missing_fields']['gender'].present? %>
+
+        <select name='gender' helpText="Select Gender">
+            <option></option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+        <select>
+    <% end %>
+
+    <% if session['missing_fields']['birthdate'].present? %>
+          <%= text_field_tag "person[birth_year]", nil,
+                                     {:helpText => 'Year of Birth', :field_type => 'number', :absoluteMin => "1890", :min => "1940",
+                                      :absoluteMax => Date.today.year, :tt_pageStyleClass => "Numeric NumbersOnly",
+                                                                 :tt_onLoad => 'seen(tstCurrentPage);' }  %>
+
+          <%= select_tag "person[birth_month]", month_name_options,
+                         {:helpText => 'Month of Birth',
+                          :tt_pageStyleClass => "NoKeyboard longSelectList",
+                          :validationMessage => 'Please enter a valid date'}%>
+
+          <%= text_field_tag "person[birth_day]",  nil,
+                             :field_type => 'number',
+                             :helpText => 'Birth Day',
+                             :tt_pageStyleClass => "NumbersOnly",
+                             :validationJS => "validateDOB()",
+                             :validationMessage => 'Please enter a valid date'%>
+    <% end %>
+
+      <%= hidden_field_tag :identifier, session['missing_fields']['error_id'] %>
+  
+</form>

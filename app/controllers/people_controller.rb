@@ -6,6 +6,13 @@ class PeopleController < GenericPeopleController
 		if params[:identifier]
       params[:identifier] = params[:identifier].strip
 			local_results = DDE2Service.search_all_by_identifier(params[:identifier])
+
+      if (local_results['error_id'].present? rescue false)
+        session['missing_fields'] = local_results
+        redirect_to "/patients/edit_missing" and return
+      end
+
+
       if local_results.length > 1 
 				redirect_to :action => 'conflicts' ,:identifier => params['identifier']
         return
@@ -83,6 +90,7 @@ class PeopleController < GenericPeopleController
       results = PersonSearch.new(national_id)
       results.national_id = national_id
 
+      data["birthdate"] = "1900-01-01" if data["birthdate"]
       results.current_residence = data["addresses"]["current_village"]
       results.person_id = 0
       results.home_district = data["addresses"]["home_district"]
