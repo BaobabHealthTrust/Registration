@@ -264,8 +264,10 @@ class PeopleController < GenericPeopleController
       print_and_redirect("/patients/national_id_label?patient_id=#{p.id}", next_task(p.patient)) and return
     else
       #search from dde in case you want to replace the identifier
-      npid = data['npid']
-      
+
+      response = DDE2Service.search_by_identifier(data['npid'])
+      npid = response.first['npid'] rescue nil
+
       person = {
           "person"  =>{
               "birthdate_estimated"      => data['birthdate_estimated'],
@@ -287,10 +289,10 @@ class PeopleController < GenericPeopleController
         }
 
        if npid.present?
+
          person['person']['identifiers']['National id'] = npid
          p = DDE2Service.create_from_form(person)
        
-         response = DDE2Service.search_by_identifier(npid)
          if response.present?
 
           if response.first['npid'] != npid || (params[:scan_identifier].present? && params[:scan_identifier].strip != npid)

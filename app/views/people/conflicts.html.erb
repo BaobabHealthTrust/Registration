@@ -212,7 +212,7 @@
       var gender = {'F': 'Female', 'M': 'Male'}
       setTimeout(function () {
           if (local == true) {
-              __$("patient_number").innerHTML = data['npid'];
+              __$("patient_number").innerHTML = (data['npid'].length > 10 ? "" : data['npid']);
               __$("given_name").innerHTML = data['given_name'];
               __$("middle_name").innerHTML = data['middle_name'];
               __$("family_name").innerHTML = data['family_name'];
@@ -227,7 +227,7 @@
               __$("nextButton").innerHTML = "<span>Create</span>"
 
           } else if (local == false) {
-              __$("patient_number").innerHTML = data['npid'];
+              __$("patient_number").innerHTML = (data['npid'].length > 10 ? "" : data['npid']);;
               __$("given_name").innerHTML = data['names']['given_name'];
               __$("middle_name").innerHTML = data['names']['middle_name'];
               __$("family_name").innerHTML = data['names']['family_name'];
