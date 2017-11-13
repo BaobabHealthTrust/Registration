@@ -298,7 +298,7 @@ module DDE2Service
   end
 
   def self.search_all_by_identifier(npid)
-    identifier = npid.gsub(/\-/, '').strip
+    identifier = npid.length <= 10 ? npid.gsub(/\-/, '').strip : npid
     people = PatientIdentifier.find_all_by_identifier_and_identifier_type(identifier, 3).map{|id|
       id.patient.person
     } unless identifier.blank?

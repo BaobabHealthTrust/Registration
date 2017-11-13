@@ -20,7 +20,7 @@ class PeopleController < GenericPeopleController
 
         if create_from_dde_server
           p = DDE2Service.search_by_identifier(params[:identifier])
-          if p.count > 1 
+          if p.count > 1
 						redirect_to :action => 'conflicts' ,:identifier => params['identifier']
             return
           elsif (p.present? && p.length == 1) && local_results.length == 1
