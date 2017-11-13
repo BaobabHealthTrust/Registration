@@ -90,7 +90,7 @@ class PeopleController < GenericPeopleController
       results = PersonSearch.new(national_id)
       results.national_id = national_id
 
-      data["birthdate"] = "1900-01-01" if data["birthdate"]
+      data["birthdate"] = "1900-01-01" if data["birthdate"].blank? 
       results.current_residence = data["addresses"]["current_village"]
       results.person_id = 0
       results.home_district = data["addresses"]["home_district"]
