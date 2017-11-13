@@ -90,7 +90,7 @@ class PeopleController < GenericPeopleController
       results = PersonSearch.new(national_id)
       results.national_id = national_id
 
-      data["birthdate"] = "1900-01-01" if data["birthdate"].blank? 
+      data["birthdate"] = "1900-01-01" if data["birthdate"].blank?
       results.current_residence = data["addresses"]["current_village"]
       results.person_id = 0
       results.home_district = data["addresses"]["home_district"]
@@ -170,10 +170,7 @@ class PeopleController < GenericPeopleController
 
     
 
-    if @remote_duplicates.present?
-      @local_duplicates = []
-    else 
-      
+
       (@local_found || []).each do |p|
         p = Person.find(p.person_id) rescue next
         patient_bean = PatientService.get_patient(p)
@@ -201,7 +198,7 @@ class PeopleController < GenericPeopleController
         }
       end
 
-    end   
+    #end
 
   end
 
@@ -305,7 +302,25 @@ class PeopleController < GenericPeopleController
     redirect_to next_task(p.patient)
   end
 
-  
+  def force_create_local
+    data = JSON.parse(params['data'])
+    person = Person.find(data['patient_id'])
+    patient_bean = PatientService.get_patient(person)
+
+    data = DDE2Service.push_to_dde2(patient_bean)
+    if !data.blank?
+      if patient_bean.national_id != data['npid']
+        print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
+      else
+        redirect_to next_task(person.patient)
+      end
+    else
+      redirect_to "/"
+    end
+  end
+
+
+
   private
 
   def cul_age(birthdate , birthdate_estimated , date_created = Date.today, today = Date.today)
