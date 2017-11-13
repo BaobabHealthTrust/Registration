@@ -96,8 +96,9 @@
     </tr>
     <%color = 'white'
       row_number = 0
+       note = ''
       ( @local_duplicates || {} ).each do | patient |
-        if row_number == 0
+        if row_number == 0 && params[:identifier].blank?
           note = 'New'
         else
           note = 'Local'
@@ -146,7 +147,7 @@
        phone = patient['attributes']['cell_phone_number'] rescue nil
     %>
 
-        <tr class='row' data = '<%= patient.to_json%>' onmousedown="view(this, false);">
+        <tr class='row' scan_identifier="<%= params[:identifier]%>" data = '<%= patient.to_json%>' onmousedown="view(this, false);">
           <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%= (patient['names']['given_name'] + ' ' + patient['names']['family_name']) + " (#{gender})"  || '&nbsp;' %></td>
           <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>"><%=  patient['addresses']['home_ta'] || '&nbsp;' %></td>
           <td class="color_<%=row_number % 2 == 0 ? 'white' : 'darkslatedgray'%> row_number_<%=row_number%>" style="text-align:center;"><%= patient['addresses']['home_village'] || '&nbsp;' %></td>
@@ -257,6 +258,12 @@
       var input = document.createElement('input');
       input.setAttribute('name', 'data');
       input.setAttribute('value', node.getAttribute('data'));
+      input.setAttribute('type', 'hidden');
+      form.appendChild(input);
+
+      var input = document.createElement('input');
+      input.setAttribute('name', 'scan_identifier');
+      input.setAttribute('value', node.getAttribute('scan_identifier'));
       input.setAttribute('type', 'hidden');
 
       form.appendChild(input);

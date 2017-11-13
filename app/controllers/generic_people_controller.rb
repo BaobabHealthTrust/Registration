@@ -324,7 +324,7 @@ class GenericPeopleController < ApplicationController
 =begin
   When params is local, data['return_path'] is available
 =end 
-    
+
     data = JSON.parse(params['data'])
     data['gender'] = data['gender'].match(/F/i) ? "Female" : "Male"
     data['birthdate'] = data['birthdate'].to_date.strftime("%Y-%m-%d")
