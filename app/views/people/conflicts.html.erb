@@ -82,7 +82,7 @@
   <!--
 
   -->
-  <h3 class="msg">Select (Re-Assign ID or Create) Patient to continue ...</h3>
+  <h3 class="msg">Re-Assign ID & Create or Select Patient to continue ...</h3>
   <table style="width: 100%; border-top: 1px solid lightgray">
     <tr>
         <td style="width: 57%;">
@@ -241,7 +241,13 @@
                   __$("current_village").innerHTML = data['addresses']['current_village'];
                   __$("landmark").innerHTML = data['addresses']['current_residence'];
               }
-              __$("nextButton").innerHTML = "<span>Create</span>"
+
+
+              if (data['npid'].length != "<%= params[:identifier].length %>") {
+              __$("nextButton").innerHTML = "<span>Re-Assign ID & Create</span>"
+              } else {
+                __$("nextButton").innerHTML = "<span>Select</span>"
+              } 
           }
 
           for (var i = 0; i < valNodes.length; i++) {

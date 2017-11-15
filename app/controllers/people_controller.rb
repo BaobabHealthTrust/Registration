@@ -170,7 +170,9 @@ class PeopleController < GenericPeopleController
 
     
 
-
+    if @remote_duplicates.present?
+      @local_duplicates = []
+    else  
       (@local_found || []).each do |p|
         p = Person.find(p.person_id) rescue next
         patient_bean = PatientService.get_patient(p)
@@ -198,7 +200,7 @@ class PeopleController < GenericPeopleController
         }
       end
 
-    #end
+    end
 
   end
 
@@ -308,6 +310,7 @@ class PeopleController < GenericPeopleController
     patient_bean = PatientService.get_patient(person)
 
     data = DDE2Service.push_to_dde2(patient_bean)
+
     if !data.blank?
       if patient_bean.national_id != data['npid']
         print_and_redirect("/patients/national_id_label?patient_id=#{person.id}", next_task(person.patient))
