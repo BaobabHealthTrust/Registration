@@ -82,7 +82,7 @@
   <!--
 
   -->
-  <h3 class="msg">Select patient to continue ....</h3>
+  <h3 class="msg">Select (Re-Assign ID or Create) Patient to continue ...</h3>
   <table style="width: 100%; border-top: 1px solid lightgray">
     <tr>
         <td style="width: 57%;">
@@ -177,7 +177,7 @@
 </div>
 
 <div id="footer" style="position: absolute; bottom: 1px; right: 10px;width: 99.5%;left: 0.25%;background: #333333">
-  <button id="nextButton" class="button navButton green" onclick="__$('form').submit()"><span>Select</span></button>
+  <button id="nextButton" class="button navButton green" onclick="__$('form').submit()"><span>Create</span></button>
   <button id="cancelButton" class="button navButton red" onclick="window.location = '/'"><span>Cancel</span></button>
 </div>
 
@@ -224,7 +224,7 @@
               __$("current_district").innerHTML = data['current_district'];
               __$("current_village").innerHTML = data['current_village'];
               __$("landmark").innerHTML = data['current_residence'];
-              __$("nextButton").innerHTML = "<span>Create</span>"
+              __$("nextButton").innerHTML = "<span>Re-Assign ID</span>"
 
           } else if (local == false) {
               __$("patient_number").innerHTML = (data['npid'].length > 10 ? "" : data['npid']);;
@@ -241,7 +241,7 @@
                   __$("current_village").innerHTML = data['addresses']['current_village'];
                   __$("landmark").innerHTML = data['addresses']['current_residence'];
               }
-              __$("nextButton").innerHTML = "<span>Select</span>"
+              __$("nextButton").innerHTML = "<span>Create</span>"
           }
 
           for (var i = 0; i < valNodes.length; i++) {
