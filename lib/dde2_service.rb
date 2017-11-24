@@ -552,10 +552,18 @@ module DDE2Service
       if patient_bean.birth_date.split("/").second == "???"
         birthdate = Date.new(patient_bean.birth_date.split("/").third.to_i,7,1).strftime("%Y-%m-%d")
         birthdate_estimated = true
-      elsif patient_bean.birth_date.split("/").first == "??"
+      elsif patient_bean.birth_date.split("/").first == "??" && patient_bean.birth_date.split("/").second.length >= 3
+        birthdate = Date.new(patient_bean.birth_date.split("/").third.to_i,
+        Date::ABBR_MONTHNAMES.index(patient_bean.birth_date.split("/").second.titleize),1).strftime("%Y-%m-%d") rescue nil
+        if birthdate.blank?
+          birthdate = Date.new(patient_bean.birth_date.split("/").third.to_i,
+          Date::MONTHNAMES.index(patient_bean.birth_date.split("/").second.titleize),1).strftime("%Y-%m-%d") 
+        end
+        birthdate_estimated = true
+      elsif patient_bean.birth_date.split("/").first == "??" && patient_bean.birth_date.split("/").second.length < 3
         birthdate = Date.new(patient_bean.birth_date.split("/").third.to_i,
                              patient_bean.birth_date.split("/").second.to_i,1).strftime("%Y-%m-%d")
-        birthdate_estimated = true               
+        birthdate_estimated = true                 
       else
         birthdate = patient_bean.birth_date.to_date.strftime("%Y-%m-%d")
       end  
