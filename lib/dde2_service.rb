@@ -328,6 +328,7 @@ module DDE2Service
     anomalies = {'error_id' => passed_national_id}
     anomalies['gender'] = true if p['gender'].blank?
     anomalies['birthdate'] = true if p['birthdate'].blank?
+    anomalies['birthdate'] = true if p['birthdate'] == "1900-01-01"
     anomalies['home_address'] = true if p['addresses']["home_district"].blank?
     return anomalies if anomalies.keys.length > 1
 
