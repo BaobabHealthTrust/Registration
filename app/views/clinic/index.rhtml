@@ -50,7 +50,11 @@
             <select id="links">
 
               <option value='/logout' link='/logout'>Logout</option>
-              <option value='/people/search' link='/people/search' ttSize="300px">Find or Register Patient</option>
+              <%if create_from_dde_server %>
+                  <option value='/dde/search' link='/dde/search' ttSize="295px">Find or Register Patient</option>
+                <%else%>
+                  <option value='/people/search' link='/people/search' ttSize="295px">Find or Register Patient</option>
+                <%end%>
 
               <% if development_environment? %>
                 <option value='/location?from=clinic' ttSize="150px">Swap Desk</option>

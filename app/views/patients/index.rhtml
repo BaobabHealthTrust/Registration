@@ -61,7 +61,11 @@
              <% else %>
                 <select id="links">
                  <!-- <option value='/patients/programs_dashboard/<%= @patient.id -%>'>States</option> -->
-                  <option value='/people/demographics?id=<%=@patient.id%>'>Edit Demographics</option>
+                 <%if create_from_dde_server %>
+                 <option value='/dde/edit_demographics?patient_id=<%=@patient.id%>'>Edit Demographics</option>
+                 <%else%>
+                 <option value='/people/demographics?id=<%=@patient.id%>'>Edit Demographics</option>
+                 <%end%>
                   <option value='/patients/dashboard_print_national_id/<%=@patient.id%>'>Print National ID</option>
                   
                 </select>

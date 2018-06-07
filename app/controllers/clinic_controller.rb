@@ -58,7 +58,8 @@ class ClinicController < GenericClinicController
     @settings = [
       ["Set Site Code", "/properties/site_code"],
       ["Confirm patient creation", "/properties/creation?value=confirm_before_creating_a_patient"],
-      ["Manage Roles", "/properties/set_role_privileges"]
+      ["Manage Roles", "/properties/set_role_privileges"],
+      ["DDE Configurations", "/dde/dde_login"]
     ]
     render :layout => false
   end

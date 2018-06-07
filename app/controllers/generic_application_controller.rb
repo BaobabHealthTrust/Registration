@@ -109,8 +109,18 @@ class GenericApplicationController < ActionController::Base
     CoreService.get_global_property_value('create.from.remote').to_s == "true" rescue false
   end
 
+  # def create_from_dde_server                                                    
+  #   CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+  # end
+
   def create_from_dde_server                                                    
-    CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    #CoreService.get_global_property_value('create.from.dde.server').to_s == "true" rescue false
+    dde_status = GlobalProperty.find_by_property('dde.status').property_value.to_s.squish rescue 'NO'#New DDE API
+    if (dde_status.upcase == 'ON')
+      return true
+    else
+      return false
+    end
   end
 
   def concept_set(concept_name)
