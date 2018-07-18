@@ -33,12 +33,19 @@ class DdeController < ApplicationController
     #########################################################
     #We check if the DDE record exisit local if not we create it locally
     dde_results  = JSON.parse(output)
+    if dde_results.blank?
+      flash[:notice] = "Failed to register patient."
+      redirect_to("/dde/search?gender=Female") and return
+    end
+
     local_people = DDEService.create_local_person(dde_results)
 
 		if params[:guardian_present] == "YES"
 			redirect_to "/relationships/search?patient_id=#{person.id}&return_to=/people/redirections?person_id=#{person.id}" and return
     else
-    	redirect_to "/people/redirections?person_id=#{local_people.first.id}" and return
+      print_and_redirect("/patients/national_id_label?patient_id=#{local_people.first.id}", next_task(local_people.first.patient))
+      # The code below works with ART Application
+    	#redirect_to "/people/redirections?person_id=#{local_people.first.id}" and return
     end
 
   end
@@ -419,6 +426,36 @@ class DdeController < ApplicationController
     end
   end
 
+  def update_dde_properties(params)
+    ActiveRecord::Base.transaction do
+      # Update dde username and password in db.
+
+      global_property_dde_username = GlobalProperty.find_by_property('dde.username')
+      global_property_dde_username.update_attributes(:property_value => params['username'])
+
+      global_property_dde_password = GlobalProperty.find_by_property('dde.password')
+      global_property_dde_password.update_attributes(:property_value => params['password'])
+
+    end
+
+    # Update dde token session
+    dde_address = GlobalProperty.find_by_property('dde.address').property_value
+    dde_port    = GlobalProperty.find_by_property('dde.port').property_value
+    address = dde_address.to_s + ":" + dde_port.to_s
+    data = {
+      :username => params['username'],
+      :password => params['password'],
+      :address => address
+    }
+
+    dde_token = DDEService.dde_login_from_params(data)
+
+    unless dde_token.blank?
+      session[:dde_token] = dde_token
+    end
+
+  end
+
   def get_dde_locations
     dde_locations = DDEService.dde_locations(session[:dde_token], params[:name])
     li_elements = "<li></li>"
@@ -444,6 +481,7 @@ class DdeController < ApplicationController
         flash[:notice] = "Failed to create user"
         redirect_to("/dde/dde_add_user") and return
       end
+      update_dde_properties(data)
       redirect_to("/clinic") and return
     end
   end
