@@ -1,4 +1,5 @@
 class DdeController < ApplicationController
+
   def create
     birthdate_params = birthdate_format(params)
     birthdate = birthdate_params[0]
@@ -43,9 +44,7 @@ class DdeController < ApplicationController
 		if params[:guardian_present] == "YES"
 			redirect_to "/relationships/search?patient_id=#{person.id}&return_to=/people/redirections?person_id=#{person.id}" and return
     else
-      print_and_redirect("/patients/national_id_label?patient_id=#{local_people.first.id}", next_task(local_people.first.patient))
-      # The code below works with ART Application
-    	#redirect_to "/people/redirections?person_id=#{local_people.first.id}" and return
+    	redirect_to "/people/redirections?person_id=#{local_people.first.id}" and return
     end
 
   end
@@ -60,6 +59,9 @@ class DdeController < ApplicationController
   end
 
   def search
+  end
+
+  def confirm
   end
 
   def search_by_name_and_gender
@@ -86,6 +88,41 @@ class DdeController < ApplicationController
       output = RestClient::Request.execute( { :method => :post, :url => dde_url,
           :payload => search_params, :headers => {:Authorization => session[:dde_token]} } )
       dde_search_results  = JSON.parse(output)
+
+      ############################xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      local_search_results = DDEService.search_local_by_identifier(params[:identifier])
+      if local_search_results.length == 1 && dde_search_results.blank?
+				person_id = local_search_results[0].person_id
+
+        if params[:identifier].length == 6
+          redirect_to "/people/confirm?found_person_id=#{person_id}" and return
+        end
+
+				local_client_to_dde(person_id)
+        next_url = "/people/confirm?found_person_id=#{local_search_results[0].person_id}"
+				print_and_redirect("/patients/national_id_label?patient_id=#{person_id}", next_url) and return
+      elsif local_search_results.length == 1 && dde_search_results.length == 1
+				person_id = local_search_results[0].person_id
+        dde_person_doc_id = dde_search_results[0]['doc_id']
+
+        local_person_doc = PatientIdentifier.find(:first, 
+          :conditions =>["patient_id = ? AND identifier = ? AND identifier_type = ?",
+          person_id, dde_person_doc_id,
+          PatientIdentifierType.find_by_name('DDE person document ID').id]) 
+       
+        unless local_person_doc.blank?
+          redirect_to "/people/confirm?found_person_id=#{person_id}" and return
+        end
+        
+        redirect_to "/dde/confirm?person_id=#{person_id}" and return
+      elsif local_search_results.length == 1 && !dde_search_results.blank?
+        redirect_to :controller => 'dde',
+          :action => 'dde_duplicates', :npid => params[:identifier] and return
+      elsif local_search_results.length > 1 
+        redirect_to :controller => 'dde',
+          :action => 'dde_duplicates', :npid => params[:identifier] and return
+      end
+      ############################xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
       if dde_search_results.length > 1
         redirect_to :controller => 'dde',
@@ -131,8 +168,6 @@ class DdeController < ApplicationController
         :person_id              =>  0
       }
     end
-
-    local_search_results = DDEService.search_local_by_identifier(params[:npid])
 
     (local_search_results || []).each do |person|
        
@@ -368,7 +403,7 @@ class DdeController < ApplicationController
           :password => params[:dde_password],
           :address => address
         }
-        
+         
         dde_token = DDEService.dde_login_from_params(data)
 
         if dde_token.blank?
@@ -376,8 +411,15 @@ class DdeController < ApplicationController
           redirect_to("/dde/dde_login") and return
         else
           session[:dde_token] = dde_token
-          create_dde_properties(params, dde_status)
-          redirect_to("/dde/dde_add_user") and return
+          #create_dde_properties(params, dde_status)
+          dde_username    = params[:dde_username]
+          dde_port        = params[:dde_port]
+          dde_ipaddress   = params[:dde_address]
+          
+          url = "/dde/dde_add_user?dde_token=#{dde_token}"
+          url += "&dde_username=#{dde_username}&dde_port=#{dde_port}"
+          url +=  "&dde_ipaddress=#{dde_ipaddress}" 
+          redirect_to url and return
         end
       else
         global_property_dde_status = GlobalProperty.find_by_property('dde.status')
@@ -429,23 +471,36 @@ class DdeController < ApplicationController
   def update_dde_properties(params)
     ActiveRecord::Base.transaction do
       # Update dde username and password in db.
-
-      global_property_dde_username = GlobalProperty.find_by_property('dde.username')
-      global_property_dde_username.update_attributes(:property_value => params['username'])
-
-      global_property_dde_password = GlobalProperty.find_by_property('dde.password')
-      global_property_dde_password.update_attributes(:property_value => params['password'])
-
+      dde_app = DdeApplicationUsers.find_by_program_id(params[:program])
+      if dde_app.blank?
+        DdeApplicationUsers.create(:program_id => params[:program], 
+          :username => params[:username], 
+          :port => params[:dde_port], :ipaddress => params[:dde_ipaddress],
+          :password => params[:password], :creator => User.current.id)
+      else
+        dde_app.update_attributes(:username => params[:username], 
+          :port => params[:dde_port], :ipaddress => params[:dde_ipaddress],
+          :password => params[:password], :creator => User.current.id)
+      end
     end
 
     # Update dde token session
+    property = GlobalProperty.find_by_property('dde.status')
+    if property.blank?
+      GlobalProperty.create(:property => 'dde.status', :property_value => 'ON')
+    else
+      property.update_attributes(:property_value => 'ON')
+    end
+    
+=begin
     dde_address = GlobalProperty.find_by_property('dde.address').property_value
     dde_port    = GlobalProperty.find_by_property('dde.port').property_value
     address = dde_address.to_s + ":" + dde_port.to_s
+=end
     data = {
       :username => params['username'],
       :password => params['password'],
-      :address => address
+      :address => "#{params[:dde_ipaddress]}:#{params[:dde_port]}"
     }
 
     dde_token = DDEService.dde_login_from_params(data)
@@ -457,7 +512,7 @@ class DdeController < ApplicationController
   end
 
   def get_dde_locations
-    dde_locations = DDEService.dde_locations(session[:dde_token], params[:name])
+    dde_locations = DDEService.dde_locations(params[:dde_token], params[:name])
     li_elements = "<li></li>"
     dde_locations.each do |location|
       doc_id = location["doc_id"]
@@ -476,14 +531,29 @@ class DdeController < ApplicationController
         "location" => params[:location]
       }
 
-      dde_status = DDEService.add_dde_user(data, session[:dde_token])
+      dde_status = DDEService.add_dde_user(data, params[:dde_token])
       unless dde_status.to_i == 200
         flash[:notice] = "Failed to create user"
         redirect_to("/dde/dde_add_user") and return
       end
-      update_dde_properties(data)
+      update_dde_properties(params)
       redirect_to("/clinic") and return
     end
+  end
+
+  def programs
+    program_id  = YAML.load_file("#{Rails.root}/config/dde_connection.yml")[Rails.env]["program_id"]
+    programs = Program.find(:all, :conditions =>["program_id = #{program_id} 
+      AND name LIKE (?)","%#{params[:name]}%"],:limit => 10)
+
+    li_elements = "<li></li>"
+    (programs || []).each do |program|
+      program_id  =  program.id
+      name        = program.name
+      li_elements += "<li value='#{program_id}'>#{name}</li>"
+    end
+    li_elements += "<li></li>"
+    render :text => li_elements and return
   end
 
   def edit_demographics
@@ -750,6 +820,28 @@ class DdeController < ApplicationController
     
   end
 
+  def potential_duplicates
+    person_params = {
+      :given_name   =>  params[:person][:names][:given_name],
+      :family_name  =>  params[:person][:names][:family_name],         
+      :middle_name  =>  params[:person][:names][:middle_name],
+      :gender       =>  params[:person][:gender],          
+      :birthdate    =>  params[:person][:birthdate],
+      :birthdate_estimated => "1",   
+      :attributes => {
+        :home_district    => params[:person][:addresses]['home_district'],            
+        :home_traditional_authority => params[:person][:addresses]['home_traditional_authority'],
+        :home_village     => params[:person][:addresses]['home_village']
+      }
+    }   
+
+    dde_url = DDEService.dde_settings['dde_address'] + "/v1/search/people"
+    output = RestClient::Request.execute( { :method => :post, :url => dde_url,
+      :payload => person_params, :headers => {:Authorization => session[:dde_token]} } )
+
+    render :text => output and return
+  end
+
   private
 
   def birthdate_formatted(birthdate, birthdate_estimated)
@@ -838,6 +930,54 @@ class DdeController < ApplicationController
     end
 
     return [birthdate, birthdate_estimated]
+  end
+
+  def local_client_to_dde(patient_id)
+		names = PersonName.find(:last, :conditions => ["person_id = ?", patient_id])
+		person	=	Person.find(patient_id)
+		person_addresses = PersonAddress.find(:last, :conditions => ["person_id = ?", patient_id])
+
+		person_params = {
+      :given_name   =>  names.given_name,
+      :family_name  =>  names.family_name,
+      :middle_name  =>  names.middle_name,
+      :gender       =>  person.gender,
+      :birthdate    =>  person.birthdate,
+      :birthdate_estimated => person.birthdate_estimated,
+      :attributes => { 
+        :occupation => "",
+        :cellphone_number => nil,
+                  
+        :home_district    => (person_addresses.address2 rescue nil),            
+        :home_traditional_authority => (person_addresses.county_district rescue nil),
+        :home_village     => (person_addresses.neighborhood_cell rescue nil),    
+        :current_district => (person_addresses.state_province rescue nil),       
+        :current_traditional_authority => (person_addresses.address1 rescue nil),
+        :current_village => (person_addresses.city_village rescue nil)
+      },
+      :identifiers => {}
+    }
+
+
+    dde_url = DDEService.dde_settings['dde_address'] + "/v1/add_person"
+    output = RestClient::Request.execute( { :method => :post, :url => dde_url,
+      :payload => person_params, :headers => {:Authorization => session[:dde_token]} } )
+
+    dde_results  = JSON.parse(output)
+		identifiers = PatientIdentifier.find(:all, 
+			:conditions => ["patient_id = ? AND identifier_type = 3", patient_id])		
+	
+		(identifiers || []).each do |i|
+			i.update_attributes(:identifier_type => 2)
+		end
+
+		PatientIdentifier.create(:identifier => dde_results['npid'], 
+			:patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('National id').id)
+
+		PatientIdentifier.create(:identifier => dde_results['doc_id'], 
+			:patient_id => patient_id, :identifier_type => PatientIdentifierType.find_by_name('DDE person document ID').id)
+
+
   end
 
 end

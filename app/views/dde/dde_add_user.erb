@@ -4,7 +4,14 @@
     :id => 'location',
     :field_type => 'alpha',
     :helpText => 'Select location',
-    :ajaxURL => '/dde/get_dde_locations?name='
+    :ajaxURL => "/dde/get_dde_locations?dde_token=#{params[:dde_token]}&name="
+  } %>
+  
+  <%= text_field_tag "program", "", {
+    :id => 'program',
+    :field_type => 'alpha',
+    :helpText => 'Select application program',
+    :ajaxURL => '/dde/programs?name='
   } %>
 
   <%= text_field_tag "username", "",
@@ -21,4 +28,8 @@
     :helpText => 'Password'
   }  %>
 
+  <input type="hidden" name="dde_username" value="<%= params[:dde_username] %>" />
+  <input type="hidden" name="dde_ipaddress" value="<%= params[:dde_ipaddress] %>" />
+  <input type="hidden" name="dde_port" value="<%= params[:dde_port] %>" />
+  <input type="hidden" name="dde_token" value="<%= params[:dde_token] %>" />
 </form>

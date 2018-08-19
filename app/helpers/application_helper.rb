@@ -330,4 +330,8 @@ module ApplicationHelper
     end                                                                         
   end
 
+  def military_site?
+    return false
+  end
+
 end

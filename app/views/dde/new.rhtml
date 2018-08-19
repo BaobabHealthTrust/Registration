@@ -60,6 +60,9 @@
 
 </style>
 
+<%= stylesheet_link_tag 'tt_tabs' %>
+<%= javascript_include_tag "tt_tabs" %>
+
 <script>
 <% if params[:relation] %>
     var tt_cancel_destination = "/patients/relationships?patient_id=<%=h params[:relation] -%>"
@@ -190,6 +193,95 @@
     listSuggestions(tstCurrentPage);
   }
 
+  function duplicatesAvailable() {
+    return (potential_duplicates_arr.length > 0);
+  }
+
+  function potentialduplicateCheck() {
+    var inputFrame = document.getElementById('inputFrame' + tstCurrentPage);
+    //potential_duplicates_arr
+
+    helpText = __$('helpText' + tstCurrentPage);
+    helpText.innerHTML = "<b>Name:</b> " +  __$('given_name').value;
+    helpText.innerHTML += " " + __$('family_name').value;
+    helpText.innerHTML += " (" + __$('gender').value + ")";
+    helpText.innerHTML += "<br />";
+    helpText.innerHTML += "<b style='margin-left: 1.9%;'>Home district:</b> " + __$('address2').value;
+    helpText.innerHTML += " <b>Home Ta:</b> " + __$('person_addresses_county_district').value;
+    helpText.innerHTML += " <b>Home village:</b> " + __$('person_addresses_neighborhood_cell').value;
+    helpText.setAttribute("style","font-size: 20px;");
+
+    tabs = new ttTabsPlugin();
+    inputView = document.getElementById('inputFrame' + tstCurrentPage);
+    tabs.load(inputView, potential_duplicates_arr);
+  }
+
+  function searchForPotentialDuplicates() {
+/*
+*/
+
+   client =   "person[names][given_name]="   + __$('given_name').value;
+   client +=  "&person[names][family_name]="  + __$('family_name').value;
+   client +=  "&person[names][middle_name]="  +__$('middle_name').value;
+    
+   client +=  "&person[gender]=" +  __$('gender').value;
+   client +=  "&person[birthdate]=" + culBirthdate()[0];
+   client +=  "&person[birthdate_estimated]=" + culBirthdate()[1];
+   client +=  "&person[addresses][home_district]=" + __$('address2').value;  
+   client +=  "&person[addresses][home_traditional_authority]=" + __$('person_addresses_county_district').value;  
+   client +=  "&person[addresses][home_village]=" + __$('person_addresses_neighborhood_cell').value;  
+
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        potential_duplicates_arr = JSON.parse(this.responseText);
+      }
+    };
+    xhttp.open("POST", "/dde/potential_duplicates?" + client, true);
+    xhttp.send();
+
+  }
+
+  function culBirthdate() {
+    if(__$('person_birth_year').value.match(/Unknown/i)){
+      var birth_year = __$('person_birth_year').value;
+      var age_estimate = parseInt(__$('person_age_estimate').value);
+      var cur_year = new Date().getFullYear();
+      birth_year = (cur_year - age_estimate); 
+      return [birth_year + "-07-01", 1];
+    }
+
+    if(__$('person_birth_month').value.match(/Unknown/i)){
+      var birth_year = parseInt(__$('person_birth_year').value);
+      var cur_year = new Date().getFullYear();
+      birth_year = (cur_year - birth_year); 
+      return [birth_year + "-07-01", 1];
+    }
+
+    if(__$('person_birth_day').value.match(/Unknown/i)){
+      var birth_year = parseInt(__$('person_birth_year').value);
+      var birth_month = parseInt(__$('person_birth_month').value);
+      if(birth_month < 10)
+        birth_month = "0" + birth_month;
+
+      return [birth_year + "-" + birth_month + "-15", 1];
+    }
+
+    var birth_month = parseInt(__$('person_birth_month').value);
+    var birth_day   = parseInt(__$('person_birth_day').value);
+    var birth_year  = parseInt(__$('person_birth_year').value);
+      
+    if(birth_month < 10)
+      birth_month = "0" + birth_month;
+
+    if(birth_day < 10)
+      birth_day = "0" + birth_day;
+
+    return [(birth_year + "-" + birth_month + "-" + birth_day), 0];
+  }
+
+  var potential_duplicates_arr = [];
 </script>
 
 <% form_for :person, @person, :url => { :action => "create" } do |f| %>
@@ -236,6 +328,7 @@
     :tt_requireNextClick => false,
     :tt_pageStyleClass => "azButton",
     :ajaxURL => '/people/village?search_string=',
+    :tt_onUnLoad => "searchForPotentialDuplicates();",
     :allowFreeText => false ,
     :tt_onLoad => "set_ajaxURL_for_suggestions('/people/village/Village?filter_value=' ,document.getElementById('person_addresses_county_district').value);$('nextButton').style.display = 'none';"}%>
 
@@ -368,6 +461,17 @@
       :ttMatchFromBeginning => "true")%>
   <% end %>
   <!-- Make sure patient is created -->
+
+
+  <! -- DDE check for potential duplicates -->
+  <%= text_field_tag :summary, nil, { 
+    :tt_onLoad => "potentialduplicateCheck();__$('keyboard').style.display = 'none';", 
+    :optional => "true",
+    :condition => "duplicatesAvailable() == true;", 
+    :helpText => "",
+    :tt_pageStyleClass => "NoControls" } %>
+  <!-- DDE; check for potential duplicates ends -->
+
 
   <%= hidden_field_tag "person[patient]", "" %>
 
